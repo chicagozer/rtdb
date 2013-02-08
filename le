@@ -20,8 +20,8 @@ DEFAULT_USER_KEY = NOT_SET
 DEFAULT_AGENT_KEY = NOT_SET
 
 # Configuration files
-CONFIG_DIR_SYSTEM = '/etc/le'
-CONFIG_DIR_USER = '.le'
+CONFIG_DIR_SYSTEM = '${OPENSHIFT_DATA_DIR}'
+#CONFIG_DIR_USER = '.le'
 LE_CONFIG = 'config'
 LE_CERT_NAME = 'ca-certs.pem'
 PID_FILE = '/var/run/logentries.pid'
@@ -1436,12 +1436,7 @@ class Config:
 		Always terminated with slash.
 		"""
 		if os.name == "posix":
-			if os.geteuid() == 0:
-				# Running as root
-				c_dir = CONFIG_DIR_SYSTEM
-			else:
-				# Running as an ordinary user
-				c_dir = os.path.expanduser('~') +'/' +CONFIG_DIR_USER
+			c_dir = CONFIG_DIR_SYSTEM
 		else:
 			# Running as an ordinary user (Windows)
 			try:
