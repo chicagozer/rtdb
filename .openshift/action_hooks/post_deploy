@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd $OPENSHIFT_DATA_DIR
+./le monitor
