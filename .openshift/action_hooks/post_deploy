@@ -11,7 +11,7 @@ if [ ! -f "${OPENSHIFT_DATA_DIR}config" ];
 then
 	chmod +x ${OPENSHIFT_REPO_DIR}logentries/le
 
-	${OPENSHIFT_REPO_DIR}logentries/le register --account-key=cc639a67-1d48-448b-b5f2-85adbe16e79a
+	${OPENSHIFT_REPO_DIR}logentries/le register --account-key=
 fi
 
 #.${OPENSHIFT_DATA_DIR}/le monitor
