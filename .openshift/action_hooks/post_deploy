@@ -3,6 +3,7 @@
 if [ ! -f "${OPENSHIFT_DATA_DIR}/le" ];
 then
 	wget https://github.com/MarkLC/le_openshift/raw/master/le -O ${OPENSHIFT_DATA_DIR}/le --no-check-certificate -q
+	
 	chmod +x ${OPENSHIFT_DATA_DIR}le
 fi
 
