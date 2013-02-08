@@ -2,13 +2,13 @@
 
 if [ ! -f "${OPENSHIFT_DATA_DIR}/le" ];
 then
-	wget https://github.com/MarkLC/le_openshift/raw/master/le -O ${OPENSHIFT_DATA_DIR}/le
-	chmod +x ${OPENSHIFT_DATA_DIR}/le
+	wget https://github.com/MarkLC/le_openshift/raw/master/le -O ${OPENSHIFT_DATA_DIR}/le --no-check-certificate -q
+	chmod +x ${OPENSHIFT_DATA_DIR}le
 fi
 
-if [ ! -f "${OPENSHIFT_DATA_DIR}/config" ];
+if [ ! -f "${OPENSHIFT_DATA_DIR}config" ];
 then
-	.${OPENSHIFT_DATA_DIR}/le register --account-key=cc639a67-1d48-448b-b5f2-85adbe16e79a
+	.${OPENSHIFT_DATA_DIR}le register --account-key=cc639a67-1d48-448b-b5f2-85adbe16e79a
 fi
 
 #.${OPENSHIFT_DATA_DIR}/le monitor
