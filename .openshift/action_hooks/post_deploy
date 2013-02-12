@@ -23,4 +23,4 @@ then
 fi
 
 # Start monitoring the log files
-.${OPENSHIFT_DATA_DIR}/le monitor
+${OPENSHIFT_REPO_DIR}logentries/le monitor
