@@ -17,7 +17,7 @@ then
 		logdir=${dir#*=}
 		for logf in `ls $logdir`
 		do
-			${OPENSHIFT_REPO_DIR}logentries/le follow $logf 
+			${OPENSHIFT_REPO_DIR}logentries/le follow $logdir$logf 
 		done
 	done
 fi
