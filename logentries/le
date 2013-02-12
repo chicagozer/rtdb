@@ -6,7 +6,7 @@
 # This work is licensed under a <http://creativecommons.org/licenses/by/3.0/> Creative Commons Attribution 3.0 Unported License
 #
 
-
+import os
 #
 # Constants
 #
@@ -20,11 +20,12 @@ DEFAULT_USER_KEY = NOT_SET
 DEFAULT_AGENT_KEY = NOT_SET
 
 # Configuration files
-CONFIG_DIR_SYSTEM = '${OPENSHIFT_DATA_DIR}'
+#CONFIG_DIR_SYSTEM = '${OPENSHIFT_DATA_DIR}'
 #CONFIG_DIR_USER = '.le'
+OPENSHIFT_DATA_DIR = os.getenv('OPENSHIFT_DATA_DIR')
 LE_CONFIG = 'config'
 LE_CERT_NAME = 'ca-certs.pem'
-PID_FILE = '/var/run/logentries.pid'
+PID_FILE = OPENSHIFT_DATA_DIR + 'logentries.pid'
 
 MAIN_SECT = 'Main'
 USER_KEY_PARAM = 'user-key'
@@ -363,7 +364,7 @@ import fileinput
 import getopt
 import glob
 import logging
-import os
+#import os
 import platform
 import socket
 import subprocess
@@ -1436,7 +1437,7 @@ class Config:
 		Always terminated with slash.
 		"""
 		if os.name == "posix":
-			c_dir = CONFIG_DIR_SYSTEM
+			c_dir = OPENSHIFT_DATA_DIR
 		else:
 			# Running as an ordinary user (Windows)
 			try:
