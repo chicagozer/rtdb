@@ -10,17 +10,18 @@ then
 	source ${OPENSHIFT_REPO_DIR}logentries/le_config.ini
 
 	${OPENSHIFT_REPO_DIR}logentries/le register --hostname=${OPENSHIFT_APP_NAME} --account-key=${ACCOUNT_KEY}
-
-	# We don't want just OPENSHIFT_LOG_DIR as it could be a duplicate
-	for dir in `env | grep OPENSHIFT_.*_LOG_DIR`
-	do
-		logdir=${dir#*=}
-		for logf in `ls $logdir`
-		do
-			${OPENSHIFT_REPO_DIR}logentries/le follow $logdir$logf 
-		done
-	done
 fi
+
+# We don't want just OPENSHIFT_LOG_DIR as it could be a duplicate
+for dir in `env | grep OPENSHIFT_.*_LOG_DIR`
+do
+	logdir=${dir#*=}
+	for logf in `ls $logdir`
+	do
+		# Follow any new logs and make sure existing ones are being followed
+		${OPENSHIFT_REPO_DIR}logentries/le follow $logdir$logf 
+	done
+done
 
 # Start monitoring the log files
 ${OPENSHIFT_REPO_DIR}logentries/le monitordaemon
