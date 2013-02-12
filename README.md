@@ -23,7 +23,7 @@ Configuration
 
 Configure logentries/le_config.ini file with your Logentries Account Key
 
-Log-in to your Logentries account and click Account in the left sidebar, then click the Account Key button
+To obtain this, you need to log-in to your Logentries account and click Account in the left sidebar, then click the Account Key button
 and copy the value you are given.
 
 Paste this inside the quotation marks in logentries/le_config.ini
