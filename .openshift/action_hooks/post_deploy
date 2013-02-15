@@ -1,4 +1,4 @@
-#!/bin/bash
+i#!/bin/bash
 
 # Make sure the agent is an executable
 chmod +x ${OPENSHIFT_REPO_DIR}logentries/le
@@ -18,8 +18,15 @@ do
 	logdir=${dir#*=}
 	for logf in `ls $logdir`
 	do
-		# Follow any new logs and make sure existing ones are being followed
-		${OPENSHIFT_REPO_DIR}logentries/le follow $logdir$logf 
+		# Check if its access or error log
+		if [[ $logf == *_log-* ]]
+		then
+			# Get the filename without timestamp
+			filename=${logf%%-*}
+
+			# Follow any new logs and make sure existing ones are being followed
+			${OPENSHIFT_REPO_DIR}logentries/le follow \'$logdir$logf-*\' 
+		fi
 	done
 done
 
