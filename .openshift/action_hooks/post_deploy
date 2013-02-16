@@ -21,11 +21,11 @@ do
 		# Check if its access or error log
 		if [[ $logf == *_log-* ]]
 		then
-			# Get the filename without timestamp
-			filename=${logf%%-*}
+			# Get the full filename without timestamp
+			filename="'$logdir${logf%%-*}'"
 
 			# Follow any new logs and make sure existing ones are being followed
-			${OPENSHIFT_REPO_DIR}logentries/le follow \'$logdir$logf-*\' 
+			${OPENSHIFT_REPO_DIR}logentries/le follow $filename 
 		fi
 	done
 done
