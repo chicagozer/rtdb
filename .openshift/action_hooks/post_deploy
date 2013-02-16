@@ -1,4 +1,4 @@
-i#!/bin/bash
+#!/bin/bash
 
 # Make sure the agent is an executable
 chmod +x ${OPENSHIFT_REPO_DIR}logentries/le
@@ -21,11 +21,14 @@ do
 		# Check if its access or error log
 		if [[ $logf == *_log-* ]]
 		then
+			# Navigate to the log directory
+			cd $logdir
+
 			# Get the full filename without timestamp
-			filename="'$logdir${logf%%-*}'"
+			filename="$logdir${logf%%-*}-*"
 
 			# Follow any new logs and make sure existing ones are being followed
-			${OPENSHIFT_REPO_DIR}logentries/le follow $filename 
+			${OPENSHIFT_REPO_DIR}logentries/le follow "$filename"
 		fi
 	done
 done
