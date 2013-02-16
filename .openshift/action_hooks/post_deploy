@@ -18,8 +18,18 @@ do
 	logdir=${dir#*=}
 	for logf in `ls $logdir`
 	do
-		# Follow any new logs and make sure existing ones are being followed
-		${OPENSHIFT_REPO_DIR}logentries/le follow $logdir$logf 
+		# Check if its access or error log
+		if [[ $logf == *_log-* ]]
+		then
+			# Navigate to the log directory
+			cd $logdir
+
+			# Get the full filename without timestamp
+			filename="$logdir${logf%%-*}-*"
+
+			# Follow any new logs and make sure existing ones are being followed
+			${OPENSHIFT_REPO_DIR}logentries/le follow "$filename"
+		fi
 	done
 done
 
