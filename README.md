@@ -6,7 +6,9 @@ This git repo provides a quick method to get your OpenShift logs streaming to Lo
 Running on OpenShift
 ----------------------------
 
-Create a Logentries account at https://logentries.com/
+Create a Logentries account at https://logentries.com/doc/openshift/
+
+Take note of the Account-Key that you are given, you will need it in the Configuration step below.
 
 Create an application on Openshift if you havent already, you must enter app name and your stack.
 
@@ -22,9 +24,6 @@ Configuration
 -------------
 
 Configure logentries/le_config.ini file with your Logentries Account Key
-
-To obtain this, you need to log-in to your Logentries account and click Account in the left sidebar, then click the Account Key button
-and copy the value you are given.
 
 Paste this inside the quotation marks in logentries/le_config.ini
 
