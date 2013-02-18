@@ -22,13 +22,15 @@ do
 		if [[ $logf == *_log-* ]]
 		then
 			# Navigate to the log directory
-			cd $logdir
+			pushd $logdir > /dev/null
 
 			# Get the full filename without timestamp
 			filename="$logdir${logf%%-*}-*"
 
 			# Follow any new logs and make sure existing ones are being followed
 			${OPENSHIFT_REPO_DIR}logentries/le follow "$filename"
+
+			popd > /dev/null
 		fi
 	done
 done
