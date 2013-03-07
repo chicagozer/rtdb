@@ -11,7 +11,7 @@ Create a Logentries account at https://logentries.com/doc/openshift/
 Take note of the Account-Key that you are given, you will need it in the Configuration step below. If you have already created an account and haven't taken note of your account key, you can retrieve it following these instructions: 
 https://logentries.com/doc/accountkey/
 
-Add the upstream Logentries repo to the Openshift app (called 'myappname' in the example below) that you want to manage the logs of with Logentries: 
+Add the upstream Logentries repo to the Openshift app (called 'myappname' in the example below) that you want Logentries to manage the logs of: 
 
 	cd myappname
 	git remote add upstream -m master https://github.com/logentries/le_openshift.git
