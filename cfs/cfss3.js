@@ -1,5 +1,8 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+
+// amazon S3 filesystem support
+// remember to set your S3 parms in the settings.json
 var AWS = require('aws-sdk');
 
 function CFSS3()

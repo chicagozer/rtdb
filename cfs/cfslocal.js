@@ -1,5 +1,7 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+
+// local file system support
 var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
