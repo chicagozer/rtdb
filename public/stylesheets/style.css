@@ -1,0 +1,9 @@
+body {
+  padding: 20px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background-image:url('/RheoSoft_Logo.svg');
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  background-position:right 10px top;
+}
+

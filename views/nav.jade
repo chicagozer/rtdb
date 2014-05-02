@@ -1,0 +1,32 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends layout
+block content
+  .navbar
+    .navbar-inner
+      ul.nav
+        li: a(href="/") Home
+        li.dropdown
+          a#drop1.dropdown-toggle(href="#", role="button",data-toggle="dropdown") Demos
+            b.caret
+          ul.dropdown-menu(role="menu",aria-labelledby="drop1")
+                  li(role="presentation"): a(role="menuitem",tabindex="-1",href="/demo/mparcels") SSE Mobile Parcels
+                  li(role="presentation"): a(role="menuitem",tabindex="-1",href="/demo/mapples") SSE Mobile Apples
+                  li.divider
+                  li(role="presentation"): a(role="menuitem",tabindex="-1",href="/demo/parcels") SSE Parcels
+                  li(role="presentation"): a(role="menuitem",tabindex="-1",href="/demo/apples") SSE Apples
+                  li(role="presentation"): a(role="menuitem",tabindex="-1",href="/demo/apples") SSE Apples (Delta)
+                  li.divider
+                  li(role="presentation"): a(role="menuitem",tabindex="-1",href="/demo/mparcelsws") WS Mobile Parcels
+                  li(role="presentation"): a(role="menuitem",tabindex="-1",href="/demo/parcelsws") WS Parcels
+        li: a(href="/web/") Admin
+        li.dropdown
+          a#drop2.dropdown-toggle(href="#", role="button",data-toggle="dropdown") Help
+            b.caret
+          ul.dropdown-menu(role="menu",aria-labelledby="drop2")
+            li(role="presentation"): a(role="menuitem",tabindex="-1",href="/about/") About RTDB
+            li(role="presentation"): a(role="menuitem",tabindex="-1",href="http://www.youtube.com/watch?v=MCL4T4-Eb2s") Intro Video
+            li(role="presentation"): a(role="menuitem",tabindex="-1",href="/help/intro") Why RTDB?            
+            li(role="presentation"): a(role="menuitem",tabindex="-1",href="/help/technology") RTDB Technology            
+            
+  

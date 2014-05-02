@@ -1,0 +1,21 @@
+{
+"winston" : {
+			"transports" :
+			[[ "Console", { "timestamp":true, "level" : "warning" }]],
+			"options" : { "level" : "warning"}
+			},
+
+"cfs" : "CFSL",
+"reduceInterval" : 1000,
+"expirationInterval" : 3000000,
+"cfsinit" : {
+	"root" : "/tmp/rtdb/",
+	"config" : { "accessKeyId" : "xxx", 
+		"secretAccessKey": "xxx", 
+		"region": "us-east-1" 
+			},
+	"params" : {
+		"Bucket" : "xxxxxx"
+		}
+	}
+}

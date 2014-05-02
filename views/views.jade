@@ -1,0 +1,71 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'Views'
+block append content
+ h1 Views
+ p 
+   a.btn(href='/web/') Home
+   a.btn(href='/web/collections/#{cid}/') Up
+   a#addbtn.btn Add
+   a.btn(href='/db/collections/#{cid}/views/') Json
+ mixin showJson(json,0,true)
+ input(type='hidden', id='hcollection', value='#{cid}')
+ script.
+        jQuery(document).ready(
+
+        function() {
+          //variable to hold request
+          var request;
+      
+                // bind to the submit event of our form
+          $("#addbtn").click(function(event) {
+            
+            console.log('submitting!')
+            // abort any pending request
+            if (request) {
+              request.abort();
+            }
+            
+            // let's disable the inputs for the duration of the ajax request
+           //$inputs.prop("disabled", true);
+
+            var url = "/db/collections/" + $("#hcollection").val() + "/views/";
+            // fire off the request to /form.php
+            request = $.ajax({
+              contentType: "application/json",
+              url: url,
+              type: "post",
+              data: "{}"
+              });
+
+            // callback handler that will be called on success
+            request.done(function(response, textStatus, jqXHR) {
+              // log a message to the console
+              console.log("Hooray, it worked!");
+              
+              var url = "/web/collections/" + $("#hcollection").val() + "/views/" + response._id + "/";
+              
+              window.location.replace(url);
+              
+            });
+
+            // callback handler that will be called on failure
+            request.fail(function(jqXHR, textStatus,
+            errorThrown) {
+              // log the error to the console
+              console.error("The following error occurred: " + textStatus, errorThrown);
+            });
+
+            // callback handler that will be called regardless
+            // if the request failed or succeeded
+            request.always(function() {
+              // reenable the inputs
+              //$inputs.prop("disabled", false);
+            });
+
+            // prevent default posting of form
+            event.preventDefault();
+          });
+        });

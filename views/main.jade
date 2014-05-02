@@ -1,0 +1,62 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'RTDB'
+block append content
+  h1(style="margin-left:10px") RTDB
+      img(src="/RheoSoft_Logo.svg", width="110", alt="logo", style="margin-left:20px")
+  p.
+    RTDB (#{json._pjson.version}) #{json.copyright}
+  a.btn(href="admin/stats/") Statistics
+  a.btn(href="collections/") Collections
+  a#idstop.btn Stop    
+  
+  script.
+    jQuery(document).ready(function() {
+      //variable to hold request
+      var request;
+      
+      // bind to the submit event of our form
+      $("#idstop").click(function(event) {
+        bootbox.confirm("Are you sure?", function(result) {
+           if (result) {
+             console.log('submitting!')
+             if (request) {
+               request.abort();
+               }
+                
+             var url = "/db/admin/stop";
+             // fire off the request to /form.php
+             request = $.ajax({
+               contentType: "application/json",
+               url: url,
+               type: "post",
+               data: "{}"
+               });
+    
+             // callback handler that will be called on success
+             request.done(function(response, textStatus, jqXHR) {
+               // log a message to the console
+               console.log("Hooray, it worked!");
+               });
+    
+             // callback handler that will be called on failure
+             request.fail(function(jqXHR, textStatus, errorThrown) {
+               // log the error to the console
+               console.error("The following error occurred: " + textStatus, errorThrown);
+               });
+    
+             // callback handler that will be called regardless
+             // if the request failed or succeeded
+             request.always(function() {
+               // reenable the inputs
+               //$inputs.prop("disabled", false);
+               });
+    
+             // prevent default posting of form
+             event.preventDefault();
+           }
+         });
+      });    
+    });

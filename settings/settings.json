@@ -1,0 +1,21 @@
+{
+"useACLTicket" : false,
+"winston" : {
+	"transports" :
+	[[ "Console", { "timestamp":true, "level" : "info" }]],
+	"options" : { "level" : "info"}
+	},
+"cfs" : "CFSL",
+"reduceInterval" : 1,
+"expirationInterval" : 3000000,
+"cfsinit" : {
+	"root" : "sampledb/",
+	"config" : { "accessKeyId" : "xxx", 
+		"secretAccessKey": "xxx", 
+		"region": "us-east-1" 
+			},
+	"params" : {
+		"Bucket" : "xxxxxx"
+		}
+	}
+}

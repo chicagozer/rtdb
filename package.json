@@ -1,0 +1,51 @@
+{
+	"name": "rtdb",
+	"version": "0.4.14",
+	"description": "Real Time Database",
+	"private": false,
+	"main": "rtdb.js",
+	"dependencies": {
+		"aws-sdk": "~1.2.0",
+		"node-uuid": "~1.4.0",
+		"express": "~3.2.6",
+		"process": "~0.5.1",
+		"winston": "~0.7.1",
+		"mkdirp": "~0.3.5",
+		"async": "~0.2.9",
+		"underscore": "~1.4.4",
+		"jade": "~0.31.2",
+		"optimist": "~0.6.0",
+		"temporary": "~0.0.5",
+		"expect.js": "~0.2.0",
+		"fs.extra": "~1.2.1",
+		"symmetry": "~0.3.1",
+		"markdown": "~0.5.0",
+		"socket.io": "~0.9.16"
+	},
+	"directories": {
+		"public": "./public",
+		"cfs": "./cfs",
+		"sampledb": "./sampledb",
+		"test": "./test",
+		"views": "./views"
+	},
+	"devDependencies": {},
+	"scripts": {
+		"start": "node rtdb.js",
+		"test": "mocha"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chicagozer/rtdb.git"
+	},
+	"keywords": [
+		"rtdb.js"
+	],
+	"author": "Rheosoft (c) 2014",
+	"license": "MIT",
+	"readmeFilename": "README.md",
+	"subdomain": "rtdb",
+	"engines": {
+		"node": ">=0.10.x"
+	}
+}
