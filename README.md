@@ -7,7 +7,7 @@ Comments, questions? <info@rheosoft.com>
 
 ## Overview
 
-**rtdb** is a **r**eal-**t**ime [JSON](http://www.json.org/) document **d**ata**b**ase.
+**rtdb** is a real-time [JSON](http://www.json.org/) document database.
 Data is made available via [map/reduce](http://en.wikipedia.org/wiki/MapReduce) queries.  
 Queries are updated in real-time and subscribers are notified instantly as data is added.  
 
