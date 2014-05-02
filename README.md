@@ -1,7 +1,7 @@
 # rtdb
 
 © 2014 by Rheosoft. All rights reserved. 
-Licensed under the RTDB Software License version 1.0
+Licensed under the [RTDB Software License version 1.0](license.pdf).
  
 Comments, questions? <info@rheosoft.com>
 
@@ -17,7 +17,7 @@ Use **rtdb** and leave polling behind!
 
 * Clone the [git](http://git-scm.com/) repository (use --recursive!)
 
-    git clone --recursive [git@bitbucket.org:chicagozer/rtdb.git](https://bitbucket.org/chicagozer/rtdb)  
+    git clone --recursive [https://github.com/chicagozer/rtdb.git](https://github.com/chicagozer/rtdb)  
     
 * Then run *[npm](https://npmjs.org/) install*
     
@@ -36,7 +36,7 @@ Online demo versions are available.
 
 [http://rtdb.herokuapp.com](http://rtdb.herokuapp.com)
 
-[http://rtdb-rheosoft.rhcloud.com/](http://rtdb-rheosoft.rhcloud.com)
+[http://rtdb-rheosoft.rhcloud.com](http://rtdb-rheosoft.rhcloud.com)
 
 ## Acknowledgements
 
@@ -236,12 +236,23 @@ When adding the EventListener, use the GUID of the view.
 	    console.log(event.data);
 	    }, false);
 	    
-## Demo and Sample Database
+## Demos and Sample Databases
 
-**rtdb** comes with a small sample database and web front-end accessible at
-[http://localhost:9001/apples.html](http://localhost:9001/apples.html)
+**rtdb** comes with two sample databases and web front-end accessible at
 
-In this demo, the HTML5 web page registers an EventSource and documents are added through the REST API.
+[http://localhost:9001/demo/apples](http://localhost:9001/demo/apples)
+
+[http://localhost:9001/demo/parcels](http://localhost:9001/demo/parcels)
+
+Each demo registers an EventSource and documents are added through the REST API.
+
+## Websocket Demo
+
+In addition, there are examples using Websocket support.
+
+[http://localhost:9001/demo/applesws](http://localhost:9001/demo/applesws)
+
+[http://localhost:9001/demo/parcelsws](http://localhost:9001/demo/parcelsws)
 
 ## Advanced Topics
 
