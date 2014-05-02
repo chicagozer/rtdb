@@ -6,7 +6,7 @@
 	"options" : { "level" : "info"}
 	},
 "cfs" : "CFSL",
-"reduceInterval" : 1,
+"reduceInterval" : 1000,
 "expirationInterval" : 3000000,
 "cfsinit" : {
 	"root" : "sampledb/",
