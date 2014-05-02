@@ -30,6 +30,14 @@ Launch **rtdb** with [node.js](http://http://nodejs.org/). Change your settings 
 
 node rtdb.js --settings settings/settings.json
 
+## PaaS sites
+
+Online demo versions are available.
+
+[http://rtdb.herokuapp.com](http://rtdb.herokuapp.com)
+
+[http://rtdb-rheosoft.rhcloud.com/](http://rtdb-rheosoft.rhcloud.com)
+
 ## Acknowledgements
 
 **rtdb** was inspired by and indebted to several projects.
@@ -41,7 +49,7 @@ Thanks to [npm](https://npmjs.org/) and several excellent libraries. See package
 Some samples contain a freely licensed template from [MediaLoot](http://medialoot.com/item/html5-admin-template/).
 ## Web interface
 
-The main web interface is reachable at
+When running locally, the main web interface is reachable at
 
 [http://localhost:9001/web/](http://localhost:9001/web/)
 
