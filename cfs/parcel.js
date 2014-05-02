@@ -12,17 +12,25 @@ var dir = 'sampledb/parcels/';
 var data = {};
 
 
-var headers = {
-	'Content-Type' : 'application/json'
-};
-
  poptions = {
 	host : 'localhost',
 	port : process.env.PORT || 9001,
 	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
 	method : 'POST',
-	headers : headers
+	headers : {
+		'Content-Type' : 'application/json'
+	}
 };
+ 
+ foptions = {
+			host : 'localhost',
+			port : process.env.PORT || 9001,
+			path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents?permanent=false',
+			method : 'DELETE',
+			headers : {
+				'Content-Type' : 'application/json'
+			}
+		};
 
 // Setup the request. The options parameter is
 // the object we defined above.
@@ -70,9 +78,29 @@ function readFile(file, callback) {
 
 }
 
+
+function flush() {
+	
+	var req = http.request(foptions, function(res) {
+		res.setEncoding('utf-8');
+		res.on('data', function(data) {
+		});
+		res.on('error', function(err) {
+		});
+	});
+
+	req.end('{}');
+	
+}
+
 setTimeout(main, 10000);
 
 function main() {
+	setInterval(flush,1000*60*5);
+	main2();
+}
+
+function main2() {
 	fs.readdir(dir, function(err, files) {
 		if (err)
 			throw err;
