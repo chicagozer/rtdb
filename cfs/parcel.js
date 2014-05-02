@@ -23,14 +23,6 @@ var headers = {
 	method : 'POST',
 	headers : headers
 };
- 
- foptions = {
-			host : 'localhost',
-			port : process.env.PORT || 9001,
-			path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents?permanent=true',
-			method : 'DELETE',
-			headers : headers
-		};
 
 // Setup the request. The options parameter is
 // the object we defined above.
@@ -80,7 +72,6 @@ function readFile(file, callback) {
 
 setTimeout(main, 10000);
 
-
 function main() {
 	fs.readdir(dir, function(err, files) {
 		if (err)
@@ -92,7 +83,6 @@ function main() {
 			else
 				logger.log('debug', 'HStream.readFile - done');
 			setTimeout(main,0);
-			setInterval(http.request(poptions), 1000*60*5);
 		});
 
 	});
