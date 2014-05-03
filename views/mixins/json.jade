@@ -15,7 +15,7 @@ mixin prettyDate(uglyDate)
     day = uglyDate.getDay()
     #{weekDays[day + 1]} at #{strTime}
   else
-    #{uglyDate.getMonth() + 1}/#{uglyDate.getDate()}/#{uglyDate.getFullYear()}
+    #{uglyDate.getMonth() + 1} /#{uglyDate.getDate()} /#{uglyDate.getFullYear()}
 
 mixin showJson(myJsonObject, level, href)
   if typeof level == 'undefined'
