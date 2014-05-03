@@ -9,7 +9,10 @@ Comments, questions? <info@rheosoft.com>
 
 **rtdb** is a real-time [JSON](http://www.json.org/) document database.
 Data is made available via [map/reduce](http://en.wikipedia.org/wiki/MapReduce) queries.  
-Queries are updated in real-time and subscribers are notified instantly as data is added.  
+Queries are updated in real-time and subscribers are notified instantly as data is added.
+
+The open source version of **rtdb** takes big data principles and extends into practical domain.
+The map/reduce construct is applied in the real-time domain to provide a unique, live analytical view of data.  
 
 Use **rtdb** and leave polling behind!
 
@@ -84,11 +87,12 @@ Collections → Views → Subscribers
 ### Map/Reduce
 
 The query within each view is implemented via map/reduce. Each query requires a map function and a reduce function.  
-Optionally, a finalize function and a personalize function can be added.
+Optionally, a finalize function and a personalize function can be added; each will be explained in order.
 
 #### Map  
 
-The map function is called once for each incoming document. It takes the following arguments.  
+The map function is called once for each incoming document. The purpose is to initially categorize the data
+and it takes the following arguments.  
 
 * item - *item* is the document to process. 
 * emit - *emit* is a function that is called to *map* the item. 
@@ -142,7 +146,7 @@ A common usage would be to sort and trim to a "top 10" list.
 
 The *personalize* function is similar to *finalize* however is it called separately for each subscriber.
 The intent is to allow the function to use HTTP header values to identify the subscriber and personalize the resultset
-specifically for the subscriber.
+specifically for the subscriber. A common usage would be to filter the data based on the user.
 
 *personalize* takes the following arguments.
 
@@ -153,15 +157,22 @@ specifically for the subscriber.
 
 ## Security 
 
-**rtdb** does not have inherent security. This is by design.  
+**rtdb** has very little inherent security. This is by design.  
 
 **rtdb** is intended to be run behind a secure web server such as [Apache](http://httpd.apache.org/). 
 Apache and other web servers provide facilities to apply granular URL based security to **rtdb**.
 See advanced topic, securing **rtdb** with simplesamlphp and Apache.
 
+"Out of the box", rtdb implements Basic Authentication security for the administration functions. 
+The user/password are set via environmental variables **RTDBADMIN_USER** and **RTDBADMIN_PWD**. 
+In a production environment where security has been delegated, the Basic Authentication may be disabled
+by changing the settings file parameter **disableBasicAuth** to **true**.
+
+If rtdb is used over the internet, be sure to secure the traffic with https if you intend to rely on basic authentication.
+
 ## REST API
 
-**rtdb** uses a REST API to manage the database. (The web interface even uses this REST API behind the scenes.
+**rtdb** uses a simple REST API to manage and interact with the database. (The web interface even uses this REST API behind the scenes.
 Feel free to check out the HTML!)
 
 The REST API speaks JSON and uses standard verbs.
@@ -171,7 +182,11 @@ The REST API speaks JSON and uses standard verbs.
 `DELETE` - delete object according to url.
 `POST` - insert JSON object or execute command according to URL.
 
-Each collection, view and subscriber is given a GUID. The GUID must be used to reference the object in the REST API.
+Each collection, view and subscriber is given a Globally Unique Identifier (GUID).
+Using a GUID guarantees uniqueness of the individual objects and allows separate databases to be combined if needed.
+The GUID is used to reference specific objects via the REST API.
+
+The web interface is an easy way to familiarize yourself with the GUIDs.
 
 ### Operations on Collections  
 
@@ -190,6 +205,7 @@ Each collection, view and subscriber is given a GUID. The GUID must be used to r
 `DELETE /db/collections/[col_guid]/views/[view_guid]` - Delete View.  
 `GET /db/collections/[col_guid]/views` - List all Views.  
 `GET /db/collections/[col_guid]/views/[view_guid]` - List View.  
+`GET /db/collections/[col_guid]/views/[view_guid]/ticket` - fetch security ticket. 
 `GET /db/collections/[col_guid]/views/[view_guid]/subscribers` - List subscribers.  
 `GET /db/collections/[col_guid]/views/[view_guid]/reduction` - List query result.  
 
@@ -203,13 +219,13 @@ Each collection, view and subscriber is given a GUID. The GUID must be used to r
 
 Steps for using **rtdb** are:
 
-1. Define a collection.
-2. Define one or more views for the collection.
-3. Subscribers will register for queries via EventSource API.
+1. Use the web interface or REST API to create a collection.
+2. Create one or more views for the collection.
+3. Subscribers will register for queries via WebSocket or Server Sent Event API.
 4. Insert new JSON documents via the REST API. 
 5. Subscribers receive updates as documents are inserted.
 
-Use the REST API to insert documents. An example CURL syntax to load a file *mydoc.json* would be 
+You may use the REST API to insert documents. An example CURL syntax to load a file *mydoc.json* would be 
 
     curl -X POST -H 'Content-Type: application/json' -d @mydoc.json http://localhost:9001/db/collections/[col_guid]/documents
 
@@ -217,13 +233,17 @@ Note that for inserts, the **rtdb** REST API expects either a single JSON docume
 To maximize performance, the map/reduce is run once for the entire array.
 So use arrays when inserting multiple documents at once.
 
-Browser subscribers register for streams via the [HTML5 event source API](http://www.w3.org/TR/eventsource/).  
+Browser subscribers register for streams via the [HTML5 event source API](http://www.w3.org/TR/eventsource/) or WebSockets.  
 
+## Server Sent Events (EventSources)
+
+Intuitively a subscriber would create an EventSource for each interesting view. However in practice, web browsers
+limit the number of active EventSources to a very small number.
 Instead of creating multiple EventSources, supply multiple view params for each additional stream.
 Most browsers have a limit on the number of EventSources that may be created per page.
 With this technique there is no limit to the number of subscriptions.  
 
-When adding the EventListener, use the GUID of the view.
+When adding the EventListener, pass the GUID of each view as a param.
 
     var source = new EventSource(
 	    "/db/stream?view=6f57030d-ccad-41df-aa92-689292fa2c42&view=ec537999-60a5-41f3-9036-fcd3d5356ae2");
@@ -236,6 +256,57 @@ When adding the EventListener, use the GUID of the view.
 	    console.log(event.data);
 	    }, false);
 	    
+## Securing Subscriptions
+
+**rtdb** provides a ticket based security model. ACL based security is enabled via the settings.json by setting
+**useACLTicket** to **true**. In this case, a ticket must be retrieved for each view via a REST call.
+
+	/db/collections/[col_id]/views/[view_guid]/ticket
+	
+The "ticket" provides the proper authorization to initiate the subscription. This pattern is in place so that an upstream
+ACL security mechanism can check the URL and do the authentication.
+Since collections and views have unique GUIDs, access to the resource
+can be secured at a granular level.
+
+Tickets are passed to the EventSource as a param. If more than one view is required, pass multiple view and ticket params.
+
+    var source = new EventSource(
+	    "/db/stream?view=6f57030d-ccad-41df-aa92-689292fa2c42&ticket=" + ticket);
+	    
+The ticket has a short expiration (less than one minute) so that it may not be cached or passed around. It should be used once
+immediately after requesting it. 
+	    
+## WebSockets
+
+Subscriber data only flows in a single direction in **rtdb** from the server to the browser so Server Sent Events are
+an excellent choice for a transport. It is more widely supported in PaaS environments and may behave better with proxies.
+However in some cases, WebSockets are preferable and may even be required to support certain browsers such as Internet
+Explorer.
+
+**rtdb** uses the excellent socket.io package. The steps are as follows. 
+
+First secure a ticket for the view or views if ACL security is enabled. This process is identical to using Server Sent Events.
+	
+Once the ticket is secured. The socket is created.
+
+    var view, var ticket; 
+    var socket = io.connect(); 
+
+In the socket connect event, we call the server via an **emit** to "subscribe" to the view, passing the ticket.
+If we are subscribing to multiple views, then call subscribe multiple times or better yet pass an array of view/ticket JSON objects.
+
+    socket.on('connect', function () {
+      socket.emit('subscribe', { ticket: ticket, view: view });
+      
+      socket.on(view,
+         function(data) {
+         ...do something with data...
+         }
+         );
+      });
+
+The demos discussed below are excellent references for a complete implementation.
+      	    
 ## Demos and Sample Databases
 
 **rtdb** comes with two sample databases and web front-end accessible at
@@ -244,11 +315,18 @@ When adding the EventListener, use the GUID of the view.
 
 [http://localhost:9001/demo/parcels](http://localhost:9001/demo/parcels)
 
-Each demo registers an EventSource and documents are added through the REST API.
+These two demos utilize Server Sent Events and register an EventSource. Documents are added through the REST API. 
 
-## Websocket Demo
+The "Apples" demo provides a simple front end for adding new documents and viewing the aggregations.
+It is more interesting when running simultaneously on multiple browsers.
 
-In addition, there are examples using Websocket support.
+The "Parcels" demo uses a small sample of public domain property tax parcel data and inserts documents
+repeatedly to provide a constantly updating aggregation. The parcels demo is initiated by cfs/parcels.js.
+Remove or move this file in a production environment.
+
+## Websocket Demos
+
+In addition, these samples have been provided using Websocket support.
 
 [http://localhost:9001/demo/applesws](http://localhost:9001/demo/applesws)
 
@@ -270,6 +348,7 @@ Here is a summary of the **rtdb** project file structure.
 	 /cfs - the pluggable file systems.  
 	 	/cfslocal.js - local file storage  
 	 	/cfss3.js - Amazon S3 storage  
+	 	/parcels.js - loader for parcel demo. 
 	 node_modules - required Node modules.  
 	 /public - static files served by the web server.  
 	 /settings - startup options in JSON format.  
@@ -304,11 +383,11 @@ The REST API may be secured by specific URL to limit or control access at the co
 
 In production environments, admin functions should be secured by method and URL.
 
-### Using Expiration
+### Using Document Expirations
 
 A collection may be given an document *expiration* in milliseconds.
 This can be useful for implementing queries based on sliding windows. (i.e. trends for the last hour, last day, etc).  
-If you only want the last hour's worth of data, set the expiration to 3600000 (1000*60*60).
+If you only want the last hour's worth of data, set the expiration to 3600000.
 The views associated with the collection will be automatically map/reduced when the expiration is triggered.  
 
 Note, the *expiration* value is used to signal when to map/reduce.
@@ -347,11 +426,20 @@ These two flags are mutually exclusive.
 When a collection will be used for lookups (aka master table), it must be loaded before its dependent collections.  
 Use the *Priority* to order how collections are loaded. Lower numbers are loaded first.
 
-### Using Deltas 
+### Using Deltas
 
-If you pass the query parm *delta* when subscribing to a stream. i.e.  
+Often the amount of data that changes for each subscription event is small compared to the overall size of the reduction.
+RTDB offers a form of compression for this case by sending just the difference between the last reduction and latest one.
+
+This mode is enabled by passing the query parm *delta* when subscribing to a stream. i.e.  
 
     /db/stream?view=6f57030d-ccad-41df-aa92-689292fa2c42&delta=true
+    
+Or in the case of a WebSocket, sending 
+
+	delta: true
+	
+in the subscription event.
     
 In *delta* mode **rtdb** will first send a full JSON reduction, then all subsequent updates will be *diffs*.
 The [symmetry](https://github.com/Two-Screen/symmetry) Javascript library may be used to patch the reduction with the latest diff.
@@ -381,7 +469,7 @@ this can be useful for referencing other collections when a lookup is required.
 
 ### Custom Persistence
 
-**rtdb** uses plugins for persistence. A local filesystem (cfslocal) implementation and Amazon S3 (cfss3) are provided.  
+**rtdb** uses a plugin architecture for persistence. A local filesystem (cfslocal) implementation and Amazon S3 (cfss3) are provided.  
 To add your own provider, implement these methods for your provider and install 
 the javascript module into the /cfs subdirectory. 
 You may use either *cfslocal.js* or *cfss3.js* as a template.
