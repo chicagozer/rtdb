@@ -15,35 +15,34 @@ function Parcel() {
 var dir = 'sampledb/parcels/';
 var data = {};
 
-
- poptions = {
-	host : 'localhost',
-	port : process.env.PORT || 9001,
+poptions = {
+	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
+	port : process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
 	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
 	method : 'POST',
 	headers : {
 		'Content-Type' : 'application/json'
 	}
 };
- 
- foptions = {
-			host : 'localhost',
-			port : process.env.PORT || 9001,
-			path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents?permanent=false',
-			method : 'DELETE',
-			headers : {
-				'Content-Type' : 'application/json'
-			}
-		};
+
+foptions = {
+	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
+	port : process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
+	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents?permanent=false',
+	method : 'DELETE',
+	headers : {
+		'Content-Type' : 'application/json'
+	}
+};
 
 // Setup the request. The options parameter is
 // the object we defined above.
 var count = 0;
 
 function readFile(file, callback) {
-	
+
 	var start = new Date();
-	
+
 	fs.readFile(dir + file, 'utf-8', function(err, data) {
 		if (err)
 			callback(err);
@@ -55,11 +54,12 @@ function readFile(file, callback) {
 			res.setEncoding('utf-8');
 			res.on('end', function() {
 				var now = new Date();
-				// we are going to slow this down to a max of 100 inserts per sec
+				// we are going to slow this down to a max of 100 inserts per
+				// sec
 				var delay = Math.max(0, 10 - (now - start));
 				setTimeout(callback, delay);
 			});
-			
+
 			res.on('data', function(data) {
 			});
 
@@ -71,7 +71,7 @@ function readFile(file, callback) {
 		req.on('error', function(e) {
 			callback(err);
 		});
-		
+
 		if (logger.level === 'silly')
 			logger.log('silly', 'HStream.readFile - writing ' + count++);
 
@@ -82,9 +82,8 @@ function readFile(file, callback) {
 
 }
 
-
 function flush() {
-	
+
 	var req = http.request(foptions, function(res) {
 		res.setEncoding('utf-8');
 		res.on('data', function(data) {
@@ -94,13 +93,13 @@ function flush() {
 	});
 
 	req.end('{}');
-	
+
 }
 
 setTimeout(main, 10000);
 
 function main() {
-	setInterval(flush,1000*60*5);
+	setInterval(flush, 1000 * 60 * 5);
 	main2();
 }
 
@@ -111,10 +110,10 @@ function main2() {
 
 		async.eachSeries(files, readFile, function(err) {
 			if (err)
-				logger.log('error', 'HStream.readFile - ',err);
+				logger.log('error', 'HStream.readFile - ', err);
 			else
 				logger.log('debug', 'HStream.readFile - done');
-			setTimeout(main,0);
+			setTimeout(main, 0);
 		});
 
 	});
