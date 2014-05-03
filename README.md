@@ -205,7 +205,7 @@ The web interface is an easy way to familiarize yourself with the GUIDs.
 `DELETE /db/collections/[col_guid]/views/[view_guid]` - Delete View.  
 `GET /db/collections/[col_guid]/views` - List all Views.  
 `GET /db/collections/[col_guid]/views/[view_guid]` - List View.  
-`GET /db/collections/[col_guid]/views/[view_guid]/ticket` - fetch security ticket. 
+`GET /db/collections/[col_guid]/views/[view_guid]/ticket` - fetch security ticket.  
 `GET /db/collections/[col_guid]/views/[view_guid]/subscribers` - List subscribers.  
 `GET /db/collections/[col_guid]/views/[view_guid]/reduction` - List query result.  
 
