@@ -519,7 +519,7 @@ The settings json file is the mechanism to supply database parameters.
 
 ### Jade
 
-The excellent Jade templating engine is used for the web administration and the demos. 
+The excellent [Jade](http://jade-lang.com/) templating engine is used for the web administration and the demos. 
 The templates are contained in the /views subdirectory. Templates may be added or modified dynamically.
 (i.e. no need to restart rtdb.)
 
@@ -554,7 +554,7 @@ Set this value to to the location of the local directory to contain the database
 
 ## cfss3
 
-*cfss3* allows writing to the Amazon S3 file system. Supply your credentials accordingly in the settings json.
+*cfss3* allows writing to the [Amazon S3](http://aws.amazon.com/s3/) file system. Supply your credentials accordingly in the settings json.
 
 	"config" : { "accessKeyId" : "xxx", 
 		"secretAccessKey": "xxx", 
