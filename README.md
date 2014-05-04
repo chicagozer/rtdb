@@ -1,7 +1,7 @@
 # rtdb
 
 © 2014 by Rheosoft. All rights reserved. 
-Licensed under the [RTDB Software License version 1.0](license.pdf).
+Licensed under the [RTDB Software License version 1.0](/license.pdf).
  
 Comments, questions? <info@rheosoft.com>
 
@@ -87,7 +87,10 @@ Collections → Views → Subscribers
 ### Map/Reduce
 
 The query within each view is implemented via map/reduce. Each query requires a map function and a reduce function.  
-Optionally, a finalize function and a personalize function can be added; each will be explained in order.
+Optionally, a finalize function and a personalize function can be added.
+For incoming documents, the pipeline follows this pattern.
+
+Map → Reduce → Finalize → Personalize
 
 #### Map  
 
@@ -161,12 +164,12 @@ specifically for the subscriber. A common usage would be to filter the data base
 
 **rtdb** is intended to be run behind a secure web server such as [Apache](http://httpd.apache.org/). 
 Apache and other web servers provide facilities to apply granular URL based security to **rtdb**.
-See advanced topic, securing **rtdb** with simplesamlphp and Apache.
+See advanced topic, securing **rtdb**.
 
 "Out of the box", rtdb implements Basic Authentication security for the administration functions. 
 The user/password are set via environmental variables **RTDBADMIN_USER** and **RTDBADMIN_PWD**. 
 In a production environment where security has been delegated, the Basic Authentication may be disabled
-by changing the settings file parameter **disableBasicAuth** to **true**.
+by changing the settings json parameter **disableBasicAuth** to **true**.
 
 If rtdb is used over the internet, be sure to secure the traffic with https if you intend to rely on basic authentication.
 
@@ -177,10 +180,10 @@ Feel free to check out the HTML!)
 
 The REST API speaks JSON and uses standard verbs.
 
-`GET` - return a JSON object.
-`PUT` - update passing a JSON object.
-`DELETE` - delete object according to url.
-`POST` - insert JSON object or execute command according to URL.
+`GET` - return a JSON object.  
+`PUT` - update passing a JSON object.  
+`DELETE` - delete object according to url.  
+`POST` - insert JSON object or execute command according to URL.  
 
 Each collection, view and subscriber is given a Globally Unique Identifier (GUID).
 Using a GUID guarantees uniqueness of the individual objects and allows separate databases to be combined if needed.
@@ -233,11 +236,15 @@ Note that for inserts, the **rtdb** REST API expects either a single JSON docume
 To maximize performance, the map/reduce is run once for the entire array.
 So use arrays when inserting multiple documents at once.
 
-Browser subscribers register for streams via the [HTML5 event source API](http://www.w3.org/TR/eventsource/) or WebSockets.  
+Browser subscribers register for streams via the [HTML5 event source API](http://www.w3.org/TR/eventsource/) or [WebSockets](http://www.w3.org/TR/websockets/).  
 
-## Server Sent Events (EventSources)
+### Server Sent Events (EventSources)
 
-Intuitively a subscriber would create an EventSource for each interesting view. However in practice, web browsers
+EventSources provide a mechanism for the database to push updates to subscribers (usually a browser).
+This eliminates the need for clients to poll the database checking for updates. The heart of **rtdb** is the ability
+to send aggregations to subscribers in real-time.
+
+Often a browser client may want to show multiple views on a single page. Intuitively a subscriber would create an EventSource for each interesting view. However in practice, web browsers
 limit the number of active EventSources to a very small number.
 Instead of creating multiple EventSources, supply multiple view params for each additional stream.
 Most browsers have a limit on the number of EventSources that may be created per page.
@@ -256,7 +263,7 @@ When adding the EventListener, pass the GUID of each view as a param.
 	    console.log(event.data);
 	    }, false);
 	    
-## Securing Subscriptions
+### Securing Subscriptions
 
 **rtdb** provides a ticket based security model. ACL based security is enabled via the settings.json by setting
 **useACLTicket** to **true**. In this case, a ticket must be retrieved for each view via a REST call.
@@ -276,24 +283,24 @@ Tickets are passed to the EventSource as a param. If more than one view is requi
 The ticket has a short expiration (less than one minute) so that it may not be cached or passed around. It should be used once
 immediately after requesting it. 
 	    
-## WebSockets
+### WebSockets
 
-Subscriber data only flows in a single direction in **rtdb** from the server to the browser so Server Sent Events are
+Subscriber data only flows in a single direction in **rtdb**. Therefore Server Sent Events are
 an excellent choice for a transport. It is more widely supported in PaaS environments and may behave better with proxies.
 However in some cases, WebSockets are preferable and may even be required to support certain browsers such as Internet
 Explorer.
 
-**rtdb** uses the excellent socket.io package. The steps are as follows. 
+**rtdb** uses the excellent socket.io package for WebSocket support. The connection steps are as follows. 
 
 First secure a ticket for the view or views if ACL security is enabled. This process is identical to using Server Sent Events.
 	
-Once the ticket is secured. The socket is created.
+Once the ticket is secured the socket is created.
 
     var view, var ticket; 
     var socket = io.connect(); 
 
-In the socket connect event, we call the server via an **emit** to "subscribe" to the view, passing the ticket.
-If we are subscribing to multiple views, then call subscribe multiple times or better yet pass an array of view/ticket JSON objects.
+In the socket connect event, we use **emit** to call the server and "subscribe" to the view, passing the ticket.
+If you are subscribing to multiple views, pass an array of view/ticket JSON objects.
 
     socket.on('connect', function () {
       socket.emit('subscribe', { ticket: ticket, view: view });
@@ -305,28 +312,33 @@ If we are subscribing to multiple views, then call subscribe multiple times or b
          );
       });
 
-The demos discussed below are excellent references for a complete implementation.
+The demos discussed below serve as references for a complete implementation.
       	    
-## Demos and Sample Databases
+## Demos
 
-**rtdb** comes with two sample databases and web front-end accessible at
+**rtdb** comes with two sample collections and a web front-end accessible at
 
 [http://localhost:9001/demo/apples](http://localhost:9001/demo/apples)
 
 [http://localhost:9001/demo/parcels](http://localhost:9001/demo/parcels)
 
-These two demos utilize Server Sent Events and register an EventSource. Documents are added through the REST API. 
+These two demos utilize Server Sent Events to receive real-time updates. Documents are added through the REST API. 
 
 The "Apples" demo provides a simple front end for adding new documents and viewing the aggregations.
 It is more interesting when running simultaneously on multiple browsers.
 
 The "Parcels" demo uses a small sample of public domain property tax parcel data and inserts documents
-repeatedly to provide a constantly updating aggregation. The parcels demo is initiated by cfs/parcels.js.
-Remove or move this file in a production environment.
+repeatedly to provide constantly updating aggregations. The inserts are initiated by cfs/parcels.js.
+Be sure to remove or move this file in a production environment.
 
-## Websocket Demos
+An online connection is required to load the Google libraries used for charting.
 
-In addition, these samples have been provided using Websocket support.
+Also included are mobile versions of the demos. Accessible via the menu or loaded by default
+if accessing the demo from a mobile platform.
+
+### Websocket Demos
+
+Additional samples have been provided illustrating Websocket support.
 
 [http://localhost:9001/demo/applesws](http://localhost:9001/demo/applesws)
 
@@ -338,24 +350,26 @@ In addition, these samples have been provided using Websocket support.
 
 Here is a summary of the **rtdb** project file structure.  
 
-	 /package.json - main package  
+	 /package.json - packaging file for NPM  
 	 /README.md - this file   
 	 /rtdb.js - the main class  
 	 /collection.js - collection class  
 	 /identity.js - helper class for guid identity  
 	 /view.js - view class  
-	 /db.js - databse class  
-	 /cfs - the pluggable file systems.  
+	 /db.js - database class
+	 /license.pdf - the license  
+	 /cfs - the pluggable file systems  
 	 	/cfslocal.js - local file storage  
 	 	/cfss3.js - Amazon S3 storage  
 	 	/parcels.js - loader for parcel demo. 
-	 node_modules - required Node modules.  
-	 /public - static files served by the web server.  
-	 /settings - startup options in JSON format.  
+	 node_modules - required Node modules installed by NPM
+	 /public - static files served by the web server  
+	 /settings - startup options in JSON format  
 	    /settings.json - basic settings  
 	    /mocha.json - settings for running mocha tests  
-	 /test - mocha tests.  
-	 /views - Jade templates used by the Web interface.  
+	 /test - mocha tests  
+	 /views - Jade templates used by the web interface
+	 /sampledb - the sample collections used by the demos  
 
 There are two default settings files in /settings
 
@@ -383,7 +397,11 @@ The REST API may be secured by specific URL to limit or control access at the co
 
 In production environments, admin functions should be secured by method and URL.
 
-### Using Document Expirations
+### Collection attributes
+
+There are several attributes on a collection worth mentioning.
+
+#### Document Expirations
 
 A collection may be given an document *expiration* in milliseconds.
 This can be useful for implementing queries based on sliding windows. (i.e. trends for the last hour, last day, etc).  
@@ -404,11 +422,11 @@ Using *expiration* can be expensive. As each batch of documents expires, the ful
 *Expiration* will ensure the collection is map-reduced the minimum number of times required.. 
 However, if you are inserting large volumes of documents, consider simply forcing a map-reduce via the REST API on a regular interval instead.
 
-If you are very concerned about the expense of performing a full map-reduce, 
+If you are concerned about the expense of performing a full map-reduce, 
 consider simply clearing the collection on a timed interval. 
 The effect is a bit different than a sliding window, but very efficient.
 
-### Using Transient  
+#### Using Transient  
 
 When a collection is marked as *transient*, collections are reduced, but documents are not persisted.
 This can be useful for high volume or when the data is persisted elsewhere.  
@@ -421,21 +439,21 @@ Reductions are persisted when the database is shutdown so that current state of 
 Note that collections that use *expiration* cannot use *transient*.
 These two flags are mutually exclusive.  
 
-### Using Priority 
+#### Using Priority 
 
-When a collection will be used for lookups (aka master table), it must be loaded before its dependent collections.  
+When a collection will be used for lookups (aka master tables), it must be loaded before its dependent collections.  
 Use the *Priority* to order how collections are loaded. Lower numbers are loaded first.
 
 ### Using Deltas
 
-Often the amount of data that changes for each subscription event is small compared to the overall size of the reduction.
-RTDB offers a form of compression for this case by sending just the difference between the last reduction and latest one.
+Often the amount of data that changes between events is small compared to the overall size of the reduction.
+RTDB offers a form of compression for this case and sends just the difference between the last reduction and latest one.
 
 This mode is enabled by passing the query parm *delta* when subscribing to a stream. i.e.  
 
     /db/stream?view=6f57030d-ccad-41df-aa92-689292fa2c42&delta=true
     
-Or in the case of a WebSocket, sending 
+Or in the case of a WebSocket, send 
 
 	delta: true
 	
@@ -455,17 +473,54 @@ However, depending on the view, using delta mode may be less efficient than send
 
 Unlike a relational database, there is no *join* syntax to combine collections.
 However the database object is passed to the map/reduce methods and 
-this can be useful for referencing other collections when a lookup is required.
+this can be useful for referencing other collections when a lookup is required. 
+You will need to provide a "lookup" reduction on the collection containing the master data.
 
-    // myobject will contain the hash used for the lookup
+    // myobject will contain the key used for the lookup
     var myobject;
-    // Use a GUID to get a reference to the other collection
+    // Use a GUID to get a reference to the collection containing master data
     var c=database.collectionAt('be2aec31-3d1d-4674-bc20-106d5c46e220'); 
     // Use a GUID to get the intended view
     var v = c.viewAt('e3ef472a-1f7e-469e-98f9-cf759cc05352'); 
     // do the lookup by using "myobject" as the hash
     var r = v.reductionAt(myobject);
     // use the return value "r" as needed.
+
+### IPv6
+
+**rtdb** supports IPv6. Supply an IPv6 listen address for **hosts** in the settings json.
+
+	"hosts": ["::1"]
+
+This field takes an array so you may supply both an IPv4 address and IPv6 if desired.
+
+    "hosts": ["::1","localhost"]
+    
+If you wish to use the parcels demo with IPv6, you will need to update the hosts value in **parcels.js**.
+
+### Settings
+
+The settings json file is the mechanism to supply database parameters.
+
+	hosts: an array of hosts to listen on. May be IPv4 or IPv6.
+	port: The port to listen on.
+	useACLTicket: boolean to enable the ACL/ticket security mechanism.
+	disableBasicAuth: boolean to disable basic authentication for DB admin functions.
+	cfs: the persistence layer to use.
+	cfsinit: json object passed to persistence layer for initialization params.
+	reduceInterval: minimum interval between subscriber updates.
+	expirationInterval: expiration interval for transient collections.
+
+### Jade
+
+The jade templating engine is used for the web administration and the demos. 
+The templates are contained in the /views subdirectory. Templates may be added or modified dynamically.
+(i.e. no need to restart rtdb.)
+
+### Licensing
+
+**rtdb** is licensed under the [RTDB Software License version 1.0](/license.pdf).
+Commercial licenses and support are also available @<info@rheosoft.com>.
 
 ### Custom Persistence
 
@@ -481,3 +536,24 @@ You may use either *cfslocal.js* or *cfss3.js* as a template.
     function del(key, callback)   - delete object by key
     function put(prefix, item, callback, expires)   - put object
     function list(prefix, callback)  - list objects
+    
+## cfslocal
+
+*cfslocal* is the default persistence layer. Database objects are writen to the local file system.
+The *cfslocal* persistence layer takes a single initialization param.
+
+	"root" : "sampledb/"
+
+Set this value to to the location of the local directory to contain the database files.
+
+## cfss3
+
+*cfss3* allows writing to the Amazon S3 file system. Supply your credentials accordingly in the settings json.
+
+	"config" : { "accessKeyId" : "xxx", 
+		"secretAccessKey": "xxx", 
+		"region": "us-east-1" 
+			},
+	"params" : {
+		"Bucket" : "xxxxxx"
+		}
