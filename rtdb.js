@@ -1,6 +1,11 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
 var express = require('express');
+var auth = require('http-auth');
+var errorHandler = require('errorhandler');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
 var Database = require('./db');
 var Collection = require('./collection');
 var View = require('./view');
@@ -94,9 +99,9 @@ function loadExpress(database, start) {
 	}
 	// if you want to handle POSTS, you need this
 	// add all the plugins
-	app.use(express.bodyParser());
-	app.use(express.methodOverride());
-	app.use(express.cookieParser("yabadabachangeme"));
+	app.use(bodyParser());
+	app.use(methodOverride());
+	app.use(cookieParser("yabadabachangeme"));
 
 	// serve up statics if we aren't running under another web server
 	// I think this is clever
@@ -104,10 +109,11 @@ function loadExpress(database, start) {
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'jade');
 
-	app.configure('development', function() {
-		app.use(express.errorHandler());
+	var env = process.env.NODE_ENV || 'development';
+	if ('development' == env ) {
+		app.use(errorHandler());
 		app.locals.pretty = true;
-	});
+	}
 
 	// since most browsers can't handle alot of SSEs we allow the
 	// requester to come in with a bunch of views to see
@@ -116,14 +122,25 @@ function loadExpress(database, start) {
 		return str.substr(i || 0, start.length) === start;
 	}
 		
-	// Synchronous Function
-	var auth = express.basicAuth(function(user, pass) {
-		if (database.getSettings().disableBasicAuth)
-			return true;
+    
 		
-		return user === (process.env.RTDBADMIN_USER || 'admin')
-			&& pass === (process.env.RTDBADMIN_PWD || 'chang3m3');
-		});
+	var basic = auth.basic({
+	        realm: "rtdb"
+	    }, function (username, password, callback) { // Custom authentication method.
+	    	var reply;
+	    	
+	    	if (database.getSettings().disableBasicAuth)
+	    		reply = true;
+			
+			reply =  username === (process.env.RTDBADMIN_USER || 'admin')
+				&& password === (process.env.RTDBADMIN_PWD || 'chang3m3');
+			callback(reply);
+			}
+	);	
+	
+	app.all('/web/*', auth.connect(basic));
+	app.all('/db/admin/*', auth.connect(basic));
+	
 
 	app.get('/db/stream', function(req, res) {
 
@@ -211,12 +228,12 @@ function loadExpress(database, start) {
 	});
 
 	// write the headers; diagnostic function
-	app.get('/db/admin/echo', auth, function(req, res) {
+	app.get('/db/admin/echo',  function(req, res) {
 		res.send(req.headers);
 	});
 
 	// quick little function that will shutdown the DB
-	app.post('/db/admin/stop', auth, function(req, res) {
+	app.post('/db/admin/stop',  function(req, res) {
 		database.saveViewsThenExit();
 		res.send(202);
 	});
@@ -268,7 +285,7 @@ function loadExpress(database, start) {
 	});
 
 	// serve up some stats
-	app.get("/db/admin/stats", auth, function(req, res) {
+	app.get("/db/admin/stats",  function(req, res) {
 
 		// get current memory and uptime
 		// FIXME - so hacky
@@ -340,7 +357,7 @@ function loadExpress(database, start) {
 	});
 
 	// main web page
-	app.get("/web", auth, function(req, res) {
+	app.get("/web",  function(req, res) {
 		res.render('main', {
 			json : database._identity
 		});
@@ -396,7 +413,7 @@ function loadExpress(database, start) {
 	});
 
 	/** templated db stats */
-	app.get("/web/admin/stats", auth, function(req, res) {
+	app.get("/web/admin/stats",  function(req, res) {
 
 		// get current memory and uptime
 		database.getIdentity().hosts = database.globalSettings.hosts;
@@ -412,7 +429,7 @@ function loadExpress(database, start) {
 
 	/** templated list of collections */
 
-	app.get('/web/collections', auth, function(req, res) {
+	app.get('/web/collections',  function(req, res) {
 		var list = [];
 		database.collections.forEach(function(item) {
 			list.push(item.getIdentity());
@@ -426,7 +443,7 @@ function loadExpress(database, start) {
 
 	/** templated collection */
 
-	app.get('/web/collections/:id', auth, function(req, res) {
+	app.get('/web/collections/:id',  function(req, res) {
 		logger.debug('app.get /web/collections id is ' + req.params.id);
 		var c = database.collectionAt(req.params.id);
 		if (!c)
@@ -439,7 +456,7 @@ function loadExpress(database, start) {
 
 	/** templated list of views */
 
-	app.get('/web/collections/:id/views', auth, function(req, res) {
+	app.get('/web/collections/:id/views',  function(req, res) {
 		var list = [];
 		var c = database.collectionAt(req.params.id);
 		if (!c) {
@@ -456,7 +473,7 @@ function loadExpress(database, start) {
 	});
 
 	// templated view
-	app.get('/web/collections/:cid/views/:vid', auth, function(req, res) {
+	app.get('/web/collections/:cid/views/:vid',  function(req, res) {
 		var c = database.collectionAt(req.params.cid);
 		if (!c) {
 			res.send(404, { Status: 404, Message: "collection " + req.params.cid + " is not in the database."});
@@ -473,7 +490,7 @@ function loadExpress(database, start) {
 	});
 
 	// templated reduction
-	app.get('/web/collections/:cid/views/:vid/reduction', auth, function(req,
+	app.get('/web/collections/:cid/views/:vid/reduction',  function(req,
 			res) {
 		var c = database.collectionAt(req.params.cid);
 		if (!c) {
@@ -495,7 +512,7 @@ function loadExpress(database, start) {
 	});
 
 	// return templated list of subscriptions
-	app.get('/web/collections/:cid/views/:vid/subscriptions', auth, function(
+	app.get('/web/collections/:cid/views/:vid/subscriptions',  function(
 			req, res) {
 		var c = database.collectionAt(req.params.cid);
 		if (!c) {
