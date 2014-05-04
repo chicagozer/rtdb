@@ -1,4 +1,8 @@
 mixin prettyDate(uglyDate)
+    #{uglyDate.getMonth() + 1 + '/' + uglyDate.getDate() + '/' + uglyDate.getFullYear()}
+
+
+mixin prettyDate2(uglyDate)
   daysAgo = ((((new Date() - uglyDate) / 1000) / 60) / 60) / 24
   hours = uglyDate.getHours()
   minutes = uglyDate.getMinutes()
@@ -7,7 +11,6 @@ mixin prettyDate(uglyDate)
   hours = hours ? hours : 12 
   minutes = minutes < 10 ? '0'+minutes : minutes
   strTime = hours + ':' + minutes + ' ' + ampm
-
   if daysAgo < 1
     | Today at #{strTime}
   else if daysAgo <= 7
@@ -15,7 +18,7 @@ mixin prettyDate(uglyDate)
     day = uglyDate.getDay()
     #{weekDays[day + 1]} at #{strTime}
   else
-    #{uglyDate.getMonth() + 1} /#{uglyDate.getDate()} /#{uglyDate.getFullYear()}
+    #{uglyDate.getMonth() + 1 + '/' + uglyDate.getDate() + '/' + uglyDate.getFullYear()}
 
 mixin showJson(myJsonObject, level, href)
   if typeof level == 'undefined'
@@ -33,8 +36,7 @@ mixin showJson(myJsonObject, level, href)
         else if myJsonObject instanceof Object
           each value, key in myJsonObject
             if value instanceof Date
-              p #{key}:&nbsp;
-                mixin prettyDate(value)
+              p #{key}: #{value}
             else if value instanceof Object
               p #{key}:
               if typeof value == 'undefined' || value.length == 0
@@ -47,7 +49,6 @@ mixin showJson(myJsonObject, level, href)
             else
               p #{key}: #{value}
         else if myJsonObject instanceof Date
-          p
-            mixin prettyDate(myJsonObject)
+          p #{myJsonObject}
         else    
           p #{myJsonObject}   
