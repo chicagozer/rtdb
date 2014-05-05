@@ -114,7 +114,7 @@ function main2() {
 				logger.log('error', 'HStream.readFile - ',err);
 			else
 				logger.log('debug', 'HStream.readFile - done');
-			setTimeout(main,0);
+			setTimeout(main2,0);
 		});
 
 	});
