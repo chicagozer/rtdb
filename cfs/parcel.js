@@ -111,9 +111,9 @@ function main2() {
 
 		async.eachSeries(files, readFile, function(err) {
 			if (err)
-				logger.log('error', 'HStream.readFile - ',err);
+				logger.log('error', 'parcel.readFile - ',err);
 			else
-				logger.log('debug', 'HStream.readFile - done');
+				logger.log('debug', 'parcel.readFile - done');
 			setTimeout(main2,0);
 		});
 
