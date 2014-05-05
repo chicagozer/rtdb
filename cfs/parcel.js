@@ -35,14 +35,14 @@ foptions = {
 	}
 };
 
-// Setup the request. The options parameter is
-// the object we defined above.
+//Setup the request. The options parameter is
+//the object we defined above.
 var count = 0;
 
 function readFile(file, callback) {
-
+	
 	var start = new Date();
-
+	
 	fs.readFile(dir + file, 'utf-8', function(err, data) {
 		if (err)
 			callback(err);
@@ -54,12 +54,11 @@ function readFile(file, callback) {
 			res.setEncoding('utf-8');
 			res.on('end', function() {
 				var now = new Date();
-				// we are going to slow this down to a max of 100 inserts per
-				// sec
+				// we are going to slow this down to a max of 100 inserts per sec
 				var delay = Math.max(0, 10 - (now - start));
 				setTimeout(callback, delay);
 			});
-
+			
 			res.on('data', function(data) {
 			});
 
@@ -71,7 +70,7 @@ function readFile(file, callback) {
 		req.on('error', function(e) {
 			callback(err);
 		});
-
+		
 		if (logger.level === 'silly')
 			logger.log('silly', 'HStream.readFile - writing ' + count++);
 
@@ -82,8 +81,9 @@ function readFile(file, callback) {
 
 }
 
-function flush() {
 
+function flush() {
+	
 	var req = http.request(foptions, function(res) {
 		res.setEncoding('utf-8');
 		res.on('data', function(data) {
@@ -93,13 +93,13 @@ function flush() {
 	});
 
 	req.end('{}');
-
+	
 }
 
 setTimeout(main, 10000);
 
 function main() {
-	setInterval(flush, 1000 * 60 * 5);
+	setInterval(flush,1000*60*5);
 	main2();
 }
 
@@ -110,10 +110,10 @@ function main2() {
 
 		async.eachSeries(files, readFile, function(err) {
 			if (err)
-				logger.log('error', 'HStream.readFile - ', err);
+				logger.log('error', 'parcel.readFile - ',err);
 			else
-				logger.log('debug', 'HStream.readFile - done');
-			setTimeout(main, 0);
+				logger.log('debug', 'parcel.readFile - done');
+			setTimeout(main,0);
 		});
 
 	});
