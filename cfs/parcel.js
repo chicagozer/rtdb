@@ -113,7 +113,7 @@ function main2() {
 				logger.log('error', 'parcel.readFile - ',err);
 			else
 				logger.log('debug', 'parcel.readFile - done');
-			setTimeout(main,0);
+			setTimeout(main2,0);
 		});
 
 	});
