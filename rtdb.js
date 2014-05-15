@@ -124,18 +124,18 @@ function loadExpress(database, start) {
 		
     
 		
-	var basic = auth.basic({
-	        realm: "rtdb"
-	    }, function (username, password, callback) { // Custom authentication method.
-	    	var reply;
-	    	
-	    	if (database.getSettings().disableBasicAuth)
-	    		reply = true;
-			
-			reply =  username === (process.env.RTDBADMIN_USER || 'admin') && password === (process.env.RTDBADMIN_PWD || 'chang3m3');
-			callback(reply);
-			}
-	);	
+		var basic = auth.basic({
+		    realm: "rtdb"
+		}, function (username, password, callback) {
+		    // Custom authentication method.
+		    var reply;
+
+		    if (database.getSettings().disableBasicAuth)
+		        reply = true;
+
+		    reply = username === (process.env.RTDBADMIN_USER || 'admin') && password === (process.env.RTDBADMIN_PWD || 'chang3m3');
+		    callback(reply);
+		});
 	
 	app.all('/web/*', auth.connect(basic));
 	app.all('/db/admin/*', auth.connect(basic));
@@ -748,7 +748,7 @@ function loadExpress(database, start) {
 
 	/**
 	 * send back the reduction
-	 *
+	 * 
 	 */
 
 	app.get('/db/collections/:cid/views/:vid/reduction', function(req, res) {
@@ -834,9 +834,6 @@ function loadExpress(database, start) {
 
 	database.io.on('connection', function(socket) {
 		
-		//console.log(socket.handshake.headers);
-			  
-		// Server Side
 		var idlist=[];
 
 		socket.on('subscribe', function(data) {
@@ -856,14 +853,15 @@ function loadExpress(database, start) {
 					
 					if (!database.getSettings().useACLTicket || view.checkTicket(vid.ticket))
 						{
-						//socket.join(vid);
+						// socket.join(vid);
 					
 						var sub = {
 								socket : socket
 						};
 
 						// give him an identity and save his headers
-						// note we will use the headers for our "personalization"
+						// note we will use the headers for our
+						// "personalization"
 						// stage in the pipeline
 						sub._identity = new Identity();
 						sub._identity.headers = socket.handshake.headers;
@@ -897,7 +895,7 @@ function loadExpress(database, start) {
 		
 		socket.on('unsubscribe', function(data) {
 			// TODO make array aware
-			//socket.leave(data.room);
+			// socket.leave(data.room);
 		});
 	});
 
