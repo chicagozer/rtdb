@@ -20,6 +20,8 @@ describe('CFS plugins', function() {
 
 		if (argv.settings)
 			settings = JSON.parse(fs.readFileSync(argv.settings));
+		else if (process.env.MOCHA_SETTINGS)
+			settings = JSON.parse(fs.readFileSync(process.env.MOCHA_SETTINGS));
 		else
 			settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
 
