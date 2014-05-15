@@ -1,5 +1,7 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true */
+/*global describe, it, before, beforeEach, after, afterEach */
 "use strict";
 var assert = require('assert');
 var argv = require('optimist').argv;
@@ -24,7 +26,6 @@ describe('Suite', function() {
 	var cid = null;
 	var vid = null;
 	var vid2 = null;
-	var logger = null;
 	before(function() {
 		
 		
@@ -43,7 +44,7 @@ describe('Suite', function() {
 			global.logger.add(winston.transports[item[0]], item[1]);
 		});
 		
-		dir = new Tempdir;
+		dir = new Tempdir();
 		globalSettings.cfsinit.root = dir.path + '/';
 		//fs.mkdirSync(dir.path + '/collections');
 		globalSettings.cfs = 'CFSL';
