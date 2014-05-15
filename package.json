@@ -1,6 +1,6 @@
 {
   "name": "rtdb",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Real Time Database",
   "private": false,
   "main": "rtdb.js",
@@ -19,7 +19,7 @@
     "markdown": "^0.5.0",
     "marked": "^0.3.2",
     "nforce" : "https://api.github.com/repos/chicagozer/nforce/tarball",
-    "mkdirp": "^0.4.0",
+    "mkdirp": "^0.5.0",
     "node-uuid": "^1.4.1",
     "optimist": "^0.6.1",
     "process": "^0.7.0",
