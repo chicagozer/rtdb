@@ -1,11 +1,10 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
-
+/*jslint node: true */
 // local file system support
 "use strict";
-var fs = require('fs');
+var fs = require('fs.extra');
 var path = require('path');
-var mkdirp = require('mkdirp');
 function CFSL() {
 }
 
@@ -19,10 +18,10 @@ CFSL.prototype.name = function()
 };
 
 CFSL.prototype.get = function(key, callback) {
-	logger.log('silly', 'CFSL.get - ', key);
+	global.logger.log('silly', 'CFSL.get - ', key);
 	fs.readFile(this.root + key, function(err, data) {
 		if (err) {
-			logger.log('error', 'CFSL.get', err);
+			global.logger.log('error', 'CFSL.get', err);
 			callback(err);
 		} else {
 			callback(null, JSON.parse(data));
@@ -55,11 +54,11 @@ CFSL.prototype.put = function(prefix, item, callback) {
 	}
 
 	var dirname = path.dirname(key);
-	mkdirp(dirname, function(err) {
+	fs.mkdirp(dirname, function(err) {
 		if (err)
 			callback(err);
 		else {
-			logger.log('debug', 'CFSL.put - ', key);
+			global.logger.log('debug', 'CFSL.put - ', key);
 			fs.writeFile(key, JSON.stringify(item), callback);
 		}
 	});
@@ -68,7 +67,7 @@ CFSL.prototype.put = function(prefix, item, callback) {
 CFSL.prototype.list = function(prefix, callback) {
 	
 	var dir  = this.root + prefix ;
-	mkdirp(dir, function(err) {
+	fs.mkdirp(dir, function(err) {
 		if (err)
 			callback(err);
 		else {

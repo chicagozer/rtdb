@@ -1,10 +1,10 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true */
 "use strict";
 var express = require('express');
 var auth = require('http-auth');
 var errorHandler = require('errorhandler');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var Database = require('./db');
@@ -39,7 +39,7 @@ function addStream(req, res, view, delta) {
 	view.subscriptions[sub._identity._id] = sub;
 
 	function drain() {
-		logger.log('info', 'drain - subscription:', sub._identity._id);
+		global.logger.log('info', 'drain - subscription:', sub._identity._id);
 		if (sub.data) {
 
 			var data;
@@ -88,13 +88,13 @@ function addStream(req, res, view, delta) {
 /** loadExpress methods */
 function loadExpress(database, start) {
 
-	logger.log('debug', 'Database.loadExpress - started.');
+	global.logger.log('debug', 'Database.loadExpress - started.');
 	var app = express();
 
 	// lets cap the # of sockets at a reasonable # so we don't run out of
 	// filehandles
 	if (database.globalSettings.maxSockets) {
-		logger.log('debug', 'Database.loadExpress - maxSockets:',
+		global.logger.log('debug', 'Database.loadExpress - maxSockets:',
 					database.globalSettings.maxSockets);
 		http.globalAgent.maxSockets = database.globalSettings.maxSockets;
 	}
@@ -102,8 +102,7 @@ function loadExpress(database, start) {
 	// add all the plugins
 	app.use(bodyParser());
 	app.use(methodOverride());
-	app.use(cookieParser("yabadabachangeme"));
-
+	
 	// serve up statics if we aren't running under another web server
 	// I think this is clever
 	app.use(express.static(__dirname + '/public'));
@@ -125,19 +124,18 @@ function loadExpress(database, start) {
 		
     
 		
-	var basic = auth.basic({
-	        realm: "rtdb"
-	    }, function (username, password, callback) { // Custom authentication method.
-	    	var reply;
-	    	
-	    	if (database.getSettings().disableBasicAuth)
-	    		reply = true;
-			
-			reply =  username === (process.env.RTDBADMIN_USER || 'admin')
-				&& password === (process.env.RTDBADMIN_PWD || 'chang3m3');
-			callback(reply);
-			}
-	);	
+		var basic = auth.basic({
+		    realm: "rtdb"
+		}, function (username, password, callback) {
+		    // Custom authentication method.
+		    var reply;
+
+		    if (database.getSettings().disableBasicAuth)
+		        reply = true;
+
+		    reply = username === (process.env.RTDBADMIN_USER || 'admin') && password === (process.env.RTDBADMIN_PWD || 'chang3m3');
+		    callback(reply);
+		});
 	
 	app.all('/web/*', auth.connect(basic));
 	app.all('/db/admin/*', auth.connect(basic));
@@ -170,8 +168,7 @@ function loadExpress(database, start) {
 		vidlist.forEach(function(vid) {
 			var view = database.viewAt(vid);
 			if (!view) {
-				logger.log('warn', 'Database.stream - view [' + vid
-						+ '] not found.');
+				global.logger.log('warn', 'Database.stream - view [' + vid	+ '] not found.');
 				verrlist.push(vid);
 			} else
 				vlist.push(view);
@@ -184,7 +181,7 @@ function loadExpress(database, start) {
 			return;
 		}
 
-		if (database.getSettings().useACLTicket != false) {
+		if (database.getSettings().useACLTicket) {
 		
 			var fail = false;
 			
@@ -209,7 +206,7 @@ function loadExpress(database, start) {
 				return;
 				}
 			}
-		logger.log('debug', 'app.get stream: writing stream!!');
+		global.logger.log('debug', 'app.get stream: writing stream!!');
 		// setup the SEE
 		if (res.setTimeout)
 			res.setTimeout(0);
@@ -445,7 +442,7 @@ function loadExpress(database, start) {
 	/** templated collection */
 
 	app.get('/web/collections/:id',  function(req, res) {
-		logger.debug('app.get /web/collections id is ' + req.params.id);
+		global.logger.debug('app.get /web/collections id is ' + req.params.id);
 		var c = database.collectionAt(req.params.id);
 		if (!c)
 			res.send(404, { Status: 404, Message: "collection " + req.params.id + " is not in the database."});
@@ -461,7 +458,7 @@ function loadExpress(database, start) {
 		var list = [];
 		var c = database.collectionAt(req.params.id);
 		if (!c) {
-			res.send(404, { Status: 404, Message: "collection " + req.params.id + " is not in the database."});;
+			res.send(404, { Status: 404, Message: "collection " + req.params.id + "is not in the database."});
 			return;
 		}
 		c.views.forEach(function(item) {
@@ -582,7 +579,7 @@ function loadExpress(database, start) {
 
 		database.addCollection(c, function(err) {
 			if (err) {
-				logger.log('error', 'app.post - collections', err);
+				global.logger.log('error', 'app.post - collections', err);
 				res.send(500, { Status: 500, Message: err});
 			} else
 				res.send(201, c._identity);
@@ -593,12 +590,11 @@ function loadExpress(database, start) {
 
 	app.post('/db/collections/:id/views', function(req, res) {
 
-		logger.debug('App.post - adding view to ' + req.params.id);
+		global.logger.debug('App.post - adding view to ' + req.params.id);
 		var c = database.collectionAt(req.params.id);
 		if (!c) {
-			var msg = 'app.post - collections/views ' + req.params.id
-					+ ' not found.';
-			logger.log('error', msg);
+			var msg = 'app.post - collections/views ' + req.params.id + ' not found.';
+			global.logger.log('error', msg);
 			res.send(404, { Status: 404, Message: "collection " + req.params.id + " is not in the database."});
 		}
 
@@ -612,8 +608,7 @@ function loadExpress(database, start) {
 		}
 		c.addView(v, function(err) {
 			if (err) {
-				logger.log('error', 'app.post - collections/view: '
-						+ req.params.id + '/' + req.params.vid, err);
+				global.logger.log('error', 'app.post - collections/view: ' + req.params.id + '/' + req.params.vid, err);
 				res.send(500, { Status: 500, Message: err});
 			} else {
 				res.send(201, v.getIdentity());
@@ -654,7 +649,7 @@ function loadExpress(database, start) {
 	// update an existing view.
 	app.put('/db/collections/:id/views/:vid', function(req, res) {
 
-		logger.debug('App.put - updating  view: ' + req.params.vid);
+		global.logger.debug('App.put - updating  view: ' + req.params.vid);
 		var c = database.collectionAt(req.params.id);
 		if (!c) {
 			res.send(404, { Status: 404, Message: "collection " + req.params.id + " is not in the database."});
@@ -670,8 +665,7 @@ function loadExpress(database, start) {
 
 		c.updateView(v, function(err) {
 			if (err) {
-				logger.log('error', 'app.put - collections/view: '
-						+ req.params.id + '/' + req.params.vid, err);
+				global.logger.log('error', 'app.put - collections/view: ' + req.params.id + '/' + req.params.vid, err);
 				res.send(500, { Status: 500, Message: err});
 			} else
 				res.send(200, v.getIdentity());
@@ -754,7 +748,7 @@ function loadExpress(database, start) {
 
 	/**
 	 * send back the reduction
-	 *
+	 * 
 	 */
 
 	app.get('/db/collections/:cid/views/:vid/reduction', function(req, res) {
@@ -785,7 +779,7 @@ function loadExpress(database, start) {
 
 			c.removeView(req.params.vid, function(err) {
 				if (err) {
-					logger.log('error', err);
+					global.logger.log('error', err);
 					res.send(500, { Status: 500, Message: err});
 				} else {
 					res.send(200);
@@ -794,7 +788,7 @@ function loadExpress(database, start) {
 			});
 		} else {
 			var msg = 'app.del - Collection ' + req.params.cid + ' not found.';
-			logger.log('warn', msg);
+			global.logger.log('warn', msg);
 			res.send(404, { Status: 404, Message: "collection " + req.params.cid + " is not in the database."});
 		}
 	});
@@ -835,14 +829,11 @@ function loadExpress(database, start) {
 
 	var server = require('http').createServer(app);
 	database.io = require('socket.io').listen(server, {
-		'logger' : logger
+		'logger' : global.logger
 	});
 
 	database.io.on('connection', function(socket) {
 		
-		//console.log(socket.handshake.headers);
-			  
-		// Server Side
 		var idlist=[];
 
 		socket.on('subscribe', function(data) {
@@ -857,20 +848,20 @@ function loadExpress(database, start) {
 				
 				var view = database.viewAt(vid.view);
 				if (!view) {
-					logger.log('warn', 'Database.subscribe - view [' + vid
-							+ '] not found.');
+					global.logger.log('warn', 'Database.subscribe - view [' + vid + '] not found.');
 				} else {
 					
 					if (!database.getSettings().useACLTicket || view.checkTicket(vid.ticket))
 						{
-						//socket.join(vid);
+						// socket.join(vid);
 					
 						var sub = {
 								socket : socket
 						};
 
 						// give him an identity and save his headers
-						// note we will use the headers for our "personalization"
+						// note we will use the headers for our
+						// "personalization"
 						// stage in the pipeline
 						sub._identity = new Identity();
 						sub._identity.headers = socket.handshake.headers;
@@ -883,7 +874,7 @@ function loadExpress(database, start) {
 									view : view,
 									id : sub._identity._id
 								});
-						logger.log('debug', 'Database.socket - subscribe view:'  + view._identity._id + ' subscription:' + sub._identity._id);
+						global.logger.log('debug', 'Database.socket - subscribe view:'  + view._identity._id + ' subscription:' + sub._identity._id);
 						var myReduction = view.personalize(sub._identity._id);
 						socket.volatile.emit(vid, myReduction);
 						}
@@ -896,7 +887,7 @@ function loadExpress(database, start) {
 			idlist.forEach(function(key)
 					{
 				
-					logger.log('debug', 'Database.socket - disconnect view:'  + key.view._identity._id + ' subscription:' + key.id);
+					global.logger.log('debug', 'Database.socket - disconnect view:'  + key.view._identity._id + ' subscription:' + key.id);
 				
 					delete key.view.subscriptions[key.id];
 					});
@@ -904,7 +895,7 @@ function loadExpress(database, start) {
 		
 		socket.on('unsubscribe', function(data) {
 			// TODO make array aware
-			//socket.leave(data.room);
+			// socket.leave(data.room);
 		});
 	});
 
@@ -912,19 +903,15 @@ function loadExpress(database, start) {
 	if (database.getSettings().hosts) {
 		database.getSettings().hosts.forEach(function(host) {
 			server.listen(database.getSettings().port, host);
-			logger.log('info', 'rtdb (' + database.getIdentity()._pjson.version
-					+ ') is listening on ' + host + ':'
-					+ database.getSettings().port + ' ...');
+			global.logger.log('info', 'rtdb (' + database.getIdentity()._pjson.version + ') is listening on ' + host + ':' + database.getSettings().port + ' ...');
 		});
 	} else {
 		server.listen(database.getSettings().port);
-		logger.log('info', 'rtdb (' + database.getIdentity()._pjson.version
-				+ ') is listening on ' + database.getSettings().port + ' ...');
+		global.logger.log('info', 'rtdb (' + database.getIdentity()._pjson.version + ') is listening on ' + database.getSettings().port + ' ...');
 	}
 
-	logger.log('info', database.getIdentity().copyright);
-	logger
-			.log('info',
+	global.logger.log('info', database.getIdentity().copyright);
+	global.logger.log('info',
 					'for more info, visit https://rtdb.rheosoft.com/about/.');
 
 	database.getIdentity().startupTime = new Date().getTime() - start;
@@ -957,7 +944,7 @@ function main() {
 		global.logger = new (winston.Logger)(globalSettings.winston.options);
 
 		globalSettings.winston.transports.forEach(function(item) {
-			logger.add(winston.transports[item[0]], item[1]);
+			global.logger.add(winston.transports[item[0]], item[1]);
 		});
 
 	} else {
@@ -965,7 +952,7 @@ function main() {
 		console.error('Sorry, but we have to leave.');
 		process.exit();
 	}
-	logger.log('info', 'Settings loaded from ' + settingsFile + '.');
+	global.logger.log('info', 'Settings loaded from ' + settingsFile + '.');
 
 	if (argv.port)
 		globalSettings.port = argv.port;
@@ -978,8 +965,7 @@ function main() {
 	}
 
 	if (!globalSettings.port)
-		globalSettings.port = process.env.PORT || process.env.VCAP_APP_PORT || process.env.OPENSHIFT_NODEJS_PORT
-				|| 9001;
+		globalSettings.port = process.env.PORT || process.env.VCAP_APP_PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001;
 
 	if (!globalSettings.hosts && (process.env.HOST || process.env.OPENSHIFT_NODEJS_IP))
 		globalSettings.hosts = [ process.env.HOST || process.env.OPENSHIFT_NODEJS_IP];

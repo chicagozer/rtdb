@@ -3,6 +3,7 @@
 
 // amazon S3 filesystem support
 // remember to set your S3 parms in the settings.json
+/*jslint node: true */
 "use strict";
 var AWS = require('aws-sdk');
 
@@ -61,7 +62,7 @@ CFSS3.prototype.put = function ( prefix, item, callback, expires)
 		return;
 		}
 	
-	logger.log('debug','CFSS3.put - key:',key );
+	global.logger.log('debug','CFSS3.put - key:',key );
 	
 	var expireDate=null;
 	if (expires)
@@ -88,7 +89,7 @@ CFSS3.prototype.list = function (prefix, callback)
 		if (nextMarker)
 			options.Marker = nextMarker;
 		
-		logger.log('debug','CFSS3.list - prefix:' + prefix + ' marker:' + nextMarker);
+		global.logger.log('debug','CFSS3.list - prefix:' + prefix + ' marker:' + nextMarker);
 		self.s3.listObjects(options, function(err, files) {
 			if (err) {
 				callback(err);
@@ -108,7 +109,7 @@ CFSS3.prototype.list = function (prefix, callback)
 		});
 
 	}
-	logger.log('debug','CFSS3.list ', prefix);
+	global.logger.log('debug','CFSS3.list ', prefix);
 	fetchNext(prefix,null,callback);
 	
 };
