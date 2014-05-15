@@ -16,7 +16,7 @@ var dir = 'sampledb/parcels/';
 var data = {};
 
 
- poptions = {
+ var poptions = {
 	host : 'localhost',
 	port : process.env.PORT || 9001,
 	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
@@ -26,7 +26,7 @@ var data = {};
 	}
 };
  
- foptions = {
+ var foptions = {
 			host : 'localhost',
 			port : process.env.PORT || 9001,
 			path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents?permanent=false',
