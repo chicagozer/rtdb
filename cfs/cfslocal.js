@@ -1,6 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
-
+/*jslint node: true */
 // local file system support
 "use strict";
 var fs = require('fs.extra');
@@ -18,10 +18,10 @@ CFSL.prototype.name = function()
 };
 
 CFSL.prototype.get = function(key, callback) {
-	logger.log('silly', 'CFSL.get - ', key);
+	global.logger.log('silly', 'CFSL.get - ', key);
 	fs.readFile(this.root + key, function(err, data) {
 		if (err) {
-			logger.log('error', 'CFSL.get', err);
+			global.logger.log('error', 'CFSL.get', err);
 			callback(err);
 		} else {
 			callback(null, JSON.parse(data));
@@ -58,7 +58,7 @@ CFSL.prototype.put = function(prefix, item, callback) {
 		if (err)
 			callback(err);
 		else {
-			logger.log('debug', 'CFSL.put - ', key);
+			global.logger.log('debug', 'CFSL.put - ', key);
 			fs.writeFile(key, JSON.stringify(item), callback);
 		}
 	});
