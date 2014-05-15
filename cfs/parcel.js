@@ -4,6 +4,7 @@
 // parcels.js supports the demo for Tax Parcels. Because it's in the cfs subfolder
 // it gets loaded at runtime. It loads the database on a timer and flushes every 5 mins
 // in a production environment, remove this file from the cfs folder.
+/*jslint node: true */
 "use strict";
 var http = require('http');
 var fs = require('fs');
@@ -72,8 +73,8 @@ function readFile(file, callback) {
 			callback(err);
 		});
 		
-		if (logger.level === 'silly')
-			logger.log('silly', 'HStream.readFile - writing ' + count++);
+		if (global.logger.level === 'silly')
+			global.logger.log('silly', 'HStream.readFile - writing ' + count++);
 
 		req.write(data);
 		req.end();
@@ -111,9 +112,9 @@ function main2() {
 
 		async.eachSeries(files, readFile, function(err) {
 			if (err)
-				logger.log('error', 'parcel.readFile - ',err);
+				global.logger.log('error', 'parcel.readFile - ',err);
 			else
-				logger.log('debug', 'parcel.readFile - done');
+				global.logger.log('debug', 'parcel.readFile - done');
 			setTimeout(main2,0);
 		});
 
