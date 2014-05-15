@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+"use strict";
 var winston = require('winston');
 var assert = require('assert');
 
@@ -15,7 +16,7 @@ describe('CFS plugins', function() {
 	var settings;
 	var dir = null;
 	var cfsTypes = [];
-
+	
 	before(function() {
 
 		if (argv.settings)
@@ -25,7 +26,7 @@ describe('CFS plugins', function() {
 		else
 			settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
 
-		logger = new (winston.Logger)(settings.winston.options);
+		global.logger = new (winston.Logger)(settings.winston.options);
 		dir = new Tempdir;
 		settings.cfsinit.root = dir.path;
 

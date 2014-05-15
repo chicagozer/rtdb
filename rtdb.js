@@ -4,7 +4,6 @@
 var express = require('express');
 var auth = require('http-auth');
 var errorHandler = require('errorhandler');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var Database = require('./db');
@@ -102,8 +101,7 @@ function loadExpress(database, start) {
 	// add all the plugins
 	app.use(bodyParser());
 	app.use(methodOverride());
-	app.use(cookieParser("yabadabachangeme"));
-
+	
 	// serve up statics if we aren't running under another web server
 	// I think this is clever
 	app.use(express.static(__dirname + '/public'));
