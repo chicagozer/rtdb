@@ -4,7 +4,7 @@
 // parcels.js supports the demo for Tax Parcels. Because it's in the cfs subfolder
 // it gets loaded at runtime. It loads the database on a timer and flushes every 5 mins
 // in a production environment, remove this file from the cfs folder.
-
+"use strict";
 var http = require('http');
 var fs = require('fs');
 var async = require('async');
@@ -15,7 +15,7 @@ function Parcel() {
 var dir = 'sampledb/parcels/';
 var data = {};
 
-poptions = {
+var poptions = {
 	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
 	port : process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
 	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
@@ -24,8 +24,8 @@ poptions = {
 		'Content-Type' : 'application/json'
 	}
 };
-
-foptions = {
+ 
+ var foptions = {
 	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
 	port : process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
 	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents?permanent=false',
