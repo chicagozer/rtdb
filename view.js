@@ -6,7 +6,6 @@ var Identity = require('./identity');
 var vm = require('vm');
 var _ = require("underscore");
 var Symmetry = require('symmetry');
-var process = require('process');
 var crypto = require('crypto');
 // constructor
 
