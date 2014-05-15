@@ -2,9 +2,9 @@
 // Licensed under the RTDB Software License version 1.0
 
 // local file system support
-var fs = require('fs');
+"use strict";
+var fs = require('fs.extra');
 var path = require('path');
-var mkdirp = require('mkdirp');
 function CFSL() {
 }
 
@@ -54,7 +54,7 @@ CFSL.prototype.put = function(prefix, item, callback) {
 	}
 
 	var dirname = path.dirname(key);
-	mkdirp(dirname, function(err) {
+	fs.mkdirp(dirname, function(err) {
 		if (err)
 			callback(err);
 		else {
@@ -67,7 +67,7 @@ CFSL.prototype.put = function(prefix, item, callback) {
 CFSL.prototype.list = function(prefix, callback) {
 	
 	var dir  = this.root + prefix ;
-	mkdirp(dir, function(err) {
+	fs.mkdirp(dir, function(err) {
 		if (err)
 			callback(err);
 		else {

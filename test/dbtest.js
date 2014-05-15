@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+"use strict";
 var assert = require('assert');
 var argv = require('optimist').argv;
 var Identity = require('../identity');
@@ -23,19 +24,23 @@ describe('Suite', function() {
 	var cid = null;
 	var vid = null;
 	var vid2 = null;
-	
+	var logger = null;
 	before(function() {
-		if (!argv.settings)
-			argv.settings = 'settings/mocha.json';
-
-		assert(fs.existsSync(argv.settings));
-		globalSettings = JSON.parse(fs.readFileSync(argv.settings));
+		
+		
+		if (argv.settings)
+			globalSettings = JSON.parse(fs.readFileSync(argv.settings));
+		else if (process.env.MOCHA_SETTINGS)
+			globalSettings = JSON.parse(fs.readFileSync(process.env.MOCHA_SETTINGS));
+		else
+			globalSettings = JSON.parse(fs.readFileSync('settings/mocha.json'));
+		
 		// global on purpose
 		// we are going to put this in global.
-		logger = new (winston.Logger)(globalSettings.winston.options);
+		global.logger = new (winston.Logger)(globalSettings.winston.options);
 
 		globalSettings.winston.transports.forEach(function(item) {
-			logger.add(winston.transports[item[0]], item[1]);
+			global.logger.add(winston.transports[item[0]], item[1]);
 		});
 		
 		dir = new Tempdir;
