@@ -2,7 +2,7 @@
 // Licensed under the RTDB Software License version 1.0
 "use strict";
 var events = require('events');
-var fs = require('fs');
+var fs = require('fs.extra');
 var pjson = require('./package.json');
 var async = require('async');
 var argv = require('optimist').argv;
