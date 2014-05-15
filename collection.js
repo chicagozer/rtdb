@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true */
 "use strict";
 var events = require('events');
 var Identity = require('./identity');
@@ -43,7 +44,7 @@ function Collection(database, obj) {
 	
 	function doExpire() {
 
-		logger.log('debug','expiring ' + self._identity._id);
+		global.logger.log('debug','expiring ' + self._identity._id);
 		// calculate when was the last expire. if less than 1 sec (now configurable), hold off.
 		var now = new Date();
 		var delay = 0;
@@ -66,7 +67,7 @@ function Collection(database, obj) {
 			// console.log('### working docs is ' +self.workingdocs.length);
 			self.loadDocuments(self.views, function(err) {
 				if (err)
-					logger.log('error', err);
+					global.logger.log('error', err);
 				self._emitter.once('expire', doExpire);
 			});
 		}, delay);
@@ -74,7 +75,7 @@ function Collection(database, obj) {
 
 	function doReduce() {
 
-		logger.log('debug', 'in reduce! ', self._identity._id);
+		global.logger.log('debug', 'in reduce! ', self._identity._id);
 		// calculate when was the last reduce. if less than 1 sec (now
 		// configurable), hold off.
 		var now = new Date();
@@ -89,16 +90,16 @@ function Collection(database, obj) {
 		}
 
 		lastReduce = now;
-		logger.log('debug','reduce delay is ',delay);
+		global.logger.log('debug','reduce delay is ',delay);
 
 		setTimeout(function() {
-			logger.log('debug', 'Reducing ', self._identity._id);
+			global.logger.log('debug', 'Reducing ', self._identity._id);
 			// console.log('### working docs is ' +self.workingdocs.length);
 			self.views.forEach(function(elem) {
 				try {
 					elem.mapreduce(self._workingdocs, true);
 				} catch (e) {
-					logger.log('error', e.toString());
+					global.logger.log('error', e.toString());
 				}
 			});
 			self._workingdocs.length = 0;
@@ -147,7 +148,7 @@ Collection.prototype.push = function() {
 	if (docs.length === 0)
 		return;
 
-	// if (logger.level === 'debug')logger.log('debug',docs);
+	// if (logger.level === 'debug')global.logger.log('debug',docs);
 	var retval = docs;
 	
 	if (self._fonAdd)
@@ -177,7 +178,7 @@ Collection.prototype.push = function() {
 			self._workingdocs.push(item);
 		});
 		// signal for reduce.
-		logger.log('debug', 'emitting change for ', self._identity._id);
+		global.logger.log('debug', 'emitting change for ', self._identity._id);
 
 		self._emitter.emit('change');
 	}
@@ -191,7 +192,7 @@ Collection.prototype.loadDocuments = function(viewlist, callback) {
 	var dir = 'collection/' + this._identity._id + '/documents/';
 
 	var self = this;
-	logger.log('debug',
+	global.logger.log('debug',
 				'Collection.loadDocuments: loading documents from ', dir);
 	// console.trace(callback);
 	//self.documents.length = 0;
@@ -200,7 +201,7 @@ Collection.prototype.loadDocuments = function(viewlist, callback) {
 	function readIt(item, callback) {
 		self.database.cfs.get(item, function(err, data) {
 			if (err) {
-				logger.log('error', err);
+				global.logger.log('error', err);
 				callback(err);
 				return;
 			} else {
@@ -222,14 +223,13 @@ Collection.prototype.loadDocuments = function(viewlist, callback) {
 			return;
 		}
 		var notify = idx + 100 >= files.length;
-		logger.log('debug', 'Collection.loadDocuments.innerLoop idx:' + idx
-				+ ' doc count is ' + self._workingdocs.length);
+		global.logger.log('debug', 'Collection.loadDocuments.innerLoop idx:' + idx + ' doc count is ' + self._workingdocs.length);
 		
 
 		var subset = files.slice(idx, idx + 100);
 
 		// we need to use the async library to do 100 at a time.
-		logger.log('debug',
+		global.logger.log('debug',
 				'Collection.loadDocuments.innerLoop calling asynceach');
 		async.eachLimit(subset, eachLimit, readIt, function(err) {
 			if (err)
@@ -240,14 +240,12 @@ Collection.prototype.loadDocuments = function(viewlist, callback) {
 			else
 				{
 				
-				logger.log('debug',
-						'Collection.loadDocuments.innerLoop idx: files.length is '
-								+ files.length + ' notify is ' + notify);
+				global.logger.log('debug',
+						'Collection.loadDocuments.innerLoop idx: files.length is ' + files.length + ' notify is ' + notify);
 				if (self._workingdocs.length > 0) {
 					viewlist.forEach(function(v) {
-						logger.log('debug',
-								'Collection.loadDocuments.innerLoop reducing :'
-										+ v.getId());
+						global.logger.log('debug',
+								'Collection.loadDocuments.innerLoop reducing :'+ v.getId());
 						try
 							{
 							if (v._identity._exception)
@@ -256,7 +254,7 @@ Collection.prototype.loadDocuments = function(viewlist, callback) {
 							}
 						catch (e)
 						{
-							logger.log('error',e.toString());
+							global.logger.log('error',e.toString());
 							v._identity._exception = e.toString();
 						}
 					});
@@ -275,23 +273,20 @@ Collection.prototype.loadDocuments = function(viewlist, callback) {
 		if (exists) {
 			self.database.cfs.list(dir, function(err, files) {
 				if (err) {
-					logger.log('error', 'Collection.loadDocuments ['
-							+ self._identity._id + ']', err);
+					global.logger.log('error', 'Collection.loadDocuments [' + self._identity._id + ']', err);
 					callback(err);
 					return;
 				} else {
 					var count = files.length;
 					self.stats.fileCount = count;
-					logger.log('debug', 'Collection.loadDocuments: ['
-								+ self._identity._id + '] document count is ',
+					global.logger.log('debug', 'Collection.loadDocuments: [' + self._identity._id + '] document count is ',
 								count);
 
 					innerLoop(0, files, callback);
 				}
 			});
 		} else {
-			logger.log('warn', 'Collection.loadDocuments ['
-					+ self._identity._id + '] ' + dir + ' does not exist.');
+			global.logger.log('warn', 'Collection.loadDocuments [' + self._identity._id + '] ' + dir + ' does not exist.');
 			callback();
 		}
 	});
@@ -303,13 +298,13 @@ Collection.prototype.loadViews = function(callback) {
 	var self = this;
 	var vdir = dir + '/views/';
 	
-	logger.log('debug', 'Collection.loadViews', vdir);
+	global.logger.log('debug', 'Collection.loadViews', vdir);
 	self.database.cfs.exists(vdir, function(exists) {
 		if (exists) {
-			logger.log('debug', 'Collection.loadViews listing ', vdir);
+			global.logger.log('debug', 'Collection.loadViews listing ', vdir);
 			self.database.cfs.list(	vdir,function(err, files) {
 				if (err) {
-					logger.log('error', 'Collection.loadViews ['+ self._identity._id + ']', err);
+					global.logger.log('error', 'Collection.loadViews ['+ self._identity._id + ']', err);
 					callback();
 					return;
 					} 
@@ -322,25 +317,25 @@ Collection.prototype.loadViews = function(callback) {
 						}
 		
 					async.eachLimit(files,eachLimit, function(item, callback) {
-						logger.log('debug','Collection.loadViews: loading view ['+ self._identity._id + ']',item);
+						global.logger.log('debug','Collection.loadViews: loading view ['+ self._identity._id + ']',item);
 						self.database.cfs.get(item,function(err,data) {
 							if (err) {
-								logger.log('error','Collection.loadViews ['	+ self._identity._id + ']',err);
+								global.logger.log('error','Collection.loadViews ['	+ self._identity._id + ']',err);
 								callback(err);
 								return;
 								} 
 							else {
-								logger.log('debug','Collection.loadViews - ['+ self._identity._id	+ '] creating view from ',data);
+								global.logger.log('debug','Collection.loadViews - ['+ self._identity._id	+ '] creating view from ',data);
 								var v = new View(self.database,	self, data);
 		
 								self._viewsHash[v.getId()] = v;
 								self.views.push(v);
 								if (self._identity._transient === true) {
-									logger.log('debug','Collection.loadViews - ['+ self._identity._id + '] loading reduction ',v.getId());
-									logger.log('debug','Collection.loadViews - ['+ self._identity._id + '] loading reduction from  ' + dir + '/view/');
+									global.logger.log('debug','Collection.loadViews - ['+ self._identity._id + '] loading reduction ',v.getId());
+									global.logger.log('debug','Collection.loadViews - ['+ self._identity._id + '] loading reduction from  ' + dir + '/view/');
 									v.loadReduction(dir	+ '/view/',function(err) {
 										if (err) {
-											logger.log('error','Collection.loadViews ['+ self._identity._id+ ']',err);
+											global.logger.log('error','Collection.loadViews ['+ self._identity._id+ ']',err);
 											callback(err);
 											return;
 											}
@@ -348,7 +343,7 @@ Collection.prototype.loadViews = function(callback) {
 									} 
 								else {
 									// we moved this to the load documents
-									//if (logger.level === 'debug')logger.log('debug','Collection.loadViews - ['+ self._identity._id+ '] reducing ',v.getId());
+									//if (logger.level === 'debug')global.logger.log('debug','Collection.loadViews - ['+ self._identity._id+ '] reducing ',v.getId());
 									//v.mapreduce(self.documents);
 									}
 								callback();
@@ -360,7 +355,7 @@ Collection.prototype.loadViews = function(callback) {
 		}
 	else
 		{
-		logger.log('warn', 'Collection.loadViews [' + self._identity._id + '] ' + vdir + ' does not exist.');
+		global.logger.log('warn', 'Collection.loadViews [' + self._identity._id + '] ' + vdir + ' does not exist.');
 		callback();
 		}	
 	});
@@ -430,15 +425,15 @@ Collection.prototype.removeView = function(vid,callback)
 			}
 		else
 			{
-			var msg = 'Collection.removeView - View ' + vid + ' not found in array.';
-			logger.log('warn', msg);
-			callback(msg);
+			var nfmsg = 'Collection.removeView - View ' + vid + ' not found in array.';
+			global.logger.log('warn', nfmsg);
+			callback(nfmsg);
 			}
 		}
 	else
 		{
 		var msg = 'Collection.removeView - View ' + vid + ' not found.';
-		logger.log('warn', msg);
+		global.logger.log('warn', msg);
 		callback(msg);
 		}
 };
@@ -453,7 +448,7 @@ function removeFiles(c, deleteFiles, callback) {
 	// grab all the collections from the file system
 	c.database.cfs.list(dn, function(err, files) {
 		if (err) {
-			logger.log('error', 'Collection.removeFiles ', err);
+			global.logger.log('error', 'Collection.removeFiles ', err);
 			callback(err);
 			return;
 		}

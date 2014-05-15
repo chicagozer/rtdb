@@ -1,5 +1,7 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true */
+/*global describe, it, before, beforeEach, after, afterEach */
 "use strict";
 var winston = require('winston');
 var assert = require('assert');
@@ -27,14 +29,14 @@ describe('CFS plugins', function() {
 			settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
 
 		global.logger = new (winston.Logger)(settings.winston.options);
-		dir = new Tempdir;
+		dir = new Tempdir();
 		settings.cfsinit.root = dir.path;
 
 		var cfslist = fs.readdirSync('cfs');
 		cfslist.forEach(function(file) {
-			var cfs = require('../cfs/' + file);
+			var Cfs = require('../cfs/' + file);
 
-			var mycfs = new cfs();
+			var mycfs = new Cfs();
 			if (mycfs.init) {
 				mycfs.init(settings.cfsinit);
 				cfsTypes.push(mycfs);
