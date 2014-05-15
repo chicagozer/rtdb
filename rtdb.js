@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+"use strict";
 var express = require('express');
 var auth = require('http-auth');
 var errorHandler = require('errorhandler');
@@ -953,7 +954,7 @@ function main() {
 		globalSettings = JSON.parse(fs.readFileSync(settingsFile));
 		// global on purpose
 		// we are going to put this in global.
-		logger = new (winston.Logger)(globalSettings.winston.options);
+		global.logger = new (winston.Logger)(globalSettings.winston.options);
 
 		globalSettings.winston.transports.forEach(function(item) {
 			logger.add(winston.transports[item[0]], item[1]);
