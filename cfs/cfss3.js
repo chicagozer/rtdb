@@ -3,6 +3,7 @@
 
 // amazon S3 filesystem support
 // remember to set your S3 parms in the settings.json
+"use strict";
 var AWS = require('aws-sdk');
 
 function CFSS3()

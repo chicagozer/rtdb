@@ -2,6 +2,7 @@
 // Licensed under the RTDB Software License version 1.0
 
 // local file system support
+"use strict";
 var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');

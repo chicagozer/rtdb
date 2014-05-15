@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+"use strict";
 var express = require('express');
 var auth = require('http-auth');
 var errorHandler = require('errorhandler');
@@ -639,7 +640,7 @@ function loadExpress(database, start) {
 	});
 
 	// remove an existing collection
-	app.del('/db/collections/:id', function(req, res) {
+	app.delete('/db/collections/:id', function(req, res) {
 
 		database.removeCollection(req.params.id, function(err) {
 			if (!err)
@@ -688,7 +689,7 @@ function loadExpress(database, start) {
 	});
 
 	// remove the documents. Option to delete from disk with 'permanent' parm
-	app.del('/db/collections/:id/documents', function(req, res) {
+	app.delete('/db/collections/:id/documents', function(req, res) {
 
 		var c = database.collectionAt(req.params.id);
 		if (!c) {
@@ -772,7 +773,7 @@ function loadExpress(database, start) {
 	});
 
 	/** remove a view */
-	app.del('/db/collections/:cid/views/:vid', function(req, res) {
+	app.delete('/db/collections/:cid/views/:vid', function(req, res) {
 		var c = database.collectionAt(req.params.cid);
 		if (c) {
 
@@ -953,7 +954,7 @@ function main() {
 		globalSettings = JSON.parse(fs.readFileSync(settingsFile));
 		// global on purpose
 		// we are going to put this in global.
-		logger = new (winston.Logger)(globalSettings.winston.options);
+		global.logger = new (winston.Logger)(globalSettings.winston.options);
 
 		globalSettings.winston.transports.forEach(function(item) {
 			logger.add(winston.transports[item[0]], item[1]);
