@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true */
 "use strict";
 var events = require('events');
 var fs = require('fs.extra');
@@ -41,7 +42,7 @@ function Database(settings, callback) {
 			
 			c.loadViews(function(err) {
 				if (err) {
-					logger.log('error','Database.loadViewsAndDocuments -  ', err);
+					global.logger.log('error','Database.loadViewsAndDocuments -  ', err);
 					callback(err);
 					return;
 				}
@@ -50,16 +51,16 @@ function Database(settings, callback) {
 						self._viewsHash[v.getId()] = v;
 						});
 					
-					logger.log('debug','Database.loadViewsAndDocuments: Loaded views ', c.getId());
+					global.logger.log('debug','Database.loadViewsAndDocuments: Loaded views ', c.getId());
 
 					c.loadDocuments(c.views,function(err) {
 						if (err) {
-							logger.log('error','Database.loadViewsAndDocuments - loadDocuments ', err);
+							global.logger.log('error','Database.loadViewsAndDocuments - loadDocuments ', err);
 							callback(err);
 							return;
 							} 
 						else {
-							logger.log('debug','Database.loadViewsAndDocuments: Documents completed ',  c.getId());
+							global.logger.log('debug','Database.loadViewsAndDocuments: Documents completed ',  c.getId());
 							callback();
 							}
 						});	
@@ -71,7 +72,7 @@ function Database(settings, callback) {
 	// and do some final initialization
 	function doneLoading(err) {
 		if (err) {
-			logger.log('error', 'Database.loadCollections', err);
+			global.logger.log('error', 'Database.loadCollections', err);
 			callback(err);
 			return;
 			}
@@ -90,16 +91,16 @@ function Database(settings, callback) {
 		});
 			
 			
-		if (logger.level === 'debug')logger.log('debug','Database.loadCollections - now views then docs');
+		if (global.logger.level === 'debug')global.logger.log('debug','Database.loadCollections - now views then docs');
 		// now load documents and views
 		// do this in sequential order
 		async.eachSeries(self.collections, loadViewsAndDocuments, function(err)	{
 			if (err) {
-				logger.log('error', 'Database.loadCollections', err);
+				global.logger.log('error', 'Database.loadCollections', err);
 				callback(err);
 				return;
 			}
-			logger.log('debug','Database.loadCollections - now done with docs and views!!');
+			global.logger.log('debug','Database.loadCollections - now done with docs and views!!');
 			callback();
 		});
 	}
@@ -107,25 +108,25 @@ function Database(settings, callback) {
 	// grab all the collections from the file system
 	self.cfs.list(dn,  function(err, files) {
 		if (err) {
-			logger.log('error', 'Database.loadCollections - listObjects ', err);
+			global.logger.log('error', 'Database.loadCollections - listObjects ', err);
 			callback(err);
 			return;
 			}
 		else {
-			logger.log('debug','Database.loadCollections ' + JSON.stringify(files));
+			global.logger.log('debug','Database.loadCollections ' + JSON.stringify(files));
 			
 			// ok, for each one we are going to load it
 			// when we are done with all of them, do "doneLoading"
 			async.each(files, function(item, callback) {
-				logger.log('debug','Database.loadCollections - fetching ' + item);
+				global.logger.log('debug','Database.loadCollections - fetching ' + item);
 				self.cfs.get(item, function(err, data) {
 					if (err) {
-						logger.log('error','Database.loadCollections - getObject ', err);
+						global.logger.log('error','Database.loadCollections - getObject ', err);
 						callback(err);
 						return;
 					} 
 					else {
-						logger.debug('debug','Database.loadCollections - creating Collection:', data);
+						global.logger.debug('debug','Database.loadCollections - creating Collection:', data);
 						var c = new Collection(self,data);
 							
 						// store it in our hashes
@@ -170,8 +171,8 @@ function Database(settings, callback) {
 	self.cfs = new cfsTypes[self.globalSettings.cfs]();
 	self.cfs.init(self.globalSettings.cfsinit);
 	
-	logger.log('info','cfs is ' + self.globalSettings.cfs +'.');
-	logger.log('info','see settings file for connection parms.');
+	global.logger.log('info','cfs is ' + self.globalSettings.cfs +'.');
+	global.logger.log('info','see settings file for connection parms.');
 	
 	
 	// some signal handlers to allow us to save reductions on shutdown
@@ -179,22 +180,22 @@ function Database(settings, callback) {
 		
 		
 		process.on('uncaughtException', function (exception) {
-				   logger.log('error',exception.toString());
+				   global.logger.log('error',exception.toString());
 			  });
 		
 		process.on('SIGINT',function() {
-			logger.log('info','Received sigint. Relaying to exit');
+			global.logger.log('info','Received sigint. Relaying to exit');
 			self.saveViewsThenExit();
 		});
 	
 		process.on('SIGTERM',function() {
-			logger.log('info','Received sigterm. Relaying to exit');
+			global.logger.log('info','Received sigterm. Relaying to exit');
 			self.saveViewsThenExit();
 		});
 		
 		
 		process.on('exit', function() {
-			logger.log('info','rtdb (' + self._identity._pjson.version	+ ') is exiting.');
+			global.logger.log('info','rtdb (' + self._identity._pjson.version	+ ') is exiting.');
 			});
 	}
 	
@@ -202,7 +203,7 @@ function Database(settings, callback) {
 	loadCollections(function(err) {
 		if (err)
 			{
-			logger.error('Database.loadCollections ', err);
+			global.logger.error('Database.loadCollections ', err);
 			callback(err);
 			return;
 			}
@@ -218,17 +219,17 @@ function Database(settings, callback) {
 Database.prototype.saveViewsThenExit = function() {
 	var self = this;
 
-	if (logger.level === 'debug')logger.log('debug', 'Database.saveViewsThenExit - started');
+	if (global.logger.level === 'debug')global.logger.log('debug', 'Database.saveViewsThenExit - started');
 	async.each(self.collections, function(c, callback) {
-		logger.debug('Database.saveViewsThenExit - collection ', c.getId());
+		global.logger.debug('Database.saveViewsThenExit - collection ', c.getId());
 		// transient or not, save a copy of the views
 		// I think we are going to reverse that decision
 
 		if (!c.isTransient()) {
 			async.each(c.views, function(v, callback) {
-				logger.debug('Database.saveViewsThenExit - view ', v.getId());
+				global.logger.debug('Database.saveViewsThenExit - view ', v.getId());
 				var vd = 'collection/' + c.getId() + '/view/';
-				logger.log('debug','Database.onExit - writing view reduction to ' + vd);
+				global.logger.log('debug','Database.onExit - writing view reduction to ' + vd);
 				v.saveReduction(vd, callback);
 			}, function(err) {
 				callback(err);
@@ -238,9 +239,9 @@ Database.prototype.saveViewsThenExit = function() {
 		}
 	}, function(err) {
 		if (err) {
-			logger.log('error', 'Database.saveViewsThenExit - ', err);
+			global.logger.log('error', 'Database.saveViewsThenExit - ', err);
 		}
-		logger.log('debug', 'Database.saveViewsThenExit - calling exit');
+		global.logger.log('debug', 'Database.saveViewsThenExit - calling exit');
 		process.exit();
 	});
 };
@@ -290,7 +291,7 @@ Database.prototype.removeCollection = function(cid,callback)
 		}
 	var dn = 'collections/';
 	this.collections.splice(idx, 1);
-	delete this.collectionAt(cid);
+	delete this._collectionsHash[cid];
 	var fn = dn + cid + '.json';
 	this.cfs.del(fn, callback);
 };

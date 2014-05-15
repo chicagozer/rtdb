@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true */
 "use strict";
 var events = require('events');
 var Identity = require('./identity');
@@ -64,7 +65,7 @@ function View(database, collection,  obj) {
 	// on change function to notify subscriptions
 	this._emitter.on('change', function() {
 
-		logger.log('debug', 'View.onChange - ', self._identity._id);
+		global.logger.log('debug', 'View.onChange - ', self._identity._id);
 		
 		
 		
@@ -106,7 +107,7 @@ function View(database, collection,  obj) {
 					res.write(self._identity._id);
 					res.write("\ndata: ");
 					if ( !res.write(JSON.stringify(data) + "\n\n")) {
-						logger.log('warn', 'View.onChange - buffer full:', key);
+						global.logger.log('warn', 'View.onChange - buffer full:', key);
 						sub.overflow = true;
 						}
 					}
@@ -194,7 +195,7 @@ View.prototype.mapreduce = function(documents, notify) {
 	
 	// local map result
 	var mapResult = {};
-	logger.log('debug','View.mapreduce - started for ' + self._identity._id);
+	global.logger.log('debug','View.mapreduce - started for ' + self._identity._id);
 	
 	// make a copy of our current reduction.
 	// we will compare it at the end to decide if notifications are
@@ -215,7 +216,7 @@ View.prototype.mapreduce = function(documents, notify) {
 	// do the map function
 	documents.forEach(function(e) {
 		self._fmap(e, mapEmit, self.database);
-		logger.log('silly','View.mapreduce - item is ', e._identity._id);
+		global.logger.log('silly','View.mapreduce - item is ', e._identity._id);
 		//self._fmapScript.runInNewContext({ item : e, emit : mapEmit, database : self.database, logger : logger});
 		});
 	
@@ -315,7 +316,7 @@ View.prototype.mapreduce = function(documents, notify) {
 	
 	//self._finalizeScript.runInNewContext({ reduction : this.redcontainer.reduction, emit : finalizeEmit, database : self.database, logger : logger});
 	
-	logger.log('debug','View.mapreduce - ended for ' + self._identity._id);
+	global.logger.log('debug','View.mapreduce - ended for ' + self._identity._id);
 	
 	var hrDiff = process.hrtime(hrStart);
 	self.stats.reduceCount++;
@@ -370,11 +371,11 @@ View.prototype.loadReduction = function(dir, callback) {
 			if (files.length === 1) {
 				self.database.cfs.get(files[0], function(err, data) {
 					if (err) {
-						logger.log('warn', 'View.loadReduction - ' + rn	+ 'not loaded.', err);
+						global.logger.log('warn', 'View.loadReduction - ' + rn	+ 'not loaded.', err);
 						// callback(err);
 						return;
 					} else {
-						logger.log('debug', 'View.loadReduction - reduction is ',
+						global.logger.log('debug', 'View.loadReduction - reduction is ',
 								data);
 						
 						// we can marshal the json right into _redcontainer
@@ -395,7 +396,7 @@ View.prototype.loadReduction = function(dir, callback) {
 
 			} else {
 				// we didn't find a single file.
-				logger.log('warn', 'Not expecting ' + files.length + ' reductions in ' + rn);
+				global.logger.log('warn', 'Not expecting ' + files.length + ' reductions in ' + rn);
 				callback();
 			}
 		}
@@ -431,7 +432,7 @@ View.prototype.checkTicket = function(ticket) {
 	
 	var reply = false;
 	var now = new Date();
-	for (key in this.tickets)
+	for (var key in this.tickets)
 		{
 		if (ticket == key && now - this.tickets[key] < 60000)
 			{

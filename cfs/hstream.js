@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true */
 "use strict";
 var nforce = require('nforce');
 
@@ -35,14 +36,14 @@ org.authenticate({
 	password : process.env.NFORCE_PWD
 }, function(err, oauth) {
 	if (err) {
-		logger.log('error', 'HStream.authenticate -  ', err);
+		global.logger.log('error', 'HStream.authenticate -  ', err);
 		return;
 	}
 
 	var str = org.stream({ topic: 'PushTopic3', oauth:oauth});
 
 	str.on('connect', function() {
-		logger.log('debug',
+		global.logger.log('debug',
 				'HStream.authenticate - connected to "PushTopic3"');
 		// reset the connection delay 
 		delay = 0;
@@ -50,14 +51,14 @@ org.authenticate({
 	});
 
 	str.on('error', function(error) {
-		logger.log('error', 'HStream.authenticate -  ', error);
+		global.logger.log('error', 'HStream.authenticate -  ', error);
 		setTimeout(org.authenticate,delay);
 		if (delay === 0)
 			delay = 60000;
 	});
 
 	str.on('data', function(data) {
-		logger.log('debug', 'HStream.authenticate - received:', data);
+		global.logger.log('debug', 'HStream.authenticate - received:', data);
 
 		// Setup the request. The options parameter is
 		// the object we defined above.
@@ -66,20 +67,20 @@ org.authenticate({
 			
 			res.setEncoding('utf-8');
 			res.on('end', function() {
-				logger.log('debug', 'HStream.authenticate - posted');
+				global.logger.log('debug', 'HStream.authenticate - posted');
 			});
 			
 			res.on('data', function(data) {
 			});
 
 			res.on('error', function(err) {
-				logger.log('error', 'HStream.authenticate - posting:',err);
+				global.logger.log('error', 'HStream.authenticate - posting:',err);
 			});
 			
 		});
 
 		req.on('error', function(e) {
-			logger.log('error', 'HStream.post -  ', e);
+			global.logger.log('error', 'HStream.post -  ', e);
 		});
 
 		req.write(JSON.stringify(data.sobject));
