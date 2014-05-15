@@ -1,5 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+"use strict";
 var events = require('events');
 var Identity = require('./identity');
 var vm = require('vm');
