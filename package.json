@@ -1,6 +1,6 @@
 {
   "name": "rtdb",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Real Time Database",
   "private": false,
   "main": "rtdb.js",
