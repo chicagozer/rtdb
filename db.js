@@ -96,8 +96,7 @@ function Database(settings, callback) {
 			// ensures it gets loaded beforehand
 
 			self.collections.sort(function(a, b) {
-				return a._identity._priority ? a._identity._priority
-						- b._identity._priority : 1;
+				return a._identity._priority ? a._identity._priority - b._identity._priority : 1;
 			});
 
 			// lets initialize the hash while we are here
@@ -143,8 +142,7 @@ function Database(settings, callback) {
 								return;
 							} else {
 								global.logger.log('debug',
-										'Database.loadCollections '
-												+ JSON.stringify(files));
+										'Database.loadCollections ' + JSON.stringify(files));
 
 								// ok, for each one we are going to load it
 								// when we are done with all of them, do
@@ -154,8 +152,7 @@ function Database(settings, callback) {
 												files,
 												function(item, callback) {
 													global.logger.log('debug',
-															'Database.loadCollections - fetching '
-																	+ item);
+															'Database.loadCollections - fetching ' + item);
 													self.cfs
 															.get(
 																	item,
@@ -247,8 +244,7 @@ function Database(settings, callback) {
 		});
 
 		process.on('exit', function() {
-			global.logger.log('info', 'rtdb (' + self._identity._pjson.version
-					+ ') is exiting.');
+			global.logger.log('info', 'rtdb (' + self._identity._pjson.version + ') is exiting.');
 		});
 	}
 
