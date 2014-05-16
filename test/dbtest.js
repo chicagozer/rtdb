@@ -1,6 +1,8 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
-/*jslint node: true */
+/*jslint node: true, white: true, nomen: true */
+/*jshint laxbreak: true */
+
 /*global describe, it, before, beforeEach, after, afterEach */
 "use strict";
 var assert = require('assert');
@@ -18,27 +20,22 @@ var async = require('async');
 describe(
 		'Suite',
 		function() {
-			var db = null;
-			var c = null;
-			var v = null;
-			var v2 = null;
-			var globalSettings = null;
-			var dir = null;
-
-			var cid = null;
-			var vid = null;
-			var vid2 = null;
+			var db = null,c = null,v = null,v2 = null,globalSettings = null,dir = null,cid = null,vid = null,vid2 = null;
 			before(function() {
 
-				if (argv.settings)
+				/*jslint stupid: true */
+				if (argv.settings) {
 					globalSettings = JSON.parse(fs.readFileSync(argv.settings));
-				else if (process.env.MOCHA_SETTINGS)
+				}
+				else if (process.env.MOCHA_SETTINGS) {
 					globalSettings = JSON.parse(fs
 							.readFileSync(process.env.MOCHA_SETTINGS));
-				else
+				}
+				else {
 					globalSettings = JSON.parse(fs
 							.readFileSync('settings/mocha.json'));
-
+				}
+				/*jslint stupid: false */
 				// global on purpose
 				// we are going to put this in global.
 				global.logger = new (winston.Logger)(
@@ -56,7 +53,9 @@ describe(
 			});
 
 			after(function() {
+				/*jslint stupid: true */
 				fs.rmrfSync(dir.path);
+				/*jslint stupid: false */
 			});
 
 			describe(
@@ -155,7 +154,8 @@ describe(
 						it('add 200 documents', function(done) {
 							var i = 0;
 							async.whilst(function() {
-								return (i++ < 200);
+								i=i+1;
+								return (i <= 200);
 							}, function(callback) {
 								var doc = [ {
 									name : 'test3',
