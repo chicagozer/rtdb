@@ -1,5 +1,10 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
+/*jslint node: true, white: true, nomen: true */
+/*jshint laxbreak: true */
+
+/*global describe, it, before, beforeEach, after, afterEach */
+"use strict";
 var winston = require('winston');
 var assert = require('assert');
 
@@ -10,28 +15,33 @@ var expect = require('expect.js');
 var Tempdir = require('temporary/lib/dir');
 
 describe('CFS plugins', function() {
-	var dn = 'junk/';
-	var id = null;
-	var settings;
-	var dir = null;
-	var cfsTypes = [];
-
+	var dn = 'junk/',id = null, settings, dir = null, cfsTypes = [];
+	
 	before(function() {
 
-		if (argv.settings)
-			settings = JSON.parse(fs.readFileSync(argv.settings));
-		else
-			settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
+		/*jslint stupid: true */
 
-		logger = new (winston.Logger)(settings.winston.options);
-		dir = new Tempdir;
+		if (argv.settings) {
+			settings = JSON.parse(fs.readFileSync(argv.settings));
+		}
+		else if (process.env.MOCHA_SETTINGS) {
+			settings = JSON.parse(fs.readFileSync(process.env.MOCHA_SETTINGS));
+		}
+		else {
+			settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
+		}
+		global.logger = new (winston.Logger)(settings.winston.options);
+		dir = new Tempdir();
 		settings.cfsinit.root = dir.path;
 
 		var cfslist = fs.readdirSync('cfs');
-		cfslist.forEach(function(file) {
-			var cfs = require('../cfs/' + file);
+		
+		/*jslint stupid: false */
 
-			var mycfs = new cfs();
+		cfslist.forEach(function(file) {
+			var mycfs, Cfs = require('../cfs/' + file);
+
+			mycfs = new Cfs();
 			if (mycfs.init) {
 				mycfs.init(settings.cfsinit);
 				cfsTypes.push(mycfs);
@@ -78,8 +88,9 @@ describe('CFS plugins', function() {
 	});
 
 	after(function() {
-		if (dir)
+		if (dir) {
 			dir.rmdir();
+		}
 	});
 
 });

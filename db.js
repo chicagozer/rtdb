@@ -1,6 +1,8 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
-/*jslint node: true */
+/*jslint node: true, white: true, nomen: true */
+/*jshint laxbreak: true */
+
 "use strict";
 var events = require('events');
 var fs = require('fs.extra');
@@ -16,7 +18,7 @@ var uuid = require('node-uuid');
 function Database(settings, callback) {
 
 	// save a reference for our closures
-	var self = this;
+	var self = this, cfslist, cfsTypes = {};
 
 	this.globalSettings = settings;
 
@@ -24,8 +26,10 @@ function Database(settings, callback) {
 	// CFSL = local, CFSS3 = Amazon S3
 	// it's pretty trival to make a new one - just look at the methods
 
-	var cfslist = fs.readdirSync('./cfs');
-	var cfsTypes = {};
+	/*jslint stupid: true */
+	cfslist = fs.readdirSync('./cfs');
+	/*jslint stupid: false */
+
 	cfslist.forEach(function(file) {
 		var cfs = require('./cfs/' + file);
 		cfsTypes[cfs.name] = cfs;
@@ -45,39 +49,39 @@ function Database(settings, callback) {
 									'Database.loadViewsAndDocuments -  ', err);
 							callback(err);
 							return;
-						} else {
-							c.views.forEach(function(v) {
-								self._viewsHash[v.getId()] = v;
-							});
-
-							global.logger
-									.log(
-											'debug',
-											'Database.loadViewsAndDocuments: Loaded views ',
-											c.getId());
-
-							c
-									.loadDocuments(
-											c.views,
-											function(err) {
-												if (err) {
-													global.logger
-															.log(
-																	'error',
-																	'Database.loadViewsAndDocuments - loadDocuments ',
-																	err);
-													callback(err);
-													return;
-												} else {
-													global.logger
-															.log(
-																	'debug',
-																	'Database.loadViewsAndDocuments: Documents completed ',
-																	c.getId());
-													callback();
-												}
-											});
 						}
+						c.views.forEach(function(v) {
+							self._viewsHash[v.getId()] = v;
+						});
+
+						global.logger
+								.log(
+										'debug',
+										'Database.loadViewsAndDocuments: Loaded views ',
+										c.getId());
+
+						c
+								.loadDocuments(
+										c.views,
+										function(err) {
+											if (err) {
+												global.logger
+														.log(
+																'error',
+																'Database.loadViewsAndDocuments - loadDocuments ',
+																err);
+												callback(err);
+												return;
+											}
+											global.logger
+													.log(
+															'debug',
+															'Database.loadViewsAndDocuments: Documents completed ',
+															c.getId());
+											callback();
+
+										});
+
 					});
 		}
 
@@ -96,7 +100,8 @@ function Database(settings, callback) {
 			// ensures it gets loaded beforehand
 
 			self.collections.sort(function(a, b) {
-				return a._identity._priority ? a._identity._priority - b._identity._priority : 1;
+				return a._identity._priority ? a._identity._priority
+						- b._identity._priority : 1;
 			});
 
 			// lets initialize the hash while we are here
@@ -104,9 +109,10 @@ function Database(settings, callback) {
 				self._collectionsHash[c.getId()] = c;
 			});
 
-			if (global.logger.level === 'debug')
+			if (global.logger.level === 'debug') {
 				global.logger.log('debug',
 						'Database.loadCollections - now views then docs');
+			}
 			// now load documents and views
 			// do this in sequential order
 			async
@@ -128,70 +134,47 @@ function Database(settings, callback) {
 		}
 
 		// grab all the collections from the file system
-		self.cfs
-				.list(
-						dn,
-						function(err, files) {
-							if (err) {
-								global.logger
-										.log(
-												'error',
-												'Database.loadCollections - listObjects ',
-												err);
-								callback(err);
-								return;
-							} else {
-								global.logger.log('debug',
-										'Database.loadCollections ' + JSON.stringify(files));
+		self.cfs.list(dn, function(err, files) {
+			if (err) {
+				global.logger.log('error',
+						'Database.loadCollections - listObjects ', err);
+				callback(err);
+				return;
+			}
+			global.logger.log('debug', 'Database.loadCollections '
+					+ JSON.stringify(files));
 
-								// ok, for each one we are going to load it
-								// when we are done with all of them, do
-								// "doneLoading"
-								async
-										.each(
-												files,
-												function(item, callback) {
-													global.logger.log('debug',
-															'Database.loadCollections - fetching ' + item);
-													self.cfs
-															.get(
-																	item,
-																	function(
-																			err,
-																			data) {
-																		if (err) {
-																			global.logger
-																					.log(
-																							'error',
-																							'Database.loadCollections - getObject ',
-																							err);
-																			callback(err);
-																			return;
-																		} else {
-																			global.logger
-																					.debug(
-																							'debug',
-																							'Database.loadCollections - creating Collection:',
-																							data);
-																			var c = new Collection(
-																					self,
-																					data);
+			// ok, for each one we are going to load it
+			// when we are done with all of them, do
+			// "doneLoading"
+			async.each(files, function(item, callback) {
+				global.logger.log('debug',
+						'Database.loadCollections - fetching ' + item);
+				self.cfs.get(item, function(err, data) {
+					if (err) {
+						global.logger.log('error',
+								'Database.loadCollections - getObject ', err);
+						callback(err);
+						return;
+					}
+					global.logger.debug('debug',
+							'Database.loadCollections - creating Collection:',
+							data);
+					var c = new Collection(self, data);
 
-																			// store
-																			// it
-																			// in
-																			// our
-																			// hashes
-																			self._collectionsHash[c
-																					.getId()] = c;
-																			self.collections
-																					.push(c);
-																			callback();
-																		}
-																	});
-												}, doneLoading);
-							}
-						});
+					// store
+					// it
+					// in
+					// our
+					// hashes
+					self._collectionsHash[c.getId()] = c;
+					self.collections.push(c);
+					callback();
+
+				});
+			}, doneLoading);
+
+		});
 	}
 
 	// initialize some parms
@@ -244,7 +227,8 @@ function Database(settings, callback) {
 		});
 
 		process.on('exit', function() {
-			global.logger.log('info', 'rtdb (' + self._identity._pjson.version + ') is exiting.');
+			global.logger.log('info', 'rtdb (' + self._identity._pjson.version
+					+ ') is exiting.');
 		});
 	}
 
@@ -254,11 +238,11 @@ function Database(settings, callback) {
 			global.logger.error('Database.loadCollections ', err);
 			callback(err);
 			return;
-		} else {
-			loadSignalHandlers();
-			// finally we are done!!!
-			callback();
 		}
+		loadSignalHandlers();
+		// finally we are done!!!
+		callback();
+
 	});
 }
 
@@ -266,8 +250,9 @@ function Database(settings, callback) {
 Database.prototype.saveViewsThenExit = function() {
 	var self = this;
 
-	if (global.logger.level === 'debug')
+	if (global.logger.level === 'debug') {
 		global.logger.log('debug', 'Database.saveViewsThenExit - started');
+  }
 	async.each(self.collections, function(c, callback) {
 		global.logger.debug('Database.saveViewsThenExit - collection ', c
 				.getId());
@@ -309,8 +294,9 @@ Database.prototype.removeView = function(vid) {
 };
 
 Database.prototype.getToken = function(viewid) {
-	if (!this.tokens[viewid])
+	if (!this.tokens[viewid]) {
 		this.tokens[viewid] = uuid.v4();
+  }
 
 	return this.tokens[viewid];
 };
@@ -328,20 +314,22 @@ Database.prototype.updateCollection = function(c, callback) {
 };
 
 Database.prototype.removeCollection = function(cid, callback) {
-	var c = this.collectionAt(cid);
+	var dn, idx, c, fn;
+  
+  c = this.collectionAt(cid);
 	if (!c) {
 		callback('not found');
 		return;
 	}
-	var idx = this.collections.indexOf(c);
+	idx = this.collections.indexOf(c);
 	if (idx === -1) {
 		callback('not found.');
 		return;
 	}
-	var dn = 'collections/';
+	dn = 'collections/';
 	this.collections.splice(idx, 1);
 	delete this._collectionsHash[cid];
-	var fn = dn + cid + '.json';
+	fn = dn + cid + '.json';
 	this.cfs.del(fn, callback);
 };
 
