@@ -1,10 +1,12 @@
 // © 2014 by Rheosoft. All rights reserved. 
 // Licensed under the RTDB Software License version 1.0
-/*jslint node: true */
+/*jslint node: true, white: true, nomen: true */
+/*jshint laxbreak: true */
 "use strict";
 var nforce = require('nforce');
 
 function HStream() {
+	return this;
 }
 
 var org = nforce.createConnection({
@@ -53,8 +55,9 @@ org.authenticate({
 	str.on('error', function(error) {
 		global.logger.log('error', 'HStream.authenticate -  ', error);
 		setTimeout(org.authenticate,delay);
-		if (delay === 0)
+		if (delay === 0) {
 			delay = 60000;
+		}
 	});
 
 	str.on('data', function(data) {
