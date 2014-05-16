@@ -188,8 +188,7 @@ View.prototype.mapreduce = function(documents, notify) {
 
 	// local map result
 	var mapResult = {};
-	global.logger.log('debug', 'View.mapreduce - started for '
-			+ self._identity._id);
+	global.logger.log('debug', 'View.mapreduce - started for ' + self._identity._id);
 
 	// make a copy of our current reduction.
 	// we will compare it at the end to decide if notifications are
@@ -321,8 +320,7 @@ View.prototype.mapreduce = function(documents, notify) {
 	// this.redcontainer.reduction, emit : finalizeEmit, database :
 	// self.database, logger : logger});
 
-	global.logger.log('debug', 'View.mapreduce - ended for '
-			+ self._identity._id);
+	global.logger.log('debug', 'View.mapreduce - ended for ' + self._identity._id);
 
 	var hrDiff = process.hrtime(hrStart);
 	self.stats.reduceCount++;
@@ -375,8 +373,7 @@ View.prototype.loadReduction = function(dir, callback) {
 			if (files.length === 1) {
 				self.database.cfs.get(files[0], function(err, data) {
 					if (err) {
-						global.logger.log('warn', 'View.loadReduction - ' + rn
-								+ 'not loaded.', err);
+						global.logger.log('warn', 'View.loadReduction - ' + rn + 'not loaded.', err);
 						// callback(err);
 						return;
 					} else {
@@ -402,8 +399,7 @@ View.prototype.loadReduction = function(dir, callback) {
 
 			} else {
 				// we didn't find a single file.
-				global.logger.log('warn', 'Not expecting ' + files.length
-						+ ' reductions in ' + rn);
+				global.logger.log('warn', 'Not expecting ' + files.length + ' reductions in ' + rn);
 				callback();
 			}
 		}
