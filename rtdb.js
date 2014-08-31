@@ -19,6 +19,11 @@ var winston = require('winston');
 var http = require('http');
 var Symmetry = require('symmetry');
 
+function Rtdb() {
+  this.servers = [];
+}
+
+
 
 // helper function to add a stream. We call it from a couple places
 function addStream(req, res, view, delta) {
@@ -87,9 +92,10 @@ function addStream(req, res, view, delta) {
 
 
 /** loadExpress methods */
-function loadExpress(database, start) {
+function loadExpress(rtdb, database, startTime, done) {
 
-    var basic, env, server, app = express();
+    var basic, env, server;
+    var app = express();
     global.logger.log('debug', 'Database.loadExpress - started.');
 
     // lets cap the # of sockets at a reasonable # so we don't run out of
@@ -1085,11 +1091,11 @@ function loadExpress(database, start) {
     // LATER do we need a different websocket for head listening host???
     if (database.getSettings().hosts) {
         database.getSettings().hosts.forEach(function (host) {
-            server.listen(database.getSettings().port, host);
+            rtdb.servers.push(server.listen(database.getSettings().port, host));
             global.logger.log('info', 'rtdb (' + database.getIdentity()._pjson.version + ') is listening on ' + host + ':' + database.getSettings().port + ' ...');
         });
     } else {
-        server.listen(database.getSettings().port);
+        rtdb.servers.push(server.listen(database.getSettings().port));
         global.logger.log('info', 'rtdb (' + database.getIdentity()._pjson.version + ') is listening on ' + database.getSettings().port + ' ...');
     }
 
@@ -1097,14 +1103,23 @@ function loadExpress(database, start) {
     global.logger.log('info',
         'for more info, visit https://rtdb.rheosoft.com/about/.');
 
-    database.getIdentity().startupTime = new Date().getTime() - start;
+    database.getIdentity().startupTime = new Date().getTime() - startTime;
+    done();
 }
 
+Rtdb.prototype.stop = function(done)
+{
+  this.servers.forEach(function (server) 
+    {
+      server.close();
+    });
+    done();
+}
 /** main function */
-function main() {
+Rtdb.prototype.start = function(done) {
     var database, globalSettings = null,
         settingsFile = null,
-        start = new Date().getTime();
+        startTime = new Date().getTime();
 
 
     /* we require a settings file */
@@ -1115,9 +1130,9 @@ function main() {
             settingsFile = 'settings/settings.json';
         }
     } else {
-        console
-            .log('\nrtdb [--settings settingsfile] [--help] [--port portnum] [--host listenhost]');
-        process.exit();
+        done(new Error('\nrtdb [--settings settingsfile] [--help] [--port portnum] [--host listenhost]'));
+        return;
+        //process.exit();
     }
 
     /* load the settings file and setup the logging */
@@ -1134,9 +1149,8 @@ function main() {
         });
 
     } else {
-        console.error('Settings file not found at - ' + settingsFile);
-        console.error('Sorry, but we have to leave.');
-        process.exit();
+        done(new Error('Settings file not found at - ' + settingsFile));
+        return;
     }
     global.logger.log('info', 'Settings loaded from ' + settingsFile + '.');
 
@@ -1160,11 +1174,12 @@ function main() {
         globalSettings.hosts = [process.env.HOST || process.env.OPENSHIFT_NODEJS_IP];
     }
 
+    var self = this;
     // spark it up
     database = new Database(globalSettings, function () {
-        loadExpress(database, start);
+        loadExpress(self,database, startTime, done);
 
     });
 }
 
-main();
+module.exports = Rtdb;
