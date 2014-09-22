@@ -1,0 +1,1 @@
+{"_id":"d7c58af5-91b0-4c2e-9e2b-448e69ed3268","_ts":"2013-11-08T01:02:52.793Z","_key":"size","_map":"if (item.AnnualRevenue)\n    emit(item.Name,item.AnnualRevenue);","_reduce":"emit(values[0]);","_finalize":"reduction.sort(function(a,b){ \n    return b[1] -a[1];\n    }); \nif (reduction.length > 20) \n    reduction.length = 20; \nemit(reduction);"}

@@ -1,0 +1,172 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'Accounts'
+  
+block append head 
+    link(rel='stylesheet', href='/stylesheets/layout.css', type='text/css', media='screen')
+    //script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
+    script(type='text/javascript', src='https://www.google.com/jsapi')
+    script(type='text/javascript', src='/async/async.js')
+    script(type='text/javascript').
+      google.load("visualization", "1", {
+      packages : [ "corechart", "table" ]
+      });
+      google.setOnLoadCallback(registerStream);
+      window.addEventListener('online',  function() {
+      console.log('online called!');
+      reconnect();
+      });
+      var c1;
+      var t1;
+      var c2;
+      var t2;
+      var c3;
+      var t3;
+      var tickets = [];
+      function reconnect() {
+      
+      var views= ['d7c58af5-91b0-4c2e-9e2b-448e69ed3268','ac2a8c8e-6f53-49d2-93bf-b6832569fbcd','f9828798-768f-42f0-8303-ef8e81120aa0'];
+     
+     
+      function getjson(view,callback)
+      {
+      $.getJSON("/db/collections/c6e6dda4-e715-4be0-aa36-8ea08a53a3a2/views/" + view +"/ticket",function(data)
+        {
+        console.log('view is ' + view + ' ticket is ' + data.ticket);
+        tickets.push({view: view, ticket : data.ticket});
+        callback();
+        });
+      }
+     
+     
+      async.each(views,getjson,reconnect2);
+      }  
+
+      function reconnect2(err)
+      {
+      if (err)
+      {
+      console.err(err);
+      return;
+      }
+      var url = "/db/stream?";
+      tickets.forEach(function(ticket)
+      {
+      url = url + "view=" + ticket.view + "&ticket=" + ticket.ticket + "&";
+      });
+      
+      var source = new EventSource(url);
+      
+      source.addEventListener("d7c58af5-91b0-4c2e-9e2b-448e69ed3268",
+      function(event) {
+      drawTable(JSON.parse(event.data), 'Account',
+      c1, 'account By Account');
+      drawTable(JSON.parse(event.data), 'Account',
+      t1, 'By Account');
+      }, false);
+      source.addEventListener("ac2a8c8e-6f53-49d2-93bf-b6832569fbcd",
+      function(event) {
+      drawTable(JSON.parse(event.data), 'Industry',
+      c2, 'By Industry');
+      drawTable(JSON.parse(event.data), 'Industry',
+      t2, 'By Industry');
+      }, false);
+      source.addEventListener("f9828798-768f-42f0-8303-ef8e81120aa0",
+      function(event) {
+      drawTable(JSON.parse(event.data), 'State',
+      c3, 'By State');
+      drawTable(JSON.parse(event.data), 'State',
+      t3, 'By State');
+      }, false);
+      }
+      function registerStream() {
+      c1 = new google.visualization.PieChart(document.getElementById('accountchart_div'));
+      t1 = new google.visualization.Table(document.getElementById('accounttable_div'));
+      c2 = new google.visualization.PieChart(document.getElementById('industrychart_div'));
+      t2 = new google.visualization.Table(document.getElementById('industrytable_div'));
+      c3 = new google.visualization.PieChart(document.getElementById('statechart_div'));
+      t3 = new google.visualization.Table(document.getElementById('statetable_div'));
+      reconnect();
+      }
+      function toUSD(number) {
+      var number = number.toString(), dollars = number.split('.')[0], cents = (number
+      .split('.')[1] || '')
+      + '00';
+      dollars = dollars.split('').reverse().join('').replace(/(\\d{3}(?!$))/g,
+      '$1,').split('').reverse().join('');
+      return '$' + dollars + '.' + cents.slice(0, 2);
+      }
+      function drawTable(myjson, columnheader, table, mytitle) {
+      console.dir(myjson);
+      if (!myjson || !myjson.length)
+      return;
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', columnheader);
+      data.addColumn('number', 'Val ($M)');
+      var mydata = [];
+      myjson.forEach(function(item)
+      {
+      mydata.push([item[0],Math.round(item[1])]);
+      });
+      data.addRows(mydata);
+      table.draw(data, {
+      fontName : 'Verdana',
+      backgroundColor : 'white',
+      allowHtml : true,
+      alternatingRowStyle : true,
+      showRowNumber : true,
+       is3D: true,
+      });
+      }
+ 
+  block append content
+    section#main.column
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Account
+        .module_content
+          article.stats_graph
+            #accountchart
+              #accountchart_div(style='height: 400px;')
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Account
+        .module_content
+          article.stats_graph
+            #accountlist
+              #accounttable_div
+      .clear
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Industry
+        .module_content
+          article.stats_graph
+            #industrychart
+              #industrychart_div(style='height: 400px;')
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Industry
+        .module_content
+          article.stats_graph
+            #industrylist
+              #industrytable_div
+      .clear
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By State
+        .module_content
+          article.stats_graph
+            #statechart
+              #statechart_div(style='height: 400px;')
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By State
+        .module_content
+          article.stats_graph
+            #statelist
+              #statetable_div
+      .clear
+      
+      
