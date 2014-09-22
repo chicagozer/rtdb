@@ -14,600 +14,560 @@ var eachLimit = 10;
 
 function Collection(database, obj) {
 
-	if (null !== obj && "object" === typeof obj) {
-		this._identity = obj;
-		if (this._identity._onAdd) {
-      /*jshint evil: true */
-      
-			this._fonAdd = new Function("item", "database",
-					this._identity._onAdd);
-          /*jshint evil: false */
-		}
-	} else {
-		this._identity = new Identity();
-	}
+    if (null !== obj && "object" === typeof obj) {
+        this._identity = obj;
+        if (this._identity._onAdd) {
+            /*jshint evil: true */
 
-	this._emitter = new events.EventEmitter();
+            this._fonAdd = new Function("item", "database",
+                this._identity._onAdd);
+            /*jshint evil: false */
+        }
+    } else {
+        this._identity = new Identity();
+    }
 
-	this.database = database;
-	// this.documents = [];
-	this.views = [];
-	this._viewsHash = {};
+    this._emitter = new events.EventEmitter();
 
-	this._workingdocs = [];
-	this.stats = {
-		fileCount : 0
-	};
+    this.database = database;
+    this.views = [];
+    this._viewsHash = {};
 
-	var self = this, lastReduce = null, lastExpire = null;
+    this._workingdocs = [];
+    this.stats = {
+        fileCount: 0
+    };
 
-	function dateDiff(date1, date2) {
-		return date1.getTime() - date2.getTime();
-	}
+    var self = this,
+        lastReduce = null,
+        lastExpire = null;
 
-	function doExpire() {
+    function dateDiff(date1, date2) {
+        return date1.getTime() - date2.getTime();
+    }
 
-		global.logger.log('debug', 'expiring ' + self._identity._id);
-		// calculate when was the last expire. if less than 1 sec (now
-		// configurable), hold off.
-		var now = new Date(), delay = 0, interval, delta;
+    function doExpire() {
 
-		if (lastExpire) {
-			delta = dateDiff(now, lastExpire);
+        global.logger.log('debug', 'expiring ' + self._identity._id);
+        // calculate when was the last expire. if less than 1 sec (now
+        // configurable), hold off.
+        var now = new Date(),
+            delay = 0,
+            interval, delta;
 
-			interval = 1000 * 60;
-			if (self.database.globalSettings.expireInterval) {
-				interval = self.database.globalSettings.expireInterval;
-			}
+        if (lastExpire) {
+            delta = dateDiff(now, lastExpire);
 
-			delay = Math.max(0, interval - delta);
-		}
-		lastExpire = now;
+            interval = 1000 * 60;
+            if (self.database.globalSettings.expireInterval) {
+                interval = self.database.globalSettings.expireInterval;
+            }
 
-		setTimeout(function() {
-			self._workingdocs.length = 0;
-			// self.documents.length = 0;
-			self.views.forEach(function(v) {
-				v.reset();
-			});
-			// console.log('### working docs is ' +self.workingdocs.length);
-			self.loadDocuments(self.views, function(err) {
-				if (err) {
-					global.logger.log('error', err);
-				}
-				self._emitter.once('expire', doExpire);
-			});
-		}, delay);
-	}
+            delay = Math.max(0, interval - delta);
+        }
+        lastExpire = now;
 
-	function doReduce() {
+        setTimeout(function () {
+            self._workingdocs.length = 0;
+            self.views.forEach(function (v) {
+                v.reset();
+            });
+            self.loadDocuments(self.views, function (err) {
+                if (err) {
+                    global.logger.log('error', err);
+                }
+                self._emitter.once('expire', doExpire);
+            });
+        }, delay);
+    }
 
-		global.logger.log('debug', 'in reduce! ', self._identity._id);
-		// calculate when was the last reduce. if less than 1 sec (now
-		// configurable), hold off.
-		var now = new Date(), interval, delta, delay = 0;
-		if (lastReduce) {
-			delta = dateDiff(now, lastReduce);
+    function doReduce() {
 
-			interval = 1000;
-			if (self.database.globalSettings.reduceInterval) {
-				interval = self.database.globalSettings.reduceInterval;
-			}
-			delay = Math.max(0, interval - delta);
-		}
+        global.logger.log('debug', 'in reduce! ', self._identity._id);
+        // calculate when was the last reduce. if less than 1 sec (now
+        // configurable), hold off.
+        var now = new Date(),
+            interval, delta, delay = 0;
+        if (lastReduce) {
+            delta = dateDiff(now, lastReduce);
 
-		lastReduce = now;
-		global.logger.log('debug', 'reduce delay is ', delay);
+            interval = 1000;
+            if (self.database.globalSettings.reduceInterval) {
+                interval = self.database.globalSettings.reduceInterval;
+            }
+            delay = Math.max(0, interval - delta);
+        }
 
-		setTimeout(function() {
-			global.logger.log('debug', 'Reducing ', self._identity._id);
-			// console.log('### working docs is ' +self.workingdocs.length);
-			self.views.forEach(function(elem) {
-				try {
-					elem.mapreduce(self._workingdocs, true);
-				} catch (e) {
-					global.logger.log('error', e.toString());
-				}
-			});
-			self._workingdocs.length = 0;
-			self._emitter.once('change', doReduce);
-		}, delay);
-	}
+        lastReduce = now;
+        global.logger.log('debug', 'reduce delay is ', delay);
 
-	// THIS is the secret sauce...we are registering our listener for reduce
-	// requests!
-	self._emitter.once('change', doReduce);
-	self._emitter.once('expire', doExpire);
+        setTimeout(function () {
+            global.logger.log('debug', 'Reducing ', self._identity._id);
+            self.views.forEach(function (elem) {
+                try {
+                    elem.mapreduce(self._workingdocs, true);
+                } catch (e) {
+                    global.logger.log('error', e.toString());
+                }
+            });
+            self._workingdocs.length = 0;
+            self._emitter.once('change', doReduce);
+        }, delay);
+    }
 
-	return this;
+    // THIS is the secret sauce...we are registering our listener for reduce
+    // requests!
+    self._emitter.once('change', doReduce);
+    self._emitter.once('expire', doExpire);
+
+    return this;
 }
 
-Collection.prototype.init = function(key, trans, priority, expiration, onAdd) {
-	if (!this._identity) {
-		this._identity = new Identity();
-	}
-	this._identity._key = key;
-	this._identity._transient = trans;
-	this._identity._priority = priority;
-	this._identity._expiration = expiration;
+Collection.prototype.init = function (key, trans, priority, expiration, onAdd) {
+    if (!this._identity) {
+        this._identity = new Identity();
+    }
+    this._identity._key = key;
+    this._identity._transient = trans;
+    this._identity._priority = priority;
+    this._identity._expiration = expiration;
 
-	if (onAdd) {
-		this._identity._onAdd = onAdd;
-    /*jshint evil: true */
-		this._fonAdd = new Function("item", "database", onAdd);
-    /*jshint evil: false */
-	} else {
-		if (this._identity._onAdd) {
-			delete this._identity._onAdd;
-		}
-		if (this._fonAdd) {
-			delete this._fonAdd;
-		}
-	}
-	// FIXME - do I need to setup an expiration??
-	return this;
+    if (onAdd) {
+        this._identity._onAdd = onAdd;
+        /*jshint evil: true */
+        this._fonAdd = new Function("item", "database", onAdd);
+        /*jshint evil: false */
+    } else {
+        if (this._identity._onAdd) {
+            delete this._identity._onAdd;
+        }
+        if (this._fonAdd) {
+            delete this._fonAdd;
+        }
+    }
+    return this;
 };
 
-Collection.prototype.push = function() {
+Collection.prototype.push = function () {
 
-	var retval, docs, self = this;
+    var retval, docs, self = this;
 
-	docs = Array.prototype.slice.call(arguments, 0);
+    docs = Array.prototype.slice.call(arguments, 0);
 
-	if (docs.length === 0) {
-		return;
-	}
+    if (docs.length === 0) {
+        return;
+    }
 
-	// if (logger.level === 'debug')global.logger.log('debug',docs);
-	retval = docs;
+    retval = docs;
 
-	if (self._fonAdd) { // ok so we are going to implement a trigger
-		docs.forEach(function(e) {
-			self._fonAdd(e, self.database);
-		});
-	}
+    if (self._fonAdd) { 
+      // ok so we are going to implement a trigger
+        docs.forEach(function (e) {
+            self._fonAdd(e, self.database);
+        });
+    }
 
-	if (this._identity._transient !== true) {
-		// retval = this.documents.push.apply(this.documents, arguments);
+    if (!this._identity._transient && self._identity._expiration) {
+      // if this collection has an expiration, set up a timer to expire the
+        // docs
+        setTimeout(function () {
+          self._emitter.emit('expire');
+        }, self._identity._expiration);
+    }
 
-		// if this collection has an expiration, set up a timer to expire the
-		// docs
-		if (self._identity._expiration) {
+    if (this.views.length > 0) {
+        docs.forEach(function (item) {
+            self._workingdocs.push(item);
+        });
+        // signal for reduce.
+        global.logger.log('debug', 'emitting change for ', self._identity._id);
 
-			setTimeout(function() {
-				// console.log('### working docs is ' +self.workingdocs.length);
-				self._emitter.emit('expire');
-			}, self._identity._expiration);
-
-		}
-	}
-
-	if (this.views.length > 0) {
-		docs.forEach(function(item) {
-			self._workingdocs.push(item);
-		});
-		// signal for reduce.
-		global.logger.log('debug', 'emitting change for ', self._identity._id);
-
-		self._emitter.emit('change');
-	}
-	return retval;
+        self._emitter.emit('change');
+    }
+    return retval;
 
 };
 
-Collection.prototype.loadDocuments = function(viewlist, callback) {
+Collection.prototype.loadDocuments = function (viewlist, callback) {
 
-	var self, dir = 'collection/' + this._identity._id + '/documents/';
+    var self, dir = 'collection/' + this._identity._id + '/documents/';
 
-	self = this;
-	global.logger.log('debug',
-			'Collection.loadDocuments: loading documents from ', dir);
-	// console.trace(callback);
-	// self.documents.length = 0;
-	self._workingdocs.length = 0;
+    self = this;
+    global.logger.log('debug',
+        'Collection.loadDocuments: loading documents from ', dir);
+    self._workingdocs.length = 0;
 
-	function readIt(item, callback) {
-		self.database.cfs.get(item, function(err, data) {
-			if (err) {
-				global.logger.log('error', err);
-				callback(err);
-				return;
-			}
-			if (self._identity._transient !== true) {
-				self._workingdocs.push(data);
-			}
+    function readIt(item, callback) {
+        self.database.cfs.get(item, function (err, data) {
+            if (err) {
+                global.logger.log('error', err);
+                callback(err);
+                return;
+            }
+            if (!self._identity._transient) {
+                self._workingdocs.push(data);
+            }
 
-			// THIS IS OVERRIDEN
-			// self.push(data);
+            callback();
+        });
+    }
 
-			callback();
-		});
-	}
+    function innerLoop(idx, files, callback) {
 
-	function innerLoop(idx, files, callback) {
+        // do we have anything to reduce?
+        if (idx >= files.length) {
+            callback();
+            return;
+        }
+        var subset, notify = idx + 100 >= files.length;
+        global.logger.log('debug', 'Collection.loadDocuments.innerLoop idx:' + idx + ' doc count is ' + self._workingdocs.length);
 
-		// do we have anything to reduce?
-		if (idx >= files.length) {
-			callback();
-			return;
-		}
-		var subset, notify = idx + 100 >= files.length;
-		global.logger.log('debug', 'Collection.loadDocuments.innerLoop idx:'
-				+ idx + ' doc count is ' + self._workingdocs.length);
+        subset = files.slice(idx, idx + 100);
 
-		subset = files.slice(idx, idx + 100);
+        // we need to use the async library to do 100 at a time.
+        global.logger.log('debug',
+            'Collection.loadDocuments.innerLoop calling asynceach');
+        async.eachLimit(subset, eachLimit, readIt, function (err) {
+            if (err) {
+                callback(err);
+                return;
+            }
 
-		// we need to use the async library to do 100 at a time.
-		global.logger.log('debug',
-				'Collection.loadDocuments.innerLoop calling asynceach');
-		async.eachLimit(subset, eachLimit, readIt, function(err) {
-			if (err) {
-				callback(err);
-				return;
-			}
+            global.logger.log('debug',
+                'Collection.loadDocuments.innerLoop idx: files.length is ' + files.length + ' notify is ' + notify);
+            if (self._workingdocs.length > 0) {
+                viewlist.forEach(function (v) {
+                    global.logger.log('debug',
+                        'Collection.loadDocuments.innerLoop reducing :' + v.getId());
+                    try {
+                        if (v._identity._exception) {
+                            delete v._identity._exception;
+                        }
+                        v.mapreduce(self._workingdocs, notify);
+                    } catch (e) {
+                        global.logger.log('error', e.toString());
+                        v._identity._exception = e.toString();
+                    }
+                });
+                // reset to zero
+                self._workingdocs.length = 0;
+            }
 
-			global.logger.log('debug',
-					'Collection.loadDocuments.innerLoop idx: files.length is '
-							+ files.length + ' notify is ' + notify);
-			if (self._workingdocs.length > 0) {
-				viewlist.forEach(function(v) {
-					global.logger.log('debug',
-							'Collection.loadDocuments.innerLoop reducing :'
-									+ v.getId());
-					try {
-						if (v._identity._exception) {
-							delete v._identity._exception;
-						}
-						v.mapreduce(self._workingdocs, notify);
-					} catch (e) {
-						global.logger.log('error', e.toString());
-						v._identity._exception = e.toString();
-					}
-				});
-				// reset to zero
-				self._workingdocs.length = 0;
-			}
+            innerLoop(idx + 100, files, callback);
 
-			innerLoop(idx + 100, files, callback);
+        });
+    }
 
-		});
-	}
+    self.database.cfs.exists(dir, function (exists) {
 
-	self.database.cfs.exists(dir, function(exists) {
+        if (exists) {
+            self.database.cfs.list(dir, function (err, files) {
+                if (err) {
+                    global.logger.log('error', 'Collection.loadDocuments [' + self._identity._id + ']', err);
+                    callback(err);
+                    return;
+                }
+                var count = files.length;
+                self.stats.fileCount = count;
+                global.logger.log('debug', 'Collection.loadDocuments: [' + self._identity._id + '] document count is ', count);
 
-		if (exists) {
-			self.database.cfs.list(dir, function(err, files) {
-				if (err) {
-					global.logger.log('error', 'Collection.loadDocuments ['
-							+ self._identity._id + ']', err);
-					callback(err);
-					return;
-				}
-				var count = files.length;
-				self.stats.fileCount = count;
-				global.logger.log('debug', 'Collection.loadDocuments: ['
-						+ self._identity._id + '] document count is ', count);
+                innerLoop(0, files, callback);
 
-				innerLoop(0, files, callback);
-
-			});
-		} else {
-			global.logger.log('warn', 'Collection.loadDocuments ['
-					+ self._identity._id + '] ' + dir + ' does not exist.');
-			callback();
-		}
-	});
+            });
+        } else {
+            global.logger.log('warn', 'Collection.loadDocuments [' + self._identity._id + '] ' + dir + ' does not exist.');
+            callback();
+        }
+    });
 };
 
-Collection.prototype.loadViews = function(callback) {
+Collection.prototype.loadViews = function (callback) {
 
-	var self, vdir, dir = 'collection/' + this._identity._id;
-	self = this;
-	vdir = dir + '/views/';
+    var self, vdir, dir = 'collection/' + this._identity._id;
+    self = this;
+    vdir = dir + '/views/';
 
-	global.logger.log('debug', 'Collection.loadViews', vdir);
-	self.database.cfs
-			.exists(
-					vdir,
-					function(exists) {
-						if (exists) {
-							global.logger.log('debug',
-									'Collection.loadViews listing ', vdir);
-							self.database.cfs
-									.list(
-											vdir,
-											function(err, files) {
-												if (err) {
-													global.logger
-															.log(
-																	'error',
-																	'Collection.loadViews ['
-																			+ self._identity._id
-																			+ ']',
-																	err);
-													callback();
-													return;
-												}
+    global.logger.log('debug', 'Collection.loadViews', vdir);
+    self.database.cfs
+        .exists(
+            vdir,
+            function (exists) {
+                if (exists) {
+                    global.logger.log('debug',
+                        'Collection.loadViews listing ', vdir);
+                    self.database.cfs
+                        .list(
+                            vdir,
+                            function (err, files) {
+                                if (err) {
+                                    global.logger
+                                        .log(
+                                            'error',
+                                            'Collection.loadViews [' + self._identity._id + ']',
+                                            err);
+                                    callback();
+                                    return;
+                                }
 
-												var count = files.length;
+                                var count = files.length;
 
-												if (count === 0) {
-													callback();
-													return;
-												}
+                                if (count === 0) {
+                                    callback();
+                                    return;
+                                }
 
-												async
-														.eachLimit(
-																files,
-																eachLimit,
-																function(item,
-																		callback) {
-																	global.logger
-																			.log(
-																					'debug',
-																					'Collection.loadViews: loading view ['
-																							+ self._identity._id
-																							+ ']',
-																					item);
-																	self.database.cfs
-																			.get(
-																					item,
-																					function(
-																							err,
-																							data) {
-																						if (err) {
-																							global.logger
-																									.log(
-																											'error',
-																											'Collection.loadViews ['
-																													+ self._identity._id
-																													+ ']',
-																											err);
-																							callback(err);
-																							return;
-																						}
+                                async
+                                    .eachLimit(
+                                        files,
+                                        eachLimit,
+                                        function (item,
+                                            callback) {
+                                            global.logger
+                                                .log(
+                                                    'debug',
+                                                    'Collection.loadViews: loading view [' + self._identity._id + ']',
+                                                    item);
+                                            self.database.cfs
+                                                .get(
+                                                    item,
+                                                    function (
+                                                        err,
+                                                        data) {
+                                                        if (err) {
+                                                            global.logger
+                                                                .log(
+                                                                    'error',
+                                                                    'Collection.loadViews [' + self._identity._id + ']',
+                                                                    err);
+                                                            callback(err);
+                                                            return;
+                                                        }
 
-																						global.logger
-																								.log(
-																										'debug',
-																										'Collection.loadViews - ['
-																												+ self._identity._id
-																												+ '] creating view from ',
-																										data);
-																						var v = new View(
-																								self.database,
-																								self,
-																								data);
+                                                        global.logger
+                                                            .log(
+                                                                'debug',
+                                                                'Collection.loadViews - [' + self._identity._id + '] creating view from ',
+                                                                data);
+                                                        var v = new View(
+                                                            self.database,
+                                                            self,
+                                                            data);
 
-																						self._viewsHash[v
-																								.getId()] = v;
-																						self.views
-																								.push(v);
-																						if (self._identity._transient === true) {
-																							global.logger
-																									.log(
-																											'debug',
-																											'Collection.loadViews - ['
-																													+ self._identity._id
-																													+ '] loading reduction ',
-																											v
-																													.getId());
-																							global.logger
-																									.log(
-																											'debug',
-																											'Collection.loadViews - ['
-																													+ self._identity._id
-																													+ '] loading reduction from  '
-																													+ dir
-																													+ '/view/');
-																							v
-																									.loadReduction(
-																											dir
-																													+ '/view/',
-																											function(
-																													err) {
-																												if (err) {
-																													global.logger
-																															.log(
-																																	'error',
-																																	'Collection.loadViews ['
-																																			+ self._identity._id
-																																			+ ']',
-																																	err);
-																													callback(err);
-																													return;
-																												}
-																											});
-																						}
+                                                        self._viewsHash[v
+                                                            .getId()] = v;
+                                                        self.views
+                                                            .push(v);
+                                                        if (self._identity._transient) {
+                                                            global.logger
+                                                                .log(
+                                                                    'debug',
+                                                                    'Collection.loadViews - [' + self._identity._id + '] loading reduction ',
+                                                                    v
+                                                                    .getId());
+                                                            global.logger
+                                                                .log(
+                                                                    'debug',
+                                                                    'Collection.loadViews - [' + self._identity._id + '] loading reduction from  ' + dir + '/view/');
+                                                            v
+                                                                .loadReduction(
+                                                                    dir + '/view/',
+                                                                    function (
+                                                                        err) {
+                                                                        if (err) {
+                                                                            global.logger
+                                                                                .log(
+                                                                                    'error',
+                                                                                    'Collection.loadViews [' + self._identity._id + ']',
+                                                                                    err);
+                                                                            callback(err);
+                                                                            return;
+                                                                        }
+                                                                    });
+                                                        }
 
-																						callback();
+                                                        callback();
 
-																					});
-																}, callback);
+                                                    });
+                                        }, callback);
 
-											});
-						} else {
-							global.logger.log('warn', 'Collection.loadViews ['
-									+ self._identity._id + '] ' + vdir
-									+ ' does not exist.');
-							callback();
-						}
-					});
+                            });
+                } else {
+                    global.logger.log('warn', 'Collection.loadViews [' + self._identity._id + '] ' + vdir + ' does not exist.');
+                    callback();
+                }
+            });
 };
 
-Collection.prototype.addView = function(v, callback) {
-	var self = this;
+Collection.prototype.addView = function (v, callback) {
+    var self = this;
 
-	self.loadDocuments([ v ], function(err) {
-		if (err) {
-			callback(err);
-			return;
-		}
+    self.loadDocuments([v], function (err) {
+        if (err) {
+            callback(err);
+            return;
+        }
 
-		self.setViewAt(v.getId(), v);
-		self.views.push(v);
-		self.database.addView(v);
+        self.setViewAt(v.getId(), v);
+        self.views.push(v);
+        self.database.addView(v);
 
-		var dn = 'collection/' + self.getId() + '/views/';
-		self.database.cfs.put(dn, v.getIdentity(), callback);
-	});
+        var dn = 'collection/' + self.getId() + '/views/';
+        self.database.cfs.put(dn, v.getIdentity(), callback);
+    });
 };
 
-Collection.prototype.updateView = function(v, callback) {
-	var self = this;
+Collection.prototype.updateView = function (v, callback) {
+    var self = this;
 
-	self.loadDocuments([ v ], function(err) {
-		if (err) {
-			callback(err);
-			return;
-		}
+    self.loadDocuments([v], function (err) {
+        if (err) {
+            callback(err);
+            return;
+        }
 
-		if (v._identity._exception) {
-			callback(v._identity._exception);
-			return;
-		}
+        if (v._identity._exception) {
+            callback(v._identity._exception);
+            return;
+        }
 
-		var dn = 'collection/' + self.getId() + '/views/';
-		self.database.cfs.put(dn, v.getIdentity(), callback);
-	});
+        var dn = 'collection/' + self.getId() + '/views/';
+        self.database.cfs.put(dn, v.getIdentity(), callback);
+    });
 };
 
-Collection.prototype.removeView = function(vid, callback) {
-	var msg, dir, dn, fn, idx, v = this._viewsHash[vid];
-	if (v) {
-		idx = this.views.indexOf(v);
-		if (idx !== -1) {
-			this.views.splice(idx, 1);
-			delete this._viewsHash[vid];
+Collection.prototype.removeView = function (vid, callback) {
+    var msg, dir, dn, fn, idx, v = this._viewsHash[vid];
+    if (v) {
+        idx = this.views.indexOf(v);
+        if (idx !== -1) {
+            this.views.splice(idx, 1);
+            delete this._viewsHash[vid];
 
-			this.database.removeView(vid);
+            this.database.removeView(vid);
 
-			dir = 'collection/' + this._identity._id;
-			dn = dir + '/views/';
+            dir = 'collection/' + this._identity._id;
+            dn = dir + '/views/';
 
-			// nuke the view file
-			fn = dn + vid + '.json';
+            // nuke the view file
+            fn = dn + vid + '.json';
 
-			this.database.cfs.del(fn, callback);
-			// should we put it back in, if the delete fails??
-		} else {
-			msg = 'Collection.removeView - View ' + vid
-					+ ' not found in array.';
-			global.logger.log('warn', msg);
-			callback(msg);
-		}
-	} else {
-		msg = 'Collection.removeView - View ' + vid + ' not found.';
-		global.logger.log('warn', msg);
-		callback(msg);
-	}
+            this.database.cfs.del(fn, callback);
+            // should we put it back in, if the delete fails??
+        } else {
+            msg = 'Collection.removeView - View ' + vid + ' not found in array.';
+            global.logger.log('warn', msg);
+            callback(msg);
+        }
+    } else {
+        msg = 'Collection.removeView - View ' + vid + ' not found.';
+        global.logger.log('warn', msg);
+        callback(msg);
+    }
 };
 
 function removeFiles(c, deleteFiles, callback) {
-	if (c._identity._transient || !deleteFiles) {
-		callback();
-		return;
-	}
-	var dn = 'collection/' + c.getId() + '/documents/';
-	// grab all the collections from the file system
-	c.database.cfs.list(dn, function(err, files) {
-		if (err) {
-			global.logger.log('error', 'Collection.removeFiles ', err);
-			callback(err);
-			return;
-		}
-		async.eachLimit(files, eachLimit, function(item, callback2) {
-			c.database.cfs.del(item, callback2);
-		}, callback);
-	});
+    if (c._identity._transient || !deleteFiles) {
+        callback();
+        return;
+    }
+    var dn = 'collection/' + c.getId() + '/documents/';
+    // grab all the collections from the file system
+    c.database.cfs.list(dn, function (err, files) {
+        if (err) {
+            global.logger.log('error', 'Collection.removeFiles ', err);
+            callback(err);
+            return;
+        }
+        async.eachLimit(files, eachLimit, function (item, callback2) {
+            c.database.cfs.del(item, callback2);
+        }, callback);
+    });
 }
 
-Collection.prototype.clear = function(deleteFiles, notify, callback) {
+Collection.prototype.clear = function (deleteFiles, notify, callback) {
 
-	var self = this;
-	// self.documents = [];
-	self._workingdocs = [];
-	self.stats.fileCount = 0;
+    var self = this;
+    self._workingdocs = [];
+    self.stats.fileCount = 0;
 
-	removeFiles(self, deleteFiles, function(err) {
-		if (err) {
-			callback(err);
-			return;
-		}
-		self.views.forEach(function(v) {
-			v.reset();
-			if (notify) {
-				v._emitter.emit('change');
-			}
-		});
+    removeFiles(self, deleteFiles, function (err) {
+        if (err) {
+            callback(err);
+            return;
+        }
+        self.views.forEach(function (v) {
+            v.reset();
+            if (notify) {
+                v._emitter.emit('change');
+            }
+        });
 
-		callback();
-
-	});
+        callback();
+    });
 };
 
-Collection.prototype.put = function(body, callback) {
+Collection.prototype.put = function (body, callback) {
 
-	if (body.length === 0) {
-		callback();
-		return;
-	}
+    if (body.length === 0) {
+        callback();
+        return;
+    }
 
-	var dn, self = this;
-	self.stats.fileCount += body.length;
+    var dn, self = this;
+    self.stats.fileCount += body.length;
 
-	body.forEach(function(item) {
-		if (!item._identity) {
-			item._identity = new Identity();
-		}
-	});
+    body.forEach(function (item) {
+        if (!item._identity) {
+            item._identity = new Identity();
+        }
+    });
 
-	dn = 'collection/' + self._identity._id + '/documents/';
+    dn = 'collection/' + self._identity._id + '/documents/';
 
-	// write first
-	// DOIT, implement some sort of rollback
-	// in the event of a write failure
-	function write(item, callback) {
-		self.database.cfs.put(dn, item, callback);
-	}
+    // write first
+    // DOIT, implement some sort of rollback
+    // in the event of a write failure
+    function write(item, callback) {
+        self.database.cfs.put(dn, item, callback);
+    }
 
-	if (self._identity._transient !== true) {
-		async.eachLimit(body, eachLimit, write, function(err) {
-			if (err) {
-				callback(err);
-			} else {
-				self.push.apply(self, body);
-				callback();
-			}
-		});
-	} else {
-		self.push.apply(self, body);
-		callback();
-	}
+    if (!self._identity._transient) {
+        async.eachLimit(body, eachLimit, write, function (err) {
+            if (err) {
+                callback(err);
+            } else {
+                self.push.apply(self, body);
+                callback();
+            }
+        });
+    } else {
+        self.push.apply(self, body);
+        callback();
+    }
 };
 
-Collection.prototype.setViewAt = function(idx, val) {
-	this._viewsHash[idx] = val;
+Collection.prototype.setViewAt = function (idx, val) {
+    this._viewsHash[idx] = val;
 };
 
-Collection.prototype.viewAt = function(idx) {
-	return this._viewsHash[idx];
+Collection.prototype.viewAt = function (idx) {
+    return this._viewsHash[idx];
 };
 
-Collection.prototype.toString = function() {
-	return this._identity;
+Collection.prototype.toString = function () {
+    return this._identity;
 };
 
-Collection.prototype.getIdentity = function() {
-	return this._identity;
+Collection.prototype.getIdentity = function () {
+    return this._identity;
 };
 
-Collection.prototype.getId = function() {
-	return this._identity._id;
+Collection.prototype.getId = function () {
+    return this._identity._id;
 };
 
-Collection.prototype.isTransient = function() {
-	return this._identity._transient;
+Collection.prototype.isTransient = function () {
+    return this._identity._transient;
 };
 
 module.exports = Collection;

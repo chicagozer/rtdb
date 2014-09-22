@@ -42,7 +42,6 @@ CFSL.prototype.del = function(fn, callback) {
 
 CFSL.prototype.put = function(prefix, item, callback) {
 	var fn = this.root, key, dirname;
-	// FIXME need to fix this misalignment somehow :((
 	if (item._identity) {
 		key = fn + prefix + item._identity._id + '.json';
 	} else if (item._id) {
