@@ -15,7 +15,6 @@
     "http-auth": "^2.1.7",
     "jade": "^1.3.1",
     "marked": "^0.3.2",
-    "nforce" : "https://github.com/chicagozer/nforce/tarball/master",
     "method-override": "^1.0.0",
     "node-uuid": "^1.4.1",
     "optimist": "^0.6.1",
