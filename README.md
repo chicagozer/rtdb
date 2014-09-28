@@ -1,7 +1,7 @@
 # rtdb
 
 © 2014 by Rheosoft. All rights reserved. 
-Licensed under the [RTDB Software License version 1.0](/license.pdf).
+Licensed under the [RTDB Software License version 1.0](/public/license.pdf).
  
 Comments, questions? <info@rheosoft.com>
 
@@ -26,6 +26,10 @@ Use **rtdb** and leave polling behind!
     
     `cd rtdb`  
     `npm install`
+
+* (New!) rtdb is avaliable through [docker](https://www.docker.com/).
+
+    `docker pull chicagozer/rtdb`
     
 ## Usage
 

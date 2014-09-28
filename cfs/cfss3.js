@@ -52,7 +52,6 @@ CFSS3.prototype.del = function(fn, callback) {
 CFSS3.prototype.put = function(prefix, item, callback, expires) {
 	var buf = new Buffer(JSON.stringify(item)), key, expireDate = null;
 
-	// FIXME need to fix this misalignment somehow :((
 	if (item._identity) {
 		key = prefix + item._identity._id + '.json';
 	} else if (item._id) {
