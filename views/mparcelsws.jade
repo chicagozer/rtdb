@@ -64,7 +64,7 @@ block append head
       
       if (socket)
         socket.disconnect();
-      	
+      
       socket = io.connect( window.location.origin, {'force new connection' : true});	
       
       socket.on('error',function() {
