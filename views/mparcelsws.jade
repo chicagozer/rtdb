@@ -61,10 +61,17 @@ block append head
       }
         
       function reconnect2() {
+      var wsurl = window.location.protocol + "//" + window.location.hostname ;
+      var wsport = "#{settings.wsport}";
+      if ("" === wsport)
+        wsport = window.location.port;
+        
+      wsurl = wsurl + ":" + wsport;
+      
       if (socket)
         socket.disconnect();
       
-      socket = io.connect( window.location.protocol + "//" + window.location.hostname + ":" + #{settings.wsport}, {'force new connection' : true});	
+      socket = io.connect( wsurl, {'force new connection' : true});	
       socket.on('error',function() {
         console.log('socket error');
       });

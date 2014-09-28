@@ -1018,8 +1018,8 @@ Rtdb.prototype.start = function(done) {
         globalSettings.port = process.env.PORT || process.env.VCAP_APP_PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001;
     }
     
-    if (!globalSettings.wsport) {
-        globalSettings.wsport = globalSettings.port;
+    if (process.env.OPENSHIFT_NODEJS_PORT) {
+        globalSettings.wsport = 8443;
     }
 
     if (!globalSettings.hosts && (process.env.HOST || process.env.OPENSHIFT_NODEJS_IP)) {
