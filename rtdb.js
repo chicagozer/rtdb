@@ -118,6 +118,7 @@ function loadExpress(rtdb, database, startTime, done) {
     app.use(express.static(__dirname + '/public'));
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
+    app.set('wsport',database.globalSettings.wsport);
 
     env = process.env.NODE_ENV || 'development';
     if ('development' === env) {
@@ -1015,6 +1016,10 @@ Rtdb.prototype.start = function(done) {
 
     if (!globalSettings.port) {
         globalSettings.port = process.env.PORT || process.env.VCAP_APP_PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001;
+    }
+    
+    if (!globalSettings.wsport) {
+        globalSettings.wsport = globalSettings.port;
     }
 
     if (!globalSettings.hosts && (process.env.HOST || process.env.OPENSHIFT_NODEJS_IP)) {
