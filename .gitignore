@@ -1,5 +1,6 @@
 # ignore this stuff
 node_modules
+.sonar
 .c9revisions
 .dropbox
 .project
