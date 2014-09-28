@@ -7,7 +7,8 @@ RUN     yum install -y epel-release
 RUN     yum install -y npm
 
 # Bundle app source
-COPY . /
+COPY . /rtdb
+WORKDIR /rtdb
 # Install app dependencies
 RUN npm install
 
