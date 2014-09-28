@@ -27,6 +27,7 @@ block append head
         Owner :  "5f1d54e6-01ef-4e09-87c5-0c0aa8aba5f3"
       }
       var ticket;
+      var socket;
       
       function redraw() {
       reconnect($("#selBy").val());
@@ -60,7 +61,11 @@ block append head
       }
         
       function reconnect2() {
-      var socket = io.connect();	
+      
+      if (socket)
+        socket.disconnect();
+      
+      socket = io.connect( window.location.origin, {'force new connection' : true});	
       
       socket.on('error',function() {
         console.log('socket error');

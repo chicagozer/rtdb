@@ -180,20 +180,14 @@ function loadExpress(rtdb, database, startTime, done) {
         // if we didn't come back with the same # of views was requested
         // bail out with a not found.
         if (vlist.length !== vidlist.length) {
-            res.send(404, {
-                Status: 404,
-                Message: "Some views not found:" + verrlist
-            });
+            res.status(404).send("Some views not found:" + verrlist);
             return;
         }
 
         if (database.getSettings().useACLTicket) {
 
             if (ticketlist.length !== vlist.length) {
-                res.send(403, {
-                    Status: 403,
-                    Message: "You must supply a ticket for each view."
-                });
+                res.status(403).send("You must supply a ticket for each view.");
                 return;
             }
 
@@ -205,10 +199,7 @@ function loadExpress(rtdb, database, startTime, done) {
                 }
             });
             if (fail) {
-                res.send(403, {
-                    Status: 403,
-                    Message: "Invalid ticket(s):" + errticket
-                });
+                res.status(403).send("Invalid ticket(s):" + errticket);
                 return;
             }
         }
@@ -241,7 +232,7 @@ function loadExpress(rtdb, database, startTime, done) {
     /*jslint unparam:true */
     app.post('/db/admin/stop', function (req, res) {
         database.saveViewsThenExit();
-        res.send(202);
+        res.status(202).end();
     });
     /*jslint unparam:false */
 
@@ -250,29 +241,20 @@ function loadExpress(rtdb, database, startTime, done) {
     app.post('/db/collections/:id/load', function (req, res) {
         var c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
         // reset the collection
         c.clear(false, false, function (err) {
             if (err) {
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
                 return;
             }
             c.loadDocuments(c.views, function (err) {
                 if (!err) {
-                    res.send(200);
+                    res.status(200).end();
                 } else {
-                    res.send(500, {
-                        Status: 500,
-                        Message: err
-                    });
+                    res.status(500).send(err);
                 }
             });
         });
@@ -284,10 +266,7 @@ function loadExpress(rtdb, database, startTime, done) {
         var docs = [],
             c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
 
@@ -299,12 +278,9 @@ function loadExpress(rtdb, database, startTime, done) {
 
         c.put(docs, function (err) {
             if (!err) {
-                res.send(201);
+                res.status(201).end();
             } else {
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
             }
         });
     });
@@ -329,20 +305,14 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
 
         view = c.viewAt(req.params.vid);
 
         if (!view) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
 
@@ -403,18 +373,12 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         view = c.viewAt(req.params.vid);
         if (!view) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
 
@@ -426,18 +390,12 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         view = c.viewAt(req.params.vid);
         if (!view) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
 
@@ -451,10 +409,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         res.send(c.stats);
@@ -507,10 +462,7 @@ function loadExpress(rtdb, database, startTime, done) {
         global.logger.debug('app.get /web/collections id is ' + req.params.id);
         var c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.id + " is not in the database.");
         } else {
             res.render('collection', {
                 json: c._identity
@@ -526,10 +478,7 @@ function loadExpress(rtdb, database, startTime, done) {
         var list = [],
             c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + "is not in the database."
-            });
+            res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
         c.views.forEach(function (item) {
@@ -545,10 +494,7 @@ function loadExpress(rtdb, database, startTime, done) {
     app.get('/web/collections/:cid/views/:vid', function (req, res) {
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         view = c.viewAt(req.params.vid);
@@ -558,10 +504,7 @@ function loadExpress(rtdb, database, startTime, done) {
                 cid: req.params.cid
             });
         } else {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
         }
     });
 
@@ -570,18 +513,12 @@ function loadExpress(rtdb, database, startTime, done) {
         res) {
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         view = c.viewAt(req.params.vid);
         if (!view) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
 
@@ -599,18 +536,12 @@ function loadExpress(rtdb, database, startTime, done) {
         var view, index, list = [],
             c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         view = c.viewAt(req.params.vid);
         if (!view) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
         for (index in view.subscriptions) {
@@ -641,37 +572,25 @@ function loadExpress(rtdb, database, startTime, done) {
     app.get('/db/collections/stream', function (req, res) {
 
         // LATER STREAM changes to the collections
-        res.send(404, {
-            Status: 404,
-            Message: "Method not yet implemented."
-        });
+        res.status(404).send("Method not yet implemented.");
     });
 
     app.get('/db/collections/stream/new', function (req, res) {
 
         // LATER STREAM new collections
-        res.send(404, {
-            Status: 404,
-            Message: "Method not yet implemented."
-        });
+        res.status(404).send("Method not yet implemented.");
     });
 
     app.get('/db/collections/:id/documents/stream', function (req, res) {
 
         // LATER STREAM documents
-        res.send(404, {
-            Status: 404,
-            Message: "Method not yet implemented."
-        });
+        res.status(404).send("Method not yet implemented.");
     });
 
     app.get('/db/collections/:id/documents/stream/new', function (req, res) {
 
         // LATER STREAM documents
-        res.send(404, {
-            Status: 404,
-            Message: "Method not yet implemented."
-        });
+        res.status(404).send("Method not yet implemented.");
     });
     /*jslint unparam:false */
 
@@ -689,12 +608,9 @@ function loadExpress(rtdb, database, startTime, done) {
         database.addCollection(c, function (err) {
             if (err) {
                 global.logger.log('error', 'app.post - collections', err);
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
             } else {
-                res.send(201, c._identity);
+                res.status(201).send(c._identity);
             }
         });
     });
@@ -708,10 +624,7 @@ function loadExpress(rtdb, database, startTime, done) {
         if (!c) {
             msg = 'app.post - collections/views ' + req.params.id + ' not found.';
             global.logger.log('error', msg);
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.id + " is not in the database.");
         }
 
         if (req.body._id) {
@@ -723,12 +636,9 @@ function loadExpress(rtdb, database, startTime, done) {
         c.addView(v, function (err) {
             if (err) {
                 global.logger.log('error', 'app.post - collections/view: ' + req.params.id + '/' + req.params.vid, err);
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
             } else {
-                res.send(201, v.getIdentity());
+                res.status(201).send(v.getIdentity());
             }
         });
     });
@@ -738,22 +648,16 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
         c.init(req.body._key, req.body._transient, req.body._priority,
             req.body._expiration, req.body._onAdd);
         database.updateCollection(c, function (err) {
             if (err) {
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
             } else {
-                res.send(200);
+                res.status(200).end();
             }
         });
     });
@@ -763,12 +667,9 @@ function loadExpress(rtdb, database, startTime, done) {
 
         database.removeCollection(req.params.id, function (err) {
             if (!err) {
-                res.send(200);
+                res.status(200).end();
             } else {
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
             }
         });
 
@@ -780,18 +681,12 @@ function loadExpress(rtdb, database, startTime, done) {
         global.logger.debug('App.put - updating  view: ' + req.params.vid);
         var v, c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
         v = c.viewAt(req.params.vid);
         if (!v) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
         v.init(req.body._key, req.body._map, req.body._reduce,
@@ -800,12 +695,9 @@ function loadExpress(rtdb, database, startTime, done) {
         c.updateView(v, function (err) {
             if (err) {
                 global.logger.log('error', 'app.put - collections/view: ' + req.params.id + '/' + req.params.vid, err);
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
             } else {
-                res.send(200, v.getIdentity());
+                res.status(200).send(v.getIdentity());
             }
         });
     });
@@ -814,10 +706,7 @@ function loadExpress(rtdb, database, startTime, done) {
     app.get('/db/collections/:id', function (req, res) {
         var c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
         res.send(c.toString());
@@ -829,10 +718,7 @@ function loadExpress(rtdb, database, startTime, done) {
         var deleteFromDisk = false,
             c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
 
@@ -842,12 +728,9 @@ function loadExpress(rtdb, database, startTime, done) {
 
         c.clear(deleteFromDisk, true, function (err) {
             if (err) {
-                res.send(500, {
-                    Status: 500,
-                    Message: err
-                });
+                res.status(500).send(err);
             } else {
-                res.send(204);
+                res.status(204).end();
             }
         });
     });
@@ -858,10 +741,7 @@ function loadExpress(rtdb, database, startTime, done) {
         var list = [],
             c = database.collectionAt(req.params.id);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.id + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
         c.views.forEach(function (item) {
@@ -874,18 +754,12 @@ function loadExpress(rtdb, database, startTime, done) {
 
     app.get('/db/collections/:id/views/stream', function (req, res) {
 
-        res.send(404, {
-            Status: 404,
-            Message: "Method not yet implemented."
-        });
+        res.status(404).send("Method not yet implemented.");
     });
 
     app.get('/db/collections/:id/views/stream/new', function (req, res) {
 
-        res.send(404, {
-            Status: 404,
-            Message: "Method not yet implemented."
-        });
+        res.status(404).send("Method not yet implemented.");
     });
     /*jslint unparam:false */
 
@@ -894,18 +768,12 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+             res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         view = c.viewAt(req.params.vid);
         if (!view) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+           res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
 
@@ -921,18 +789,12 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.cid + " is not in the database.");
             return;
         }
         view = c.viewAt(req.params.vid);
         if (!view) {
-            res.send(404, {
-                Status: 404,
-                Message: "view " + req.params.vid + " is not in the collection."
-            });
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
             return;
         }
         res.send(JSON.stringify(view.reduction));
@@ -945,32 +807,23 @@ function loadExpress(rtdb, database, startTime, done) {
 
             view = c.viewAt(req.params.vid);
             if (!view) {
-                res.send(404, {
-                    Status: 404,
-                    Message: "view " + req.params.vid + " is not in the collection."
-                });
+                res.status(404).send("view " + req.params.vid + " is not in the collection.");
                 return;
             }
 
             c.removeView(req.params.vid, function (err) {
                 if (err) {
                     global.logger.log('error', err);
-                    res.send(500, {
-                        Status: 500,
-                        Message: err
-                    });
+                    res.status(500).send(err);
                 } else {
-                    res.send(200);
+                    res.status(200).end();
                 }
 
             });
         } else {
             msg = 'app.del - Collection ' + req.params.cid + ' not found.';
             global.logger.log('warn', msg);
-            res.send(404, {
-                Status: 404,
-                Message: "collection " + req.params.cid + " is not in the database."
-            });
+            res.status(404).send("collection " + req.params.cid + " is not in the database.");
         }
     });
 
@@ -981,18 +834,12 @@ function loadExpress(rtdb, database, startTime, done) {
             var index, list = [],
                 view, c = database.collectionAt(req.params.cid);
             if (!c) {
-                res.send(404, {
-                    Status: 404,
-                    Message: "collection " + req.params.cid + " is not in the database."
-                });
+                res.status(404).send("collection " + req.params.cid + " is not in the database.");
                 return;
             }
             view = c.viewAt(req.params.vid);
             if (!view) {
-                res.send(404, {
-                    Status: 404,
-                    Message: "view " + req.params.vid + " is not in the collection."
-                });
+                res.status(404).send("view " + req.params.vid + " is not in the collection.");
                 return;
             }
 
@@ -1010,12 +857,12 @@ function loadExpress(rtdb, database, startTime, done) {
 
     app.get('/db/collections/:cid/views/:vid/subscriptions/stream', function (
         req, res) {
-        res.send(404, "Work in progress.");
+        res.status(404).send("Work in progress.");
     });
 
     app.get('/db/collections/:cid/views/:vid/subscriptions/stream/new',
         function (req, res) {
-            res.send(404, "Work in progress.");
+            res.status(404).send("Work in progress.");
         });
     /*jslint unparam:false */
 
