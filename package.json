@@ -1,9 +1,9 @@
 {
   "name": "rtdb",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Real Time Database",
   "private": false,
-  "main": "rtdb.js",
+  "main": "index.js",
   "dependencies": {
     "async": "*",
     "aws-sdk": "*",
@@ -37,7 +37,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node rtdb.js",
+    "start": "node index.js",
     "test": "mocha"
   },
   "repository": {
