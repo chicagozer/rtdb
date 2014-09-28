@@ -26,7 +26,7 @@ var headers = {
 var delay = 0;
 
 var options = {
-	host : 'localhost',
+	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
 	port : process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
 	path : '/db/collections/c6e6dda4-e715-4be0-aa36-8ea08a53a3a2/documents',
 	method : 'POST',
