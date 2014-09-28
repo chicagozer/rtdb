@@ -28,6 +28,7 @@ block append head
       
       
        var tickets = [];
+       var socket;
       function reconnect() {
       
       var views= ['90e40254-d57c-4ce5-88b5-20034c9511ec','18823768-0635-49bc-9053-ac2f212d066b','5f1d54e6-01ef-4e09-87c5-0c0aa8aba5f3'];
@@ -47,7 +48,17 @@ block append head
       }  
       
       function reconnect2() {
-      var socket = io.connect();	
+      var wsurl = window.location.protocol + "//" + window.location.hostname ;
+      var wsport = "#{settings.wsport}";
+      if ("" === wsport)
+        wsport = window.location.port;
+
+      wsurl = wsurl + ":" + wsport;
+
+      if (socket)
+        socket.disconnect();
+
+      socket = io.connect( wsurl, {'force new connection' : true});
       
       socket.on('error',function() {
         console.log('socket error');
