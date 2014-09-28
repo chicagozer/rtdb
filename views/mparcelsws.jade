@@ -61,12 +61,10 @@ block append head
       }
         
       function reconnect2() {
-      
       if (socket)
         socket.disconnect();
       
-      socket = io.connect( window.location.origin, {'force new connection' : true});	
-      
+      socket = io.connect( window.location.protocol + "//" + window.location.hostname + ":" + #{settings.wsport}, {'force new connection' : true});	
       socket.on('error',function() {
         console.log('socket error');
       });
