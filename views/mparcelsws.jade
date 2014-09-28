@@ -63,7 +63,7 @@ block append head
       function reconnect2() {
       
       if (socket)
-	    socket.disconnect();
+        socket.disconnect();
       	
       socket = io.connect( window.location.origin, {'force new connection' : true});	
       
