@@ -17,7 +17,7 @@ function Parcel() {
 var dir = 'sampledb/parcels/', data = {};
 
 var poptions = {
-	host : 'localhost',
+	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
 	port : process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
 	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
 	method : 'POST',
@@ -27,7 +27,7 @@ var poptions = {
 };
 
 var foptions = {
-	host : 'localhost',
+	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
 	port : process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
 	path : '/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents?permanent=false',
 	method : 'DELETE',
