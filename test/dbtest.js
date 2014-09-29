@@ -2,13 +2,11 @@
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
-/*global describe, it, before, beforeEach, after, afterEach */
+/*global describe, it, before, after*/
 "use strict";
 var assert = require('assert');
 var argv = require('optimist').argv;
-var Identity = require('../identity');
 var fs = require('fs.extra');
-var expect = require('expect.js');
 var Database = require('../db');
 var Collection = require('../collection');
 var View = require('../view');

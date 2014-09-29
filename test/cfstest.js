@@ -2,15 +2,13 @@
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
-/*global describe, it, before, beforeEach, after, afterEach */
+/*global describe, it, before, after */
 "use strict";
 var winston = require('winston');
-var assert = require('assert');
 
 var argv = require('optimist').argv;
 var Identity = require('../identity');
 var fs = require('fs');
-var expect = require('expect.js');
 var Tempdir = require('temporary/lib/dir');
 
 describe('CFS plugins', function () {

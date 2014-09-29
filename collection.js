@@ -7,7 +7,6 @@ var events = require('events');
 var Identity = require('./identity');
 var async = require('async');
 var View = require('./view');
-var vm = require('vm');
 
 // this controls concurrency when dealing with files
 var eachLimit = 10;
@@ -18,9 +17,10 @@ function Collection(database, obj) {
         this._identity = obj;
         if (this._identity._onAdd) {
             /*jshint evil: true */
-
+			/*jslint evil: true */
             this._fonAdd = new Function("item", "database",
                 this._identity._onAdd);
+			/*jslint evil: false */
             /*jshint evil: false */
         }
     } else {
@@ -135,7 +135,9 @@ Collection.prototype.init = function (key, trans, priority, expiration, onAdd) {
     if (onAdd) {
         this._identity._onAdd = onAdd;
         /*jshint evil: true */
+		/*jslint evil: true */
         this._fonAdd = new Function("item", "database", onAdd);
+		/*jslint evil: false */
         /*jshint evil: false */
     } else {
         if (this._identity._onAdd) {

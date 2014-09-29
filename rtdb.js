@@ -13,7 +13,6 @@ var Collection = require('./collection');
 var View = require('./view');
 var Identity = require('./identity');
 var argv = require('optimist').argv;
-var pjson = require('./package.json');
 var fs = require('fs');
 var winston = require('winston');
 var http = require('http');
@@ -94,8 +93,7 @@ function addStream(req, res, view, delta) {
 /** loadExpress methods */
 function loadExpress(rtdb, database, startTime, done) {
 
-    var basic, env, server;
-    var app = express();
+    var basic, env, server, app = express();
     global.logger.log('debug', 'Database.loadExpress - started.');
 
     // lets cap the # of sockets at a reasonable # so we don't run out of
@@ -231,11 +229,11 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // quick little function that will shutdown the DB
     /*jslint unparam:true */
-    app.post('/db/admin/stop', function (req, res) {
+	app.post('/db/admin/stop', function (req, res) {
         database.saveViewsThenExit();
         res.status(202).end();
     });
-    /*jslint unparam:false */
+	/*jslint unparam:false */
 
     // method to reload the documents
     // useful if we are messing with the disk
@@ -930,10 +928,13 @@ function loadExpress(rtdb, database, startTime, done) {
             });
         });
 
+		/*jslint unparam: true */
         socket.on('unsubscribe', function (data) {
             // LATER make array aware
             // socket.leave(data.room);
+			return undefined;
         });
+		/*jslint unparam: false */
     });
 
     // LATER do we need a different websocket for head listening host???
@@ -962,12 +963,13 @@ Rtdb.prototype.stop = function(done)
       server.close();
     });
     done();
-}
+};
 /** main function */
 Rtdb.prototype.start = function(done) {
     var database, globalSettings = null,
         settingsFile = null,
-        startTime = new Date().getTime();
+        startTime = new Date().getTime(),
+		self = this;
 
 
     /* we require a settings file */
@@ -1026,12 +1028,12 @@ Rtdb.prototype.start = function(done) {
         globalSettings.hosts = [process.env.HOST || process.env.OPENSHIFT_NODEJS_IP];
     }
 
-    var self = this;
+   
     // spark it up
     database = new Database(globalSettings, function () {
         loadExpress(self,database, startTime, done);
 
     });
-}
+};
 
 module.exports = Rtdb;
