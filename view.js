@@ -22,6 +22,7 @@ function View(database, collection, obj) {
         this._freduceScript = vm.createScript(this._identity._reduce);
 
         /*jshint evil: true */
+		/*jslint evil: true */
         this._fmap = new Function("item", "emit", "database",
             this._identity._map);
         this._freduce = new Function("values", "rereduce", "emit", "database",
@@ -40,6 +41,7 @@ function View(database, collection, obj) {
             this._fpersonalizeScript = vm
                 .createScript(this._identity._personalize);
         }
+		/*jslint evil: false */
         /*jshint evil: false */
 
     } else {
@@ -150,6 +152,7 @@ View.prototype.init = function (key, map, reduce, finalize, personalize) {
 
     this._identity._map = map;
     /*jshint evil: true */
+	/*jslint evil: true */
     this._fmap = new Function("item", "emit", "database", map);
     this._fmapScript = vm.createScript(map);
     this._identity._reduce = reduce;
@@ -176,6 +179,7 @@ View.prototype.init = function (key, map, reduce, finalize, personalize) {
         this._fpersonalizeScript = vm.createScript(personalize);
         this._identity._personalize = personalize;
     }
+	/*jslint evil: false */
     /*jshint evil: false */
     return this;
 };

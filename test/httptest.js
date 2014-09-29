@@ -2,11 +2,9 @@
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
-/*global describe, it, before, beforeEach, after, afterEach */
+/*global describe, it, before, after*/
 "use strict";
-var winston = require('winston');
 var assert = require('assert');
-var expect = require('expect.js');
 var request = require('request');
 
 var Rtdb = require('../rtdb');
@@ -47,7 +45,8 @@ describe('Suite', function () {
         });
 
         it('Collections', function (done) {
-
+			
+			
             request.get({
                 url: 'http://localhost:9001/db/collections/',
                 auth: {
@@ -55,15 +54,20 @@ describe('Suite', function () {
                     pass: 'chang3m3'
                 },
                 json: true
-            }, function (error, response, body) {
-                if (!error && response.statusCode === 200) {
+            },
+			function (error, response, body) {
+				/*jslint unparam: true */ 
+			    if (!error && response.statusCode === 200) {
                     done();
                 } else if (error) {
                     done(error);
                 } else {
                     done(new Error('[' + response.statusCode + ']:' + response.body));
                 }
+				
             });
+			/*jslint unparam: false */	
+            
         });
 
         it('Collection:Parcel', function (done) {
@@ -76,6 +80,7 @@ describe('Suite', function () {
                 },
                 json: true
             }, function (error, response, body) {
+				/*jslint unparam: true */ 
                 if (!error && response.statusCode === 200) {
                     done();
                 } else if (error) {
@@ -84,6 +89,7 @@ describe('Suite', function () {
                     done(new Error('[' + response.statusCode + ']:' + response.body));
                 }
             });
+			/*jslint unparam: false */ 
         });
 
         it('Collection:Parcel Views', function (done) {
@@ -96,6 +102,7 @@ describe('Suite', function () {
                 },
                 json: true
             }, function (error, response, body) {
+				/*jslint unparam: true */ 
                 if (!error && response.statusCode === 200) {
                     done();
                 } else if (error) {
@@ -104,6 +111,7 @@ describe('Suite', function () {
                     done(new Error('[' + response.statusCode + ']:' + response.body));
                 }
             });
+			/*jslint unparam: false */ 
         });
 
 
@@ -118,6 +126,7 @@ describe('Suite', function () {
                 },
                 json: true
             }, function (error, response, body) {
+				/*jslint unparam: true */ 
                 if (!error && response.statusCode === 200) {
                     done();
                 } else if (error) {
@@ -126,6 +135,7 @@ describe('Suite', function () {
                     done(new Error('[' + response.statusCode + ']:' + response.body));
                 }
             });
+			/*jslint unparam: false */ 
         });
         it('Collection:Parcel View:Zipcode', function (done) {
 
@@ -137,6 +147,7 @@ describe('Suite', function () {
                 },
                 json: true
             }, function (error, response, body) {
+				/*jslint unparam: true */ 
                 if (!error && response.statusCode === 200) {
                     done();
                 } else if (error) {
@@ -145,6 +156,7 @@ describe('Suite', function () {
                     done(new Error('[' + response.statusCode + ']:' + response.body));
                 }
             });
+			/*jslint unparam: false */ 
         });
         it('Collection:Parcel View:Zipcode Reduction', function (done) {
 
@@ -156,6 +168,7 @@ describe('Suite', function () {
                 },
                 json: true
             }, function (error, response, body) {
+				/*jslint unparam: true */ 
                 if (!error && response.statusCode === 200) {
                     done();
                 } else if (error) {
@@ -164,6 +177,7 @@ describe('Suite', function () {
                     done(new Error('[' + response.statusCode + ']:' + response.body));
                 }
             });
+			/*jslint unparam: false */ 
         });
     });
 });

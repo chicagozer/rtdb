@@ -3,15 +3,12 @@
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
 "use strict";
-var events = require('events');
 var fs = require('fs.extra');
 var pjson = require('./package.json');
 var async = require('async');
-var argv = require('optimist').argv;
 
 var Identity = require('./identity');
 var Collection = require('./collection');
-var View = require('./view');
 var uuid = require('node-uuid');
 
 function Database(settings, callback) {

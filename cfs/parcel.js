@@ -14,7 +14,7 @@ function Parcel() {
 	return this;
 }
 
-var dir = 'sampledb/parcels/', data = {};
+var dir = 'sampledb/parcels/';
 
 var poptions = {
 	host : process.env.OPENSHIFT_NODEJS_IP || 'localhost',
@@ -65,6 +65,7 @@ function readFile(file, callback) {
 
 			/*jslint unparam: true */
 			res.on('data', function(data) {
+				return undefined;
 			});
 			/*jslint unparam: false */
 			res.on('error', function(err) {
@@ -94,8 +95,10 @@ function flush() {
 		res.setEncoding('utf-8');
 		/*jslint unparam: true */
 		res.on('data', function(data) {
+			return undefined;
 		});
 		res.on('error', function(err) {
+			return undefined;
 		});
 		/*jslint unparam: false */
 	});
