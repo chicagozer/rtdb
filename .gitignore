@@ -1,4 +1,5 @@
 # ignore this stuff
+coverage
 node_modules
 .sonar
 .c9revisions
