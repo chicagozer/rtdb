@@ -567,3 +567,5 @@ Set this value to to the location of the local directory to contain the database
 	"params" : {
 		"Bucket" : "xxxxxx"
 		}
+
+[ ![Codeship Status for chicagozer/rtdb](https://codeship.io/projects/3d221940-29ae-0132-a513-726bdf280447/status)](https://codeship.io/projects/38106)

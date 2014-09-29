@@ -21,6 +21,13 @@ CFSS3.prototype.exists = function(dir, callback) {
 /*jslint unparam: false */
 
 CFSS3.prototype.init = function(parms) {
+  
+  if (process.env.AWS_SECRET)
+    parms.config.secretAccessKey = process.env.AWS_SECRET;
+  if (process.env.AWS_KEY)
+    parms.config.accessKeyId = process.env.AWS_KEY;
+    if (process.env.AWS_BUCKET)
+    parms.params.Bucket = process.env.AWS_BUCKET;
 	AWS.config.update(parms.config);
 	this.s3 = new AWS.S3(parms);
 };
