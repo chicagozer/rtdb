@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved. 
+// © 2014 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
@@ -17,10 +17,10 @@ function Collection(database, obj) {
         this._identity = obj;
         if (this._identity._onAdd) {
             /*jshint evil: true */
-			/*jslint evil: true */
+            /*jslint evil: true */
             this._fonAdd = new Function("item", "database",
                 this._identity._onAdd);
-			/*jslint evil: false */
+            /*jslint evil: false */
             /*jshint evil: false */
         }
     } else {
@@ -67,12 +67,12 @@ function Collection(database, obj) {
         }
         lastExpire = now;
 
-        setTimeout(function () {
+        setTimeout(function() {
             self._workingdocs.length = 0;
-            self.views.forEach(function (v) {
+            self.views.forEach(function(v) {
                 v.reset();
             });
-            self.loadDocuments(self.views, function (err) {
+            self.loadDocuments(self.views, function(err) {
                 if (err) {
                     global.logger.log('error', err);
                 }
@@ -101,9 +101,9 @@ function Collection(database, obj) {
         lastReduce = now;
         global.logger.log('debug', 'reduce delay is ', delay);
 
-        setTimeout(function () {
+        setTimeout(function() {
             global.logger.log('debug', 'Reducing ', self._identity._id);
-            self.views.forEach(function (elem) {
+            self.views.forEach(function(elem) {
                 try {
                     elem.mapreduce(self._workingdocs, true);
                 } catch (e) {
@@ -123,7 +123,7 @@ function Collection(database, obj) {
     return this;
 }
 
-Collection.prototype.init = function (key, trans, priority, expiration, onAdd) {
+Collection.prototype.init = function(key, trans, priority, expiration, onAdd) {
     if (!this._identity) {
         this._identity = new Identity();
     }
@@ -135,9 +135,9 @@ Collection.prototype.init = function (key, trans, priority, expiration, onAdd) {
     if (onAdd) {
         this._identity._onAdd = onAdd;
         /*jshint evil: true */
-		/*jslint evil: true */
+        /*jslint evil: true */
         this._fonAdd = new Function("item", "database", onAdd);
-		/*jslint evil: false */
+        /*jslint evil: false */
         /*jshint evil: false */
     } else {
         if (this._identity._onAdd) {
@@ -150,7 +150,7 @@ Collection.prototype.init = function (key, trans, priority, expiration, onAdd) {
     return this;
 };
 
-Collection.prototype.push = function () {
+Collection.prototype.push = function() {
 
     var retval, docs, self = this;
 
@@ -162,23 +162,23 @@ Collection.prototype.push = function () {
 
     retval = docs;
 
-    if (self._fonAdd) { 
-      // ok so we are going to implement a trigger
-        docs.forEach(function (e) {
+    if (self._fonAdd) {
+        // ok so we are going to implement a trigger
+        docs.forEach(function(e) {
             self._fonAdd(e, self.database);
         });
     }
 
     if (!this._identity._transient && self._identity._expiration) {
-      // if this collection has an expiration, set up a timer to expire the
+        // if this collection has an expiration, set up a timer to expire the
         // docs
-        setTimeout(function () {
-          self._emitter.emit('expire');
+        setTimeout(function() {
+            self._emitter.emit('expire');
         }, self._identity._expiration);
     }
 
     if (this.views.length > 0) {
-        docs.forEach(function (item) {
+        docs.forEach(function(item) {
             self._workingdocs.push(item);
         });
         // signal for reduce.
@@ -190,7 +190,7 @@ Collection.prototype.push = function () {
 
 };
 
-Collection.prototype.loadDocuments = function (viewlist, callback) {
+Collection.prototype.loadDocuments = function(viewlist, callback) {
 
     var self, dir = 'collection/' + this._identity._id + '/documents/';
 
@@ -200,7 +200,7 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
     self._workingdocs.length = 0;
 
     function readIt(item, callback) {
-        self.database.cfs.get(item, function (err, data) {
+        self.database.cfs.get(item, function(err, data) {
             if (err) {
                 global.logger.log('error', err);
                 callback(err);
@@ -229,7 +229,7 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
         // we need to use the async library to do 100 at a time.
         global.logger.log('debug',
             'Collection.loadDocuments.innerLoop calling asynceach');
-        async.eachLimit(subset, eachLimit, readIt, function (err) {
+        async.eachLimit(subset, eachLimit, readIt, function(err) {
             if (err) {
                 callback(err);
                 return;
@@ -238,7 +238,7 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
             global.logger.log('debug',
                 'Collection.loadDocuments.innerLoop idx: files.length is ' + files.length + ' notify is ' + notify);
             if (self._workingdocs.length > 0) {
-                viewlist.forEach(function (v) {
+                viewlist.forEach(function(v) {
                     global.logger.log('debug',
                         'Collection.loadDocuments.innerLoop reducing :' + v.getId());
                     try {
@@ -260,10 +260,10 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
         });
     }
 
-    self.database.cfs.exists(dir, function (exists) {
+    self.database.cfs.exists(dir, function(exists) {
 
         if (exists) {
-            self.database.cfs.list(dir, function (err, files) {
+            self.database.cfs.list(dir, function(err, files) {
                 if (err) {
                     global.logger.log('error', 'Collection.loadDocuments [' + self._identity._id + ']', err);
                     callback(err);
@@ -283,7 +283,7 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
     });
 };
 
-Collection.prototype.loadViews = function (callback) {
+Collection.prototype.loadViews = function(callback) {
 
     var self, vdir, dir = 'collection/' + this._identity._id;
     self = this;
@@ -293,14 +293,14 @@ Collection.prototype.loadViews = function (callback) {
     self.database.cfs
         .exists(
             vdir,
-            function (exists) {
+            function(exists) {
                 if (exists) {
                     global.logger.log('debug',
                         'Collection.loadViews listing ', vdir);
                     self.database.cfs
                         .list(
                             vdir,
-                            function (err, files) {
+                            function(err, files) {
                                 if (err) {
                                     global.logger
                                         .log(
@@ -322,7 +322,7 @@ Collection.prototype.loadViews = function (callback) {
                                     .eachLimit(
                                         files,
                                         eachLimit,
-                                        function (item,
+                                        function(item,
                                             callback) {
                                             global.logger
                                                 .log(
@@ -332,7 +332,7 @@ Collection.prototype.loadViews = function (callback) {
                                             self.database.cfs
                                                 .get(
                                                     item,
-                                                    function (
+                                                    function(
                                                         err,
                                                         data) {
                                                         if (err) {
@@ -373,7 +373,7 @@ Collection.prototype.loadViews = function (callback) {
                                                             v
                                                                 .loadReduction(
                                                                     dir + '/view/',
-                                                                    function (
+                                                                    function(
                                                                         err) {
                                                                         if (err) {
                                                                             global.logger
@@ -400,10 +400,10 @@ Collection.prototype.loadViews = function (callback) {
             });
 };
 
-Collection.prototype.addView = function (v, callback) {
+Collection.prototype.addView = function(v, callback) {
     var self = this;
 
-    self.loadDocuments([v], function (err) {
+    self.loadDocuments([v], function(err) {
         if (err) {
             callback(err);
             return;
@@ -418,10 +418,10 @@ Collection.prototype.addView = function (v, callback) {
     });
 };
 
-Collection.prototype.updateView = function (v, callback) {
+Collection.prototype.updateView = function(v, callback) {
     var self = this;
 
-    self.loadDocuments([v], function (err) {
+    self.loadDocuments([v], function(err) {
         if (err) {
             callback(err);
             return;
@@ -437,7 +437,7 @@ Collection.prototype.updateView = function (v, callback) {
     });
 };
 
-Collection.prototype.removeView = function (vid, callback) {
+Collection.prototype.removeView = function(vid, callback) {
     var msg, dir, dn, fn, idx, v = this._viewsHash[vid];
     if (v) {
         idx = this.views.indexOf(v);
@@ -474,30 +474,30 @@ function removeFiles(c, deleteFiles, callback) {
     }
     var dn = 'collection/' + c.getId() + '/documents/';
     // grab all the collections from the file system
-    c.database.cfs.list(dn, function (err, files) {
+    c.database.cfs.list(dn, function(err, files) {
         if (err) {
             global.logger.log('error', 'Collection.removeFiles ', err);
             callback(err);
             return;
         }
-        async.eachLimit(files, eachLimit, function (item, callback2) {
+        async.eachLimit(files, eachLimit, function(item, callback2) {
             c.database.cfs.del(item, callback2);
         }, callback);
     });
 }
 
-Collection.prototype.clear = function (deleteFiles, notify, callback) {
+Collection.prototype.clear = function(deleteFiles, notify, callback) {
 
     var self = this;
     self._workingdocs = [];
     self.stats.fileCount = 0;
 
-    removeFiles(self, deleteFiles, function (err) {
+    removeFiles(self, deleteFiles, function(err) {
         if (err) {
             callback(err);
             return;
         }
-        self.views.forEach(function (v) {
+        self.views.forEach(function(v) {
             v.reset();
             if (notify) {
                 v._emitter.emit('change');
@@ -508,7 +508,7 @@ Collection.prototype.clear = function (deleteFiles, notify, callback) {
     });
 };
 
-Collection.prototype.put = function (body, callback) {
+Collection.prototype.put = function(body, callback) {
 
     if (body.length === 0) {
         callback();
@@ -518,7 +518,7 @@ Collection.prototype.put = function (body, callback) {
     var dn, self = this;
     self.stats.fileCount += body.length;
 
-    body.forEach(function (item) {
+    body.forEach(function(item) {
         if (!item._identity) {
             item._identity = new Identity();
         }
@@ -534,7 +534,7 @@ Collection.prototype.put = function (body, callback) {
     }
 
     if (!self._identity._transient) {
-        async.eachLimit(body, eachLimit, write, function (err) {
+        async.eachLimit(body, eachLimit, write, function(err) {
             if (err) {
                 callback(err);
             } else {
@@ -548,27 +548,27 @@ Collection.prototype.put = function (body, callback) {
     }
 };
 
-Collection.prototype.setViewAt = function (idx, val) {
+Collection.prototype.setViewAt = function(idx, val) {
     this._viewsHash[idx] = val;
 };
 
-Collection.prototype.viewAt = function (idx) {
+Collection.prototype.viewAt = function(idx) {
     return this._viewsHash[idx];
 };
 
-Collection.prototype.toString = function () {
+Collection.prototype.toString = function() {
     return this._identity;
 };
 
-Collection.prototype.getIdentity = function () {
+Collection.prototype.getIdentity = function() {
     return this._identity;
 };
 
-Collection.prototype.getId = function () {
+Collection.prototype.getId = function() {
     return this._identity._id;
 };
 
-Collection.prototype.isTransient = function () {
+Collection.prototype.isTransient = function() {
     return this._identity._transient;
 };
 
