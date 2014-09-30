@@ -95,7 +95,8 @@ describe(
                                 'junk',
                                 'emit(item.name,item.value)',
                                 'emit(values.reduce(function (a, b) { return a + b;}));',
-                                'reduction.sort(function(a,b){return b[1] -a[1];});emit(reduction);');
+                                'reduction.sort(function(a,b){return b[1] -a[1];});emit(reduction);',
+								'emit(reduction);');
                         c.addView(v, done);
                     });
 
