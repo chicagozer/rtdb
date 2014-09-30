@@ -458,12 +458,12 @@ Collection.prototype.removeView = function(vid, callback) {
         } else {
             msg = 'Collection.removeView - View ' + vid + ' not found in array.';
             global.logger.log('warn', msg);
-            callback(msg);
+            callback(new Error(msg));
         }
     } else {
         msg = 'Collection.removeView - View ' + vid + ' not found.';
         global.logger.log('warn', msg);
-        callback(msg);
+        callback(new Error(msg));
     }
 };
 

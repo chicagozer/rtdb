@@ -241,7 +241,7 @@ function Database(settings, callback) {
 }
 
 // shutdown function.
-Database.prototype.saveViewsThenExit = function() {
+Database.prototype.saveViewsThenExit = function(exit) {
     var self = this;
 
     if (global.logger.level === 'debug') {
@@ -275,7 +275,9 @@ Database.prototype.saveViewsThenExit = function() {
             }
             global.logger.log('debug',
                 'Database.saveViewsThenExit - calling exit');
-            process.exit();
+            if (exit != false) {
+				process.exit();
+			}
         });
 };
 
@@ -312,12 +314,12 @@ Database.prototype.removeCollection = function(cid, callback) {
 
     c = this.collectionAt(cid);
     if (!c) {
-        callback('not found');
+        callback(new Error(cid + ' is not found'));
         return;
     }
     idx = this.collections.indexOf(c);
     if (idx === -1) {
-        callback('not found.');
+        callback(new Error(cid + ' is not found'));
         return;
     }
     dn = 'collections/';

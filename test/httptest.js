@@ -22,6 +22,147 @@ describe('Suite', function() {
     });
 
     describe('HTTP', function() {
+		
+        it('about', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/about',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+		
+        it('index', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/index',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+		
+        it('home', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+		
+        it('web', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/web',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+		
+        it('web/admin/stats', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/web/admin/stats',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+		
+        it('web/collections', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/web/collections',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+		
+	    it('Stream (not found)', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/stream',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 404) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+		
 
         it('Stats', function(done) {
 
@@ -91,6 +232,117 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
+		
+        it('web Collection:Parcel', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+		
+        it('web Collection:Parcel views', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+		
+        it('Collection:Parcel stats', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/stats',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+		
+        it('stream Collection:(not found)', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/collections/notfound',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 404) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+		
+        it('stream Collection:Parcel:(view not found)', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/stream',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 404) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+		
 
         it('Collection:Parcel Views', function(done) {
 
@@ -113,13 +365,11 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-
-
-
-        it('Collection:Parcel Views', function(done) {
+		
+        it('web Collection:Parcel View:Zipcode', function(done) {
 
             request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views',
+                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b',
                 auth: {
                     user: 'admin',
                     pass: 'chang3m3'
@@ -137,6 +387,30 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
+		
+        it('web Collection:Parcel View:Zipcode subscriptions', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/subscriptions',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+		
+		
         it('Collection:Parcel View:Zipcode', function(done) {
 
             request.get({
@@ -158,10 +432,12 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-        it('Collection:Parcel View:Zipcode Reduction', function(done) {
+		
+		
+        it('Collection:Parcel View:Zipcode stats', function(done) {
 
             request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/reduction/',
+                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/stats',
                 auth: {
                     user: 'admin',
                     pass: 'chang3m3'
@@ -179,5 +455,29 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
+		
+        it('Collection:Parcel View:Zipcode ticket', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/ticket',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+		
+		
     });
 });
