@@ -411,7 +411,7 @@ function loadExpress(rtdb, database, startTime, done) {
     /** collection stats */
     app.get('/db/collections/:cid/stats', function(req, res) {
 
-        c = getCollection(database,req,res);
+        var c = getCollection(database,req,res);
 		if (c) {
         res.send(c.stats);
 		}

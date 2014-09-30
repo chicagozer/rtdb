@@ -68,7 +68,7 @@ CFSS3.prototype.put = function(prefix, item, callback, expires) {
     } else if (item._id) {
         key = prefix + item._id + '.json';
     } else {
-        callback('No _id found in item.');
+        callback(new Error('No _id found in item.'));
         return;
     }
 
