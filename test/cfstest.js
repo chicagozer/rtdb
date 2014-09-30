@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved. 
+// © 2014 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
@@ -11,13 +11,13 @@ var Identity = require('../identity');
 var fs = require('fs');
 var Tempdir = require('temporary/lib/dir');
 
-describe('CFS plugins', function () {
+describe('CFS plugins', function() {
     var dn = 'junk/',
         id = null,
         settings, dir = null,
         cfsTypes = [];
 
-    before(function () {
+    before(function() {
 
         /*jslint stupid: true */
 
@@ -36,7 +36,7 @@ describe('CFS plugins', function () {
 
         /*jslint stupid: false */
 
-        cfslist.forEach(function (file) {
+        cfslist.forEach(function(file) {
             var mycfs, Cfs = require('../cfs/' + file);
 
             mycfs = new Cfs();
@@ -54,29 +54,29 @@ describe('CFS plugins', function () {
     // the before function
     //
     // anyway, this seems to do the trick
-    describe('OuterLoop', function () {
+    describe('OuterLoop', function() {
 
-        it('Iteration Test', function () {
+        it('Iteration Test', function() {
 
-            cfsTypes.forEach(function (cfs) {
+            cfsTypes.forEach(function(cfs) {
 
-                describe('InnerLoop', function () {
+                describe('InnerLoop', function() {
 
-                    it(cfs.name + ': should create a file', function (done) {
+                    it(cfs.name + ': should create a file', function(done) {
                         id = new Identity();
 
                         cfs.put(dn, id, done);
                     });
 
-                    it(cfs.name + ': should fetch a file', function (done) {
+                    it(cfs.name + ': should fetch a file', function(done) {
                         cfs.get(dn + id._id + '.json', done);
                     });
 
-                    it(cfs.name + ': should list files', function (done) {
+                    it(cfs.name + ': should list files', function(done) {
                         cfs.list(dn, done);
                     });
 
-                    it(cfs.name + ': should delete file', function (done) {
+                    it(cfs.name + ': should delete file', function(done) {
                         var fn = dn + id._id + '.json';
                         cfs.del(fn, done);
                     });
@@ -85,7 +85,7 @@ describe('CFS plugins', function () {
         });
     });
 
-    after(function () {
+    after(function() {
         if (dir) {
             dir.rmdir();
         }

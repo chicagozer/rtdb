@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved. 
+// © 2014 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 "use strict";
@@ -22,7 +22,7 @@ function View(database, collection, obj) {
         this._freduceScript = vm.createScript(this._identity._reduce);
 
         /*jshint evil: true */
-		/*jslint evil: true */
+        /*jslint evil: true */
         this._fmap = new Function("item", "emit", "database",
             this._identity._map);
         this._freduce = new Function("values", "rereduce", "emit", "database",
@@ -41,7 +41,7 @@ function View(database, collection, obj) {
             this._fpersonalizeScript = vm
                 .createScript(this._identity._personalize);
         }
-		/*jslint evil: false */
+        /*jslint evil: false */
         /*jshint evil: false */
 
     } else {
@@ -67,13 +67,13 @@ function View(database, collection, obj) {
     var self = this;
 
     // on change function to notify subscriptions
-    this._emitter.on('change', function () {
+    this._emitter.on('change', function() {
 
         global.logger.log('debug', 'View.onChange - ', self._identity._id);
 
         // for each element in our subscription list
         Object.keys(self.subscriptions).forEach(
-            function (key) {
+            function(key) {
                 // grab the result handle
                 var data, myReduction, res, socket, sub;
 
@@ -119,7 +119,7 @@ function View(database, collection, obj) {
     });
 }
 
-View.prototype.personalize = function (key) {
+View.prototype.personalize = function(key) {
     var personalizeEmit, sub, myReduction, self = this;
 
     sub = self.subscriptions[key];
@@ -127,7 +127,7 @@ View.prototype.personalize = function (key) {
     myReduction = self.reduction;
     // lets personalize it
     if (self._identity._personalize) {
-        personalizeEmit = function (result) {
+        personalizeEmit = function(result) {
             myReduction = result;
         };
 
@@ -138,12 +138,12 @@ View.prototype.personalize = function (key) {
 };
 
 // reduction@ does a lookup via hash instead of index
-View.prototype.reductionAt = function (idx) {
+View.prototype.reductionAt = function(idx) {
     return this.reduction[this._reductionHash[idx]];
 };
 
 // initialize from starting values.
-View.prototype.init = function (key, map, reduce, finalize, personalize) {
+View.prototype.init = function(key, map, reduce, finalize, personalize) {
     if (!this._identity) {
         this._identity = new Identity();
     }
@@ -152,7 +152,7 @@ View.prototype.init = function (key, map, reduce, finalize, personalize) {
 
     this._identity._map = map;
     /*jshint evil: true */
-	/*jslint evil: true */
+    /*jslint evil: true */
     this._fmap = new Function("item", "emit", "database", map);
     this._fmapScript = vm.createScript(map);
     this._identity._reduce = reduce;
@@ -179,7 +179,7 @@ View.prototype.init = function (key, map, reduce, finalize, personalize) {
         this._fpersonalizeScript = vm.createScript(personalize);
         this._identity._personalize = personalize;
     }
-	/*jslint evil: false */
+    /*jslint evil: false */
     /*jshint evil: false */
     return this;
 };
@@ -188,7 +188,7 @@ View.prototype.init = function (key, map, reduce, finalize, personalize) {
 // take in the array to mapreduce
 // this method is additive - we add the results to what we have
 
-View.prototype.mapreduce = function (documents, notify) {
+View.prototype.mapreduce = function(documents, notify) {
     // save a reference for our closures
     var hrDiff, key, finalizeEmit, mapEmit, clone, mapResult, hrStart, self = this;
 
@@ -208,7 +208,7 @@ View.prototype.mapreduce = function (documents, notify) {
     // heres the map emit function - save each emitted value in mapResult
     // according
     // to the key
-    mapEmit = function (key, value) {
+    mapEmit = function(key, value) {
         if (!mapResult[key]) {
             mapResult[key] = [];
         }
@@ -216,7 +216,7 @@ View.prototype.mapreduce = function (documents, notify) {
     };
 
     // do the map function
-    documents.forEach(function (e) {
+    documents.forEach(function(e) {
         self._fmap(e, mapEmit, self.database);
         global.logger
             .log('silly', 'View.mapreduce - item is ', e._identity._id);
@@ -228,7 +228,7 @@ View.prototype.mapreduce = function (documents, notify) {
     function innerReduce(key) {
 
         // call the reduce method
-        self._freduce(mapResult[key], false, function (results) {
+        self._freduce(mapResult[key], false, function(results) {
 
             // if we don't have a result, then
             // add it to our hashes or push it
@@ -266,7 +266,7 @@ View.prototype.mapreduce = function (documents, notify) {
                 ._freduce(
                     self._reduceResult[self._reduceResultHash[key2]],
                     true,
-                    function (results) {
+                    function(results) {
                         // we are expecting a single value. so update
                         // our hashes
                         self._reduceResult[self._reduceResultHash[key2]].length = 0;
@@ -303,7 +303,7 @@ View.prototype.mapreduce = function (documents, notify) {
 
     // finalize function is easy - we just spit out what gets emitted to us
     // finalize is good for sorting/top x/averages/etc
-    finalizeEmit = function (result) {
+    finalizeEmit = function(result) {
         self.reduction = result;
     };
 
@@ -320,7 +320,7 @@ View.prototype.mapreduce = function (documents, notify) {
 
     // rebuild the hash index
     self._reductionhash = {};
-    self.reduction.forEach(function (r, idx) {
+    self.reduction.forEach(function(r, idx) {
         self._reductionHash[r[0]] = idx;
     });
 
@@ -341,7 +341,7 @@ View.prototype.mapreduce = function (documents, notify) {
 };
 
 // write reduction to disk
-View.prototype.saveReduction = function (dir, callback) {
+View.prototype.saveReduction = function(dir, callback) {
     // generate a filename
     var fn = dir + this._identity._id + '/reduction/';
     // save it
@@ -349,7 +349,7 @@ View.prototype.saveReduction = function (dir, callback) {
 };
 
 // clear out all the _privates and the reduction
-View.prototype.reset = function () {
+View.prototype.reset = function() {
     this._reduceResult = [];
     this._reduceResultHash = {};
     this._reductionHash = {};
@@ -366,20 +366,20 @@ View.prototype.reset = function () {
 
 };
 // load the reduction from Disk
-View.prototype.loadReduction = function (dir, callback) {
+View.prototype.loadReduction = function(dir, callback) {
 
     var rn, self = this;
     rn = dir + this._identity._id + '/reduction/';
 
     // see what is in the reduction folder
-    this.database.cfs.list(rn, function (err, files) {
+    this.database.cfs.list(rn, function(err, files) {
         if (err) {
             callback(err);
             return;
         }
         // if there is a single reduction file, grab it
         if (files.length === 1) {
-            self.database.cfs.get(files[0], function (err, data) {
+            self.database.cfs.get(files[0], function(err, data) {
                 if (err) {
                     global.logger.log('warn', 'View.loadReduction - ' + rn + 'not loaded.', err);
                     // callback(err);
@@ -393,7 +393,7 @@ View.prototype.loadReduction = function (dir, callback) {
 
                 // setup our hashes
                 self._redcontainer.reduction
-                    .forEach(function (key, idx) {
+                    .forEach(function(key, idx) {
 
                         self._reduceResultHash[key[0]] = idx;
                         self._reduceResult.push([key[1]]);
@@ -414,20 +414,20 @@ View.prototype.loadReduction = function (dir, callback) {
     });
 };
 
-View.prototype.getIdentity = function () {
+View.prototype.getIdentity = function() {
     return this._identity;
 };
 
-View.prototype.toString = function () {
+View.prototype.toString = function() {
     return this._identity;
 };
 
-View.prototype.getId = function () {
+View.prototype.getId = function() {
     return this._identity._id;
 };
 
 // reduction@ does a lookup via hash instead of index
-View.prototype.issueTicket = function () {
+View.prototype.issueTicket = function() {
     //LATER MAYBE ASYNC?
     var ticket = crypto.randomBytes(32).toString('hex');
     this.tickets[ticket] = new Date();
@@ -435,7 +435,7 @@ View.prototype.issueTicket = function () {
 };
 
 // reduction@ does a lookup via hash instead of index
-View.prototype.checkTicket = function (ticket) {
+View.prototype.checkTicket = function(ticket) {
     // LATER we need something more secure
 
     var key, now, reply = false;
