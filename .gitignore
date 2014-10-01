@@ -1,4 +1,5 @@
 # ignore this stuff
+strongloop.json
 coverage
 node_modules
 .sonar
