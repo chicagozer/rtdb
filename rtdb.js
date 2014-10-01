@@ -230,7 +230,9 @@ function loadExpress(rtdb, database, startTime, done) {
     // quick little function that will shutdown the DB
     /*jslint unparam:true */
     app.post('/db/admin/stop', function(req, res) {
-        database.saveViewsThenExit();
+        database.saveViews(function(err) {
+            process.exit();
+        });
         res.status(202).end();
     });
     /*jslint unparam:false */
@@ -366,55 +368,55 @@ function loadExpress(rtdb, database, startTime, done) {
         });
     });
     /*jslint unparam:false */
-	
-	function getCollection(database,req,res) {
-    var c = database.collectionAt(req.params.cid);
-    if (!c) {
-    	res.status(404).send("collection " + req.params.cid + " is not in the database.");
-		}
-	return c;
-	}
-	
-	function getView(database,req,res) {
-    var view, c = getCollection(database,req,res);
-	if (!c) {
+
+    function getCollection(database, req, res) {
+        var c = database.collectionAt(req.params.cid);
+        if (!c) {
+            res.status(404).send("collection " + req.params.cid + " is not in the database.");
+        }
         return c;
-    	}
-    view = c.viewAt(req.params.vid);
-    if (!view) {
-    	res.status(404).send("view " + req.params.vid + " is not in the collection.");
-		}
-	return view;
-	}
-	
-	
-	
+    }
+
+    function getView(database, req, res) {
+        var view, c = getCollection(database, req, res);
+        if (!c) {
+            return c;
+        }
+        view = c.viewAt(req.params.vid);
+        if (!view) {
+            res.status(404).send("view " + req.params.vid + " is not in the collection.");
+        }
+        return view;
+    }
+
+
+
 
     app.get('/db/collections/:cid/views/:vid/stats', function(req, res) {
 
-        var view = getView(database,req,res);
-		if (view) {
-        	res.send(view.stats);
-		}
+        var view = getView(database, req, res);
+        if (view) {
+            res.send(view.stats);
+        }
     });
 
     app.get('/db/collections/:cid/views/:vid/ticket', function(req, res) {
 
-        var view = getView(database,req,res);
-		if (view) {
-        	res.send(JSON.stringify({
-            	ticket: view.issueTicket()
-        	}));
-		}	
+        var view = getView(database, req, res);
+        if (view) {
+            res.send(JSON.stringify({
+                ticket: view.issueTicket()
+            }));
+        }
     });
 
     /** collection stats */
     app.get('/db/collections/:cid/stats', function(req, res) {
 
-        var c = getCollection(database,req,res);
-		if (c) {
-        res.send(c.stats);
-		}
+        var c = getCollection(database, req, res);
+        if (c) {
+            res.send(c.stats);
+        }
     });
 
     app.get('/demo/:dpage', function(req, res) {
@@ -461,8 +463,8 @@ function loadExpress(rtdb, database, startTime, done) {
     /*jslint unparam:true */
 
     app.get('/web/collections/:cid', function(req, res) {
-        var c = getCollection(database,req,res);
-		if (c) {
+        var c = getCollection(database, req, res);
+        if (c) {
             res.render('collection', {
                 json: c._identity
             });
@@ -475,10 +477,10 @@ function loadExpress(rtdb, database, startTime, done) {
 
     app.get('/web/collections/:cid/views', function(req, res) {
         var list = [],
-            c = getCollection(database,req,res);
-		if (!c) {
-			return;
-			}
+            c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
         c.views.forEach(function(item) {
             list.push(item._identity);
         });
@@ -489,23 +491,23 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // templated view
-    app.get('/web/collections/:cid/views/:vid', function (req, res) {
-        var view = getView(database,req,res);
-		if (view) {
+    app.get('/web/collections/:cid/views/:vid', function(req, res) {
+        var view = getView(database, req, res);
+        if (view) {
             res.render('view', {
                 json: view._identity,
                 cid: req.params.cid
             });
-        } 
+        }
     });
 
     // templated reduction
     app.get('/web/collections/:cid/views/:vid/reduction', function(req,
         res) {
-        var view = getView(database,req,res);
-		if (!view) {
-			return;
-		}
+        var view = getView(database, req, res);
+        if (!view) {
+            return;
+        }
 
         res.render('reduction', {
             json: view.reduction,
@@ -518,8 +520,9 @@ function loadExpress(rtdb, database, startTime, done) {
     // return templated list of subscriptions
     app.get('/web/collections/:cid/views/:vid/subscriptions', function(
         req, res) {
-        var index, list = [], view = getView(database,req,res);
-       
+        var index, list = [],
+            view = getView(database, req, res);
+
         if (!view) {
             return;
         }
@@ -599,10 +602,10 @@ function loadExpress(rtdb, database, startTime, done) {
     app.post('/db/collections/:cid/views', function(req, res) {
 
         global.logger.debug('App.post - adding view to ' + req.params.id);
-        var v, msg, c = getCollection(database,req,res);
-		if (!c) {
-			return;
-			}
+        var v, c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
 
         if (req.body._id) {
             v = new View(database, c, req.body);
@@ -623,10 +626,10 @@ function loadExpress(rtdb, database, startTime, done) {
     // update an existing collection
     app.put('/db/collections/:cid', function(req, res) {
 
-        var c = getCollection(database,req,res);
-		if (!c) {
-			return;
-			}
+        var c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
         c.init(req.body._key, req.body._transient, req.body._priority,
             req.body._expiration, req.body._onAdd);
         database.updateCollection(c, function(err) {
@@ -655,17 +658,17 @@ function loadExpress(rtdb, database, startTime, done) {
     app.put('/db/collections/:cid/views/:vid', function(req, res) {
 
         global.logger.debug('App.put - updating  view: ' + req.params.vid);
-        var v, c = getCollection(database,req,res);
-		if (!c) {
-			return;
-			}
-        
-	     v = getView(database,req,res);
-		 if (!v) {
-			 return;
-			 }
-		
-		
+        var v, c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
+
+        v = getView(database, req, res);
+        if (!v) {
+            return;
+        }
+
+
         v.init(req.body._key, req.body._map, req.body._reduce,
             req.body._finalize, req.body._personalize);
 
@@ -681,11 +684,11 @@ function loadExpress(rtdb, database, startTime, done) {
 
     /** return the indicated collection */
     app.get('/db/collections/:cid', function(req, res) {
-        var c = getCollection(database,req,res);
-		if (!c) {
-			return;
-			}
-        
+        var c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
+
         res.send(c.toString());
     });
 
@@ -693,11 +696,11 @@ function loadExpress(rtdb, database, startTime, done) {
     app.delete('/db/collections/:cid/documents', function(req, res) {
 
         var deleteFromDisk = false,
-            c = c = getCollection(database,req,res);
-		if (!c) {
-			return;
-			}
-        
+            c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
+
 
         if (req.query.permanent === 'true') {
             deleteFromDisk = true;
@@ -716,11 +719,11 @@ function loadExpress(rtdb, database, startTime, done) {
     app.get('/db/collections/:cid/views', function(req, res) {
 
         var list = [],
-		c = getCollection(database,req,res);
-				if (!c) {
-					return;
-					}
-        
+            c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
+
         c.views.forEach(function(item) {
             list.push(item._identity);
         });
@@ -743,10 +746,10 @@ function loadExpress(rtdb, database, startTime, done) {
     // send back the view
     app.get('/db/collections/:cid/views/:vid', function(req, res) {
 
-        var v = getView(database,req,res);
-		 if (!v) {
-			 return;
-			 }
+        var v = getView(database, req, res);
+        if (!v) {
+            return;
+        }
 
         res.send(v.toString());
     });
@@ -758,35 +761,35 @@ function loadExpress(rtdb, database, startTime, done) {
 
     app.get('/db/collections/:cid/views/:vid/reduction', function(req, res) {
 
-        var v = getView(database,req,res);
-		 if (!v) {
-			 return;
-			 }
+        var v = getView(database, req, res);
+        if (!v) {
+            return;
+        }
         res.send(JSON.stringify(v.reduction));
     });
 
     /** remove a view */
     app.delete('/db/collections/:cid/views/:vid', function(req, res) {
-        var msg, v, c = getCollection(database,req,res);
-		if (!c) {
-			return;
-			}
-        
-	     v = getView(database,req,res);
-		 if (!v) {
-			 return;
-			 }
-			 
-            c.removeView(req.params.vid, function(err) {
-                if (err) {
-                    global.logger.log('error', err);
-                    res.status(500).send(err);
-                } else {
-                    res.status(200).end();
-                }
+        var v, c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
 
-            });
-        
+        v = getView(database, req, res);
+        if (!v) {
+            return;
+        }
+
+        c.removeView(req.params.vid, function(err) {
+            if (err) {
+                global.logger.log('error', err);
+                res.status(500).send(err);
+            } else {
+                res.status(200).end();
+            }
+
+        });
+
     });
 
     // send back a list of subscribers
@@ -794,10 +797,10 @@ function loadExpress(rtdb, database, startTime, done) {
         function(req, res) {
 
             var index, list = [],
-   	     	v = getView(database,req,res);
-   		 	if (!v) {
-   			 	return;
-   			 }
+                v = getView(database, req, res);
+            if (!v) {
+                return;
+            }
 
             for (index in v.subscriptions) {
                 if (v.subscriptions.hasOwnProperty(index)) {

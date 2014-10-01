@@ -24,51 +24,51 @@ describe('Suite', function() {
         myrtdb.stop(done);
     });
 
-   	
-	    describe('HTTP', function() {
-			
-			
-	        it('about', function(done) {
 
-	            request.get({
-	                url: 'http://localhost:9001/about',
-	                auth: {
-	                    user: 'admin',
-	                    pass: 'chang3m3'
-	                },
-	                json: true
-	            }, function(error, response, body) {
-	                if (!error && response.statusCode === 200) {
-	                    done();
-	                } else if (error) {
-	                    done(error);
-	                } else {
-	                    done(new Error('[' + response.statusCode + ']:' + response.body));
-	                }
-	            });
-	        });	
-			
-		
-	        it('echo', function(done) {
+    describe('HTTP', function() {
 
-	            request.get({
-	                url: 'http://localhost:9001/db/admin/echo',
-	                auth: {
-	                    user: 'admin',
-	                    pass: 'chang3m3'
-	                },
-	                json: true
-	            }, function(error, response, body) {
-	                if (!error && response.statusCode === 200) {
-	                    done();
-	                } else if (error) {
-	                    done(error);
-	                } else {
-	                    done(new Error('[' + response.statusCode + ']:' + response.body));
-	                }
-	            });
-	        });
-		
+
+        it('about', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/about',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+
+
+        it('echo', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/admin/echo',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        });
+
         it('index', function(done) {
 
             request.get({
@@ -88,7 +88,7 @@ describe('Suite', function() {
                 }
             });
         });
-		
+
         it('home', function(done) {
 
             request.get({
@@ -108,7 +108,7 @@ describe('Suite', function() {
                 }
             });
         });
-		
+
         it('web', function(done) {
 
             request.get({
@@ -128,7 +128,7 @@ describe('Suite', function() {
                 }
             });
         });
-		
+
         it('web/admin/stats', function(done) {
 
             request.get({
@@ -148,7 +148,7 @@ describe('Suite', function() {
                 }
             });
         });
-		
+
         it('web/collections', function(done) {
 
             request.get({
@@ -168,8 +168,8 @@ describe('Suite', function() {
                 }
             });
         });
-		
-	    it('Stream (not found)', function(done) {
+
+        it('Stream (not found)', function(done) {
 
             request.get({
                 url: 'http://localhost:9001/db/stream',
@@ -188,7 +188,7 @@ describe('Suite', function() {
                 }
             });
         });
-		
+
 
         it('Stats', function(done) {
 
@@ -258,7 +258,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('web Collection:Parcel', function(done) {
 
             request.get({
@@ -280,7 +280,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('web Collection:Parcel views', function(done) {
 
             request.get({
@@ -302,7 +302,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('Collection:Parcel stats', function(done) {
 
             request.get({
@@ -324,7 +324,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('stream Collection:(not found)', function(done) {
 
             request.get({
@@ -346,51 +346,51 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
-		
-	    it('stream Collection:Apples', function(done) {
 
-			var es = new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2');
-			
-	        es.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2",
-	        function(event) {
-				es.close();
-				done();
-	        }, false);
-	    });
-		
-	    it('stream Collection:Parcels', function(done) {
 
-			var es = new EventSource('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/stream');
-			
-	        es.addEventListener("18823768-0635-49bc-9053-ac2f212d066b",
-	        function(event) {
-				es.close();
-				done();
-	        }, false);
-	    });
-		
-	    it('stream Collection:notfound', function(done) {
+        it('stream Collection:Apples', function(done) {
 
-			var es = new EventSource('http://localhost:9001/db/collections/notfound/views/18823768-0635-49bc-9053-ac2f212d066b/stream');
-			
-	       done();
-	    });
-		
-	    it('stream Collection:multiple', function(done) {
+            var es = new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2');
 
-			var es = new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2&view=18823768-0635-49bc-9053-ac2f212d066b');
-			
-			done();
-	    });
-		
-	    it('stream Collection:delta', function(done) {
+            es.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2",
+                function(event) {
+                    es.close();
+                    done();
+                }, false);
+        });
 
-			var es = new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2&delta=true');
-			
-			done();
-	    });
-		
+        it('stream Collection:Parcels', function(done) {
+
+            var es = new EventSource('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/stream');
+
+            es.addEventListener("18823768-0635-49bc-9053-ac2f212d066b",
+                function(event) {
+                    es.close();
+                    done();
+                }, false);
+        });
+
+        it('stream Collection:notfound', function(done) {
+
+            assert(new EventSource('http://localhost:9001/db/collections/notfound/views/18823768-0635-49bc-9053-ac2f212d066b/stream'));
+
+            done();
+        });
+
+        it('stream Collection:multiple', function(done) {
+
+            assert(new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2&view=18823768-0635-49bc-9053-ac2f212d066b'));
+
+            done();
+        });
+
+        it('stream Collection:delta', function(done) {
+
+            assert(new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2&delta=true'));
+
+            done();
+        });
+
         it('stream Collection:Parcel:(view not found)', function(done) {
 
             request.get({
@@ -412,7 +412,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
 
         it('Collection:Parcel Views', function(done) {
 
@@ -435,7 +435,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('web Collection:Parcel View:Zipcode', function(done) {
 
             request.get({
@@ -457,7 +457,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('web Collection:Parcel View:Zipcode subscriptions', function(done) {
 
             request.get({
@@ -479,8 +479,8 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
-		
+
+
         it('Collection:Parcel View:Zipcode', function(done) {
 
             request.get({
@@ -502,8 +502,8 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
-		
+
+
         it('Collection:Parcel View:Zipcode stats', function(done) {
 
             request.get({
@@ -525,7 +525,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('Collection:Parcel View:Zipcode ticket', function(done) {
 
             request.get({
@@ -547,7 +547,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('Collection:Parcel reload', function(done) {
 
             request.post({
@@ -569,7 +569,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('Collection:Parcel reload (notfound)', function(done) {
 
             request.post({
@@ -591,7 +591,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('help', function(done) {
 
             request.get({
@@ -613,7 +613,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
+
         it('demo', function(done) {
 
             request.get({
@@ -635,7 +635,7 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
-		
-		
+
+
     });
 });

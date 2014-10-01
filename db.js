@@ -241,21 +241,21 @@ function Database(settings, callback) {
 }
 
 // shutdown function.
-Database.prototype.saveViewsThenExit = function(exit) {
+Database.prototype.saveViews = function(callback) {
     var self = this;
 
     if (global.logger.level === 'debug') {
-        global.logger.log('debug', 'Database.saveViewsThenExit - started');
+        global.logger.log('debug', 'Database.saveViews - started');
     }
     async.each(self.collections, function(c, callback) {
-            global.logger.debug('Database.saveViewsThenExit - collection ', c
+            global.logger.debug('Database.saveViews - collection ', c
                 .getId());
             // transient or not, save a copy of the views
             // I think we are going to reverse that decision
 
             if (!c.isTransient()) {
                 async.each(c.views, function(v, callback) {
-                    global.logger.debug('Database.saveViewsThenExit - view ', v
+                    global.logger.debug('Database.saveViews - view ', v
                         .getId());
                     var vd = 'collection/' + c.getId() + '/view/';
                     global.logger.log('debug',
@@ -270,14 +270,10 @@ Database.prototype.saveViewsThenExit = function(exit) {
         },
         function(err) {
             if (err) {
-                global.logger.log('error', 'Database.saveViewsThenExit - ',
+                global.logger.log('error', 'Database.saveViews - ',
                     err);
             }
-            global.logger.log('debug',
-                'Database.saveViewsThenExit - calling exit');
-            if (exit != false) {
-				process.exit();
-			}
+            callback(err);
         });
 };
 
