@@ -10,6 +10,8 @@ var argv = require('optimist').argv;
 var Identity = require('../identity');
 var fs = require('fs');
 var Tempdir = require('temporary/lib/dir');
+var assert = require('assert');
+
 
 describe('CFS plugins', function() {
     var dn = 'junk/',
@@ -76,9 +78,28 @@ describe('CFS plugins', function() {
                         cfs.list(dn, done);
                     });
 
+                    it(cfs.name + ': should exist', function(done) {
+                        cfs.exists(dn, function(exists) {
+                            assert(exists);
+                            done();
+                        });
+                    });
+
                     it(cfs.name + ': should delete file', function(done) {
                         var fn = dn + id._id + '.json';
                         cfs.del(fn, done);
+                    });
+
+                    it(cfs.name + ': should create a file with expiration', function(done) {
+                        id = new Identity();
+
+                        cfs.put(dn, id, done, 1);
+                    });
+
+
+                    it(cfs.name + ': get name', function(done) {
+                        assert(cfs.name().length > 0);
+                        done();
                     });
                 });
             });

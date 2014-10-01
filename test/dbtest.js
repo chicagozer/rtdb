@@ -73,6 +73,10 @@ describe(
                     db.addCollection(c, done);
                 });
 
+                it('empty document', function(done) {
+                    c.put("", done);
+                });
+
                 it('Create a document', function(done) {
                     var doc = [{
                         name: 'test',
@@ -96,7 +100,7 @@ describe(
                                 'emit(item.name,item.value)',
                                 'emit(values.reduce(function (a, b) { return a + b;}));',
                                 'reduction.sort(function(a,b){return b[1] -a[1];});emit(reduction);',
-								'emit(reduction);');
+                                'emit(reduction);');
                         c.addView(v, done);
                     });
 
@@ -215,12 +219,11 @@ describe(
                     v2._identity._key = "junk2_2";
                     c.updateView(v2, done);
                 });
-				
-                it('saveViewsThenExit', function(done) {
-                   db.saveViewsThenExit(false);
-				   done();
+
+                it('saveViews', function(done) {
+                    db.saveViews(done);
                 });
-				
+
                 it('restart the DB', function(done) {
                     cid = c.getId();
                     vid = v.getId();
@@ -242,32 +245,32 @@ describe(
                         done();
                     }, 0);
                 });
-				
-				
+
+
                 it('viewAt', function(done) {
                     setTimeout(function() {
                         c = db.collectionAt(cid);
                         v = c.viewAt(vid);
-                        assert(v == db.viewAt(vid));
-						done();
+                        assert(v === db.viewAt(vid));
+                        done();
                     }, 0);
                 });
-				
+
                 it('getToken', function(done) {
                     setTimeout(function() {
-                        var token,token2;
+                        var token, token2;
                         token = db.getToken(vid);
-						token2 = db.getToken(vid);
-						assert(token == token2);
-						done();
+                        token2 = db.getToken(vid);
+                        assert(token === token2);
+                        done();
                     }, 0);
                 });
-				
+
 
                 it('delete view 2', function(done) {
                     c.removeView(v2.getId(), done);
                 });
-				
+
                 it('change the collection', function(done) {
                     c._identity._priority = 7;
                     db.updateCollection(c, done);
@@ -303,17 +306,15 @@ describe(
                 it('delete collection', function(done) {
                     db.removeCollection(c.getId(), done);
                 });
-				
+
                 it('delete collection (not found)', function(done) {
-                    db.removeCollection('notthere', function(err)
-					{
-						if (err instanceof Error) {
-							done();
-						}
-						else {
-							done(new Error('no error returned for invalid collection'));
-						}
-					});
+                    db.removeCollection('notthere', function(err) {
+                        if (err instanceof Error) {
+                            done();
+                        } else {
+                            done(new Error('no error returned for invalid collection'));
+                        }
+                    });
                 });
 
             });
