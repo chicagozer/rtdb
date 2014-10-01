@@ -213,12 +213,16 @@ function Database(settings, callback) {
 
         process.on('SIGINT', function() {
             global.logger.log('info', 'Received sigint. Relaying to exit');
-            self.saveViewsThenExit();
+            self.saveViews(function(err) {
+            	process.exit(128+2);
+            });
         });
 
         process.on('SIGTERM', function() {
             global.logger.log('info', 'Received sigterm. Relaying to exit');
-            self.saveViewsThenExit();
+            self.saveViews(function(err) {
+            	process.exit(128+15);
+            });
         });
 
         process.on('exit', function() {
