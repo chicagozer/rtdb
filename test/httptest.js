@@ -7,6 +7,7 @@
 var assert = require('assert');
 var request = require('request');
 var EventSource = require('eventsource');
+var fs = require('fs');
 
 
 
@@ -547,6 +548,72 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
+        
+        it('Collection:Parcel View:Zipcode subscriptions', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/subscriptions',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+        
+        it('Collection:Parcel View:Zipcode reduction', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/reduction',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
+        
+        it('Collection:Parcel View:Zipcode web reduction', function(done) {
+
+            request.get({
+                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/reduction',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 200) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+        });
 
         it('Collection:Parcel reload', function(done) {
 
@@ -635,7 +702,68 @@ describe('Suite', function() {
             });
             /*jslint unparam: false */
         });
+        
+        it('add document', function(done) {
+          var samplefile="sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
+          fs.readFile(samplefile, 'utf-8', function(err, data) {
+              if (err) {
+                  callback(err);
+                  return;
+              }
+            
+            request.post({
+                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                body:data,
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 201) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+          });
+        });
+        
+        
+        it('add document (not found)', function(done) {
+          var samplefile="sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
+          fs.readFile(samplefile, 'utf-8', function(err, data) {
+              if (err) {
+                  callback(err);
+                  return;
+              }
+            
+            request.post({
+                url: 'http://localhost:9001/db/collections/notfound/documents',
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                body:data,
+                json: true
+            }, function(error, response, body) {
+                /*jslint unparam: true */
+                if (!error && response.statusCode === 404) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+            /*jslint unparam: false */
+          });
+        });
     });
 });
