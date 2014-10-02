@@ -207,8 +207,8 @@ function Database(settings, callback) {
     // some signal handlers to allow us to save reductions on shutdown
     function loadSignalHandlers() {
 
-        process.on('uncaughtException', function(exception) {
-            global.logger.log('error', exception.toString());
+        process.on('uncaughtException', function(e) {
+            global.logger.log('error', e.toString());
         });
 
         process.on('SIGINT', function() {

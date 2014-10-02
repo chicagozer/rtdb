@@ -107,7 +107,7 @@ function Collection(database, obj) {
                 try {
                     elem.mapreduce(self._workingdocs, true);
                 } catch (e) {
-                    global.logger.log('error', e.toString());
+                    global.logger.log('error', 'reduce - ' + e.toString());
                 }
             });
             self._workingdocs.length = 0;
@@ -523,7 +523,7 @@ Collection.prototype.put = function(body, callback) {
             item._identity = new Identity();
         }
     });
-
+    
     dn = 'collection/' + self._identity._id + '/documents/';
 
     // write first
