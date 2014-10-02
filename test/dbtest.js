@@ -68,14 +68,14 @@ describe(
                 it('Create a DB', function(done) {
                     db = new Database(globalSettings, done);
                 });
-                
+
                 it('Create a Collection', function(done) {
-                    c2 = new Collection(db).init('key',false,1,10,'{}');
+                    c2 = new Collection(db).init('key', false, 1, 10, '{}');
                     db.addCollection(c2, done);
                 });
-                
+
                 it('Create a Collection2', function(done) {
-                    c = new Collection(db).init('collection',false,1,false,'{}');
+                    c = new Collection(db).init('collection', false, 1, false, '{}');
                     db.addCollection(c, done);
                 });
 
@@ -94,13 +94,12 @@ describe(
                         name: 'test2',
                         value: 13
                     }];
-                    c.put(doc, function(err)
-                      {
-                      assert(!err);
-                      c2.put(doc,done);  
-                      });
+                    c.put(doc, function(err) {
+                        assert(!err);
+                        c2.put(doc, done);
+                    });
                 });
-                
+
                 it(
                     'Create a view',
                     function(done) {
@@ -278,13 +277,12 @@ describe(
 
 
                 it('delete view notfound', function(done) {
-                    c.removeView('notfound', function(err)
-                    {
-                      assert (err instanceof Error);
-                      done();
+                    c.removeView('notfound', function(err) {
+                        assert(err instanceof Error);
+                        done();
                     });
                 });
-                
+
                 it('delete view 2', function(done) {
                     c.removeView(v2.getId(), done);
                 });

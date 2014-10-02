@@ -523,7 +523,7 @@ Collection.prototype.put = function(body, callback) {
             item._identity = new Identity();
         }
     });
-    
+
     dn = 'collection/' + self._identity._id + '/documents/';
 
     // write first
