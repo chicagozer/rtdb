@@ -15,7 +15,7 @@
 		"region": "us-east-1" 
 			},
 	"params" : {
-		"Bucket" : "xxxxxx"
+		"Bucket" : "xxxx"
 		}
 	}
 }

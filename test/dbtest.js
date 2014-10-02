@@ -19,6 +19,7 @@ describe(
     function() {
         var db = null,
             c = null,
+            c2 = null,
             v = null,
             v2 = null,
             globalSettings = null,
@@ -69,7 +70,12 @@ describe(
                 });
 
                 it('Create a Collection', function(done) {
-                    c = new Collection(db).init();
+                    c2 = new Collection(db).init('key', false, 1, 10, '{}');
+                    db.addCollection(c2, done);
+                });
+
+                it('Create a Collection2', function(done) {
+                    c = new Collection(db).init('collection', false, 1, false, '{}');
                     db.addCollection(c, done);
                 });
 
@@ -88,7 +94,10 @@ describe(
                         name: 'test2',
                         value: 13
                     }];
-                    c.put(doc, done);
+                    c.put(doc, function(err) {
+                        assert(!err);
+                        c2.put(doc, done);
+                    });
                 });
 
                 it(
@@ -266,6 +275,13 @@ describe(
                     }, 0);
                 });
 
+
+                it('delete view notfound', function(done) {
+                    c.removeView('notfound', function(err) {
+                        assert(err instanceof Error);
+                        done();
+                    });
+                });
 
                 it('delete view 2', function(done) {
                     c.removeView(v2.getId(), done);

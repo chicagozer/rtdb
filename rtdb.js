@@ -419,10 +419,6 @@ function loadExpress(rtdb, database, startTime, done) {
         }
     });
 
-    app.get('/demo/:dpage', function(req, res) {
-        res.render(req.params.dpage);
-    });
-
     /** templated db stats */
     /*jslint unparam:true */
 
@@ -557,23 +553,12 @@ function loadExpress(rtdb, database, startTime, done) {
         res.status(404).send("Method not yet implemented.");
     });
 
-    app.get('/db/collections/stream/new', function(req, res) {
-
-        // LATER STREAM new collections
-        res.status(404).send("Method not yet implemented.");
-    });
-
     app.get('/db/collections/:id/documents/stream', function(req, res) {
 
         // LATER STREAM documents
         res.status(404).send("Method not yet implemented.");
     });
 
-    app.get('/db/collections/:id/documents/stream/new', function(req, res) {
-
-        // LATER STREAM documents
-        res.status(404).send("Method not yet implemented.");
-    });
     /*jslint unparam:false */
 
     // add collection
