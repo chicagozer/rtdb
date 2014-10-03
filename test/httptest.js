@@ -274,6 +274,16 @@ describe('Suite', function() {
           post( 'http://localhost:9001/db/collections/notfound/load',
           data,404,done);
         });
+        
+        it('/db/collections/:notfound/views/:notfound/subscriptions/stream', function(done) {
+          get( 'http://localhost:9001/db/collections/notfound/views/notfound/subscriptions/stream',
+          404,done);
+        });
+        
+        it('/db/collections/:notfound/views/stream', function(done) {
+          get( 'http://localhost:9001/db/collections/notfound/views/stream',
+          404,done);
+        });
 
         it('help', function(done) {
             get('http://localhost:9001/help/intro', 200, done);
@@ -284,7 +294,7 @@ describe('Suite', function() {
         });
 
 
-        it('/db/collectiosn/:parcels/documents - add', function(done) {
+        it('/db/collections/:parcels/documents - add', function(done) {
             var samplefile = "sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
             fs.readFile(samplefile, 'utf-8', function(err, data) {
@@ -297,7 +307,7 @@ describe('Suite', function() {
             });
         });
 
-        it('/db/collectiosn/parcels/documents - add array', function(done) {
+        it('/db/collections/parcels/documents - add array', function(done) {
             var samplefile = "sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
             fs.readFile(samplefile, 'utf-8', function(err, data) {
@@ -311,7 +321,7 @@ describe('Suite', function() {
             });
         });
 
-        it('/db/collectiosn/parcels/documents - add notfound', function(done) {
+        it('/db/collections/parcels/documents - add notfound', function(done) {
             var samplefile = "sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
             fs.readFile(samplefile, 'utf-8', function(err, data) {
