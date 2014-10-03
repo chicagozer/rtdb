@@ -29,17 +29,16 @@ describe('Suite', function() {
     describe('HTTP', function() {
 
 
-        it('about', function(done) {
-
+        function get(url, status, done) {
             request.get({
-                url: 'http://localhost:9001/about',
+                url: url,
                 auth: {
                     user: 'admin',
                     pass: 'chang3m3'
                 },
                 json: true
             }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
+                if (!error && response.statusCode === status) {
                     done();
                 } else if (error) {
                     done(error);
@@ -47,331 +46,103 @@ describe('Suite', function() {
                     done(new Error('[' + response.statusCode + ']:' + response.body));
                 }
             });
+        }
+        
+        function post(url, data, status, done) {
+            request.post({
+                url: url,
+                auth: {
+                    user: 'admin',
+                    pass: 'chang3m3'
+                },
+                json: true,
+                body: data
+            }, function(error, response, body) {
+                if (!error && response.statusCode === status) {
+                    done();
+                } else if (error) {
+                    done(error);
+                } else {
+                    done(new Error('[' + response.statusCode + ']:' + response.body));
+                }
+            });
+        }
+
+        it('about', function(done) {
+            get('http://localhost:9001/about', 200, done);
         });
 
-
         it('echo', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/admin/echo',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
+            get('http://localhost:9001/db/admin/echo', 200, done);
         });
 
         it('index', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/index',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
+            get('http://localhost:9001/index', 200, done);
         });
-
         it('home', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
+            get('http://localhost:9001/', 200, done);
         });
 
         it('web', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
+            get('http://localhost:9001/web', 200, done);
         });
-
         it('web/admin/stats', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/admin/stats',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
+            get('http://localhost:9001/web/admin/stats', 200, done);
         });
 
         it('web/collections', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-        });
-
-        it('Stream (not found)', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/stream',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
+            get('http://localhost:9001/web/collections', 200, done);
         });
 
 
-        it('Stats', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/admin/stats/',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    assert(body._pjson.name === 'rtdb');
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-        });
-
-        it('Collections', function(done) {
-
-
-            request.get({
-                    url: 'http://localhost:9001/db/collections/',
-                    auth: {
-                        user: 'admin',
-                        pass: 'chang3m3'
-                    },
-                    json: true
-                },
-                function(error, response, body) {
-                    /*jslint unparam: true */
-                    if (!error && response.statusCode === 200) {
-                        done();
-                    } else if (error) {
-                        done(error);
-                    } else {
-                        done(new Error('[' + response.statusCode + ']:' + response.body));
-                    }
-
-                });
-            /*jslint unparam: false */
-
-        });
-
-        it('Collection:Parcel', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('web Collection:Parcel', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('web Collection:Parcel views', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('web Collection:notfound views', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/notfound/views',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('Collection:Parcel stats', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/stats',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('stream Collection:(not found)', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/notfound',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('db/stream (not found)', function(done) {
+            get('http://localhost:9001/db/stream', 404, done);
         });
 
 
-        it('stream Collection:Apples', function(done) {
+
+        it('db/admin/stats', function(done) {
+            get('http://localhost:9001/db/admin/stats/', 200, done);
+        });
+
+
+        it('db/collections', function(done) {
+            get('http://localhost:9001/db/collections/', 200, done);
+        });
+
+
+
+        it('db/collections/:parcel', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0', 200, done);
+        });
+
+
+        it('web/collections/:parcel', function(done) {
+            get('http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0', 200, done);
+        });
+
+
+        it('web/collections/:parcel/views', function(done) {
+            get('http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views', 200, done);
+        });
+
+
+        it('web/collections/:notfound/views', function(done) {
+            get('http://localhost:9001/web/collections/notfound/views', 404, done);
+        });
+
+
+        it('/db/collections/:parcel/stats', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/stats', 200, done);
+        });
+
+        it('/db/collections/:notfound', function(done) {
+            get('http://localhost:9001/db/collections/notfound', 404, done);
+        });
+
+
+
+        it('/db/stream/:apples', function(done) {
 
             var es = new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2');
 
@@ -382,7 +153,7 @@ describe('Suite', function() {
                 }, false);
         });
 
-        it('stream Collection:Parcels', function(done) {
+        it('/db/collections/:parcels/views/:borough/stream', function(done) {
 
             var es = new EventSource('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/stream');
 
@@ -393,471 +164,127 @@ describe('Suite', function() {
                 }, false);
         });
 
-        it('stream Collection:notfound', function(done) {
+        it('/db/collections/:notfound/views/:borough/stream', function(done) {
 
             assert(new EventSource('http://localhost:9001/db/collections/notfound/views/18823768-0635-49bc-9053-ac2f212d066b/stream'));
 
             done();
         });
 
-        it('stream Collection:multiple', function(done) {
+        it('/db/stream/:multiple', function(done) {
 
             assert(new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2&view=18823768-0635-49bc-9053-ac2f212d066b'));
 
             done();
         });
 
-        it('stream Collection:delta', function(done) {
+        it('/db/stream/:delta', function(done) {
 
             assert(new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2&delta=true'));
 
             done();
         });
 
-        it('stream Collection:Parcel:(view not found)', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/stream',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:notfound/stream', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/stream', 404, done);
         });
 
 
-        it('Collection:Parcel Views', function(done) {
 
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('web Collection:Parcel View:Zipcode', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('web Collection:Parcel View:Zipcode subscriptions', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/subscriptions',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('web Collection:Parcel View:notfound subscriptions', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/subscriptions',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('db Collections:stream', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/stream',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
-        });
-
-        it('db documents:stream', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/notfound/documents/stream',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views', 200, done);
         });
 
 
-        it('Collection:Parcel View:Zipcode', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:zipcode', function(done) {
+            get('http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b', 200, done);
         });
 
 
-        it('Collection:Parcel View:Zipcode stats', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/stats',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:zipcode/subscriptions', function(done) {
+            get('http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/subscriptions', 200, done);
         });
 
-        it('Collection:notfound View:Zipcode stats', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/notfound/views/18823768-0635-49bc-9053-ac2f212d066b/stats',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:notfound/subscriptions', function(done) {
+            get('http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/subscriptions', 404, done);
         });
 
-        it('Collection:Parcel View:notfound stats', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/stats',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/stream', function(done) {
+            get('http://localhost:9001/db/collections/stream', 404, done);
         });
 
-        it('Collection:Parcel View:Zipcode ticket', function(done) {
 
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/ticket',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:notfound/documents/stream', function(done) {
+            get('http://localhost:9001/db/collections/notfound/documents/stream', 404, done);
         });
 
-        it('Collection:Parcel View:Zipcode subscriptions', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/subscriptions',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:zipcode', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b', 200, done);
         });
 
-        it('Collection:Parcel View:Zipcode reduction', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/reduction',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:zipcode/stats', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/stats', 200, done);
         });
 
-        it('Collection:Parcel View:Zipcode web reduction', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/reduction',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:notfound/views/:zipcode/status', function(done) {
+            get('http://localhost:9001/db/collections/notfound/views/18823768-0635-49bc-9053-ac2f212d066b/stats', 404, done);
         });
 
-        it('Collection:Parcel View:notfound web reduction', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/reduction',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:notfound/status', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/stats', 404, done);
         });
 
-        it('Collection:Parcel reload', function(done) {
 
-            request.post({
-                url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/load',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+        it('/db/collections/:parcels/views/:zipcode/ticket', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/ticket', 200, done);
         });
 
-        it('Collection:Parcel reload (notfound)', function(done) {
+        it('/db/collections/:parcels/views/:zipcode/subscriptions', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/subscriptions', 200, done);
+        });
 
-            request.post({
-                url: 'http://localhost:9001/db/collections/notfound/load',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 404) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+
+        it('/db/collections/:parcels/views/:notfound/subscriptions', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/subscriptions', 404, done);
+        });
+
+
+        it('/db/collections/:parcels/views/:zipcode/reduction', function(done) {
+            get('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/reduction', 200, done);
+        });
+
+        it('/web/collections/:parcels/views/:zipcode/reduction', function(done) {
+            get('http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/reduction', 200, done);
+        });
+
+        it('/web/collections/:parcels/views/:notfound/reduction', function(done) {
+            get('http://localhost:9001/web/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/notfound/reduction', 404, done);
+        });
+
+
+        it('/db/collections/:parcels/load', function(done) {
+
+          var data;
+          post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/load',
+                data, 200, done);
+        });
+
+        it('/db/collections/:notfound/load', function(done) {
+          var data;
+          post( 'http://localhost:9001/db/collections/notfound/load',
+          data,404,done);
         });
 
         it('help', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/help/intro',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+            get('http://localhost:9001/help/intro', 200, done);
         });
 
         it('demo', function(done) {
-
-            request.get({
-                url: 'http://localhost:9001/demo/parcels',
-                auth: {
-                    user: 'admin',
-                    pass: 'chang3m3'
-                },
-                json: true
-            }, function(error, response, body) {
-                /*jslint unparam: true */
-                if (!error && response.statusCode === 200) {
-                    done();
-                } else if (error) {
-                    done(error);
-                } else {
-                    done(new Error('[' + response.statusCode + ']:' + response.body));
-                }
-            });
-            /*jslint unparam: false */
+            get('http://localhost:9001/demo/parcels', 200, done);
         });
 
-        it('add document', function(done) {
+
+        it('/db/collectiosn/:parcels/documents - add', function(done) {
             var samplefile = "sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
             fs.readFile(samplefile, 'utf-8', function(err, data) {
@@ -865,29 +292,12 @@ describe('Suite', function() {
                     done(err);
                     return;
                 }
-                request.post({
-                    url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
-                    auth: {
-                        user: 'admin',
-                        pass: 'chang3m3'
-                    },
-                    body: data,
-                    json: true
-                }, function(error, response, body) {
-                    /*jslint unparam: true */
-                    if (!error && response.statusCode === 201) {
-                        done();
-                    } else if (error) {
-                        done(error);
-                    } else {
-                        done(new Error('[' + response.statusCode + ']:' + response.body));
-                    }
-                });
-                /*jslint unparam: false */
+                post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
+                    data, 201, done);
             });
         });
 
-        it('add document array', function(done) {
+        it('/db/collectiosn/parcels/documents - add array', function(done) {
             var samplefile = "sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
             fs.readFile(samplefile, 'utf-8', function(err, data) {
@@ -896,29 +306,12 @@ describe('Suite', function() {
                     return;
                 }
 
-                request.post({
-                    url: 'http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
-                    auth: {
-                        user: 'admin',
-                        pass: 'chang3m3'
-                    },
-                    body: [JSON.parse(data)],
-                    json: true
-                }, function(error, response, body) {
-                    /*jslint unparam: true */
-                    if (!error && response.statusCode === 201) {
-                        done();
-                    } else if (error) {
-                        done(error);
-                    } else {
-                        done(new Error('[' + response.statusCode + ']:' + response.body));
-                    }
-                });
-                /*jslint unparam: false */
+                post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
+                     [JSON.parse(data)], 201, done);
             });
         });
 
-        it('add document (not found)', function(done) {
+        it('/db/collectiosn/parcels/documents - add notfound', function(done) {
             var samplefile = "sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";
 
             fs.readFile(samplefile, 'utf-8', function(err, data) {
@@ -926,26 +319,8 @@ describe('Suite', function() {
                     done(err);
                     return;
                 }
-
-                request.post({
-                    url: 'http://localhost:9001/db/collections/notfound/documents',
-                    auth: {
-                        user: 'admin',
-                        pass: 'chang3m3'
-                    },
-                    body: data,
-                    json: true
-                }, function(error, response, body) {
-                    /*jslint unparam: true */
-                    if (!error && response.statusCode === 404) {
-                        done();
-                    } else if (error) {
-                        done(error);
-                    } else {
-                        done(new Error('[' + response.statusCode + ']:' + response.body));
-                    }
-                });
-                /*jslint unparam: false */
+                post('http://localhost:9001/db/collections/notfound/documents',
+                data,404,done);
             });
         });
     });
