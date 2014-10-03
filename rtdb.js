@@ -722,10 +722,6 @@ function loadExpress(rtdb, database, startTime, done) {
         res.status(404).send("Method not yet implemented.");
     });
 
-    app.get('/db/collections/:id/views/stream/new', function(req, res) {
-
-        res.status(404).send("Method not yet implemented.");
-    });
     /*jslint unparam:false */
 
     // send back the view
@@ -804,10 +800,6 @@ function loadExpress(rtdb, database, startTime, done) {
         res.status(404).send("Work in progress.");
     });
 
-    app.get('/db/collections/:cid/views/:vid/subscriptions/stream/new',
-        function(req, res) {
-            res.status(404).send("Work in progress.");
-        });
     /*jslint unparam:false */
 
     server = require('http').createServer(app);
