@@ -55,7 +55,7 @@ describe('Suite', function() {
                     user: 'admin',
                     pass: 'chang3m3'
                 },
-                json: true,
+		json: true,
                 body: data
             }, function(error, response, body) {
                 if (!error && response.statusCode === status) {
@@ -303,7 +303,7 @@ describe('Suite', function() {
                     return;
                 }
                 post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
-                    data, 201, done);
+                    JSON.parse(data), 201, done);
             });
         });
 
@@ -330,7 +330,7 @@ describe('Suite', function() {
                     return;
                 }
                 post('http://localhost:9001/db/collections/notfound/documents',
-                data,404,done);
+                JSON.parse(data),404,done);
             });
         });
     });

@@ -214,7 +214,9 @@ function Database(settings, callback) {
         process.on('SIGINT', function() {
             global.logger.log('info', 'Received sigint. Relaying to exit');
             self.saveViews(function(err) {
-                global.logger.error('SIGINT saveViews', err);
+                if (err) {
+		    global.logger.error('SIGINT saveViews', err);
+		}
                 process.exit(128 + 2);
             });
         });
@@ -222,7 +224,9 @@ function Database(settings, callback) {
         process.on('SIGTERM', function() {
             global.logger.log('info', 'Received sigterm. Relaying to exit');
             self.saveViews(function(err) {
-                global.logger.error('SIGTERM saveViews', err);
+                if (err) {
+                    global.logger.error('SIGTERM saveViews', err);
+                }
                 process.exit(128 + 15);
             });
         });
