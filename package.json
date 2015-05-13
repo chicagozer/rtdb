@@ -23,7 +23,8 @@
     "symmetry": "^0.4.0",
     "temporary": "^0.0.8",
     "underscore": "^1.8.2",
-    "winston": "^0.9.0"
+    "winston": "^0.9.0",
+	"twitter": "^1.2.5"
   },
   "directories": {
     "public": "public",
