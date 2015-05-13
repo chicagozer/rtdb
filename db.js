@@ -215,8 +215,8 @@ function Database(settings, callback) {
             global.logger.log('info', 'Received sigint. Relaying to exit');
             self.saveViews(function(err) {
                 if (err) {
-		    global.logger.error('SIGINT saveViews', err);
-		}
+                    global.logger.error('SIGINT saveViews', err);
+                }
                 process.exit(128 + 2);
             });
         });

@@ -1,0 +1,106 @@
+// © 2014 by Rheosoft. All rights reserved. 
+// Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'Tweets'
+  
+block append head 
+    link(rel='stylesheet', href='/stylesheets/layout.css', type='text/css', media='screen')
+    //script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
+    script(type='text/javascript', src='/symmetry/patch.js')
+    script(type='text/javascript', src='https://www.google.com/jsapi')
+    script(type='text/javascript').
+      google.load("visualization", "1", {
+      packages : [ "corechart", "table" ]
+      });
+      google.setOnLoadCallback(registerStream);
+      
+      window.addEventListener('online',  function() {
+      console.log('online called!');
+      reconnect();
+      });
+      
+      var t1;
+      var myjson = null;
+      function registerStream() {
+      
+      t1 = new google.visualization.Table(document.getElementById('tweettable_div'));
+      reconnect();
+      }
+      
+      var tickets = [];
+      
+      function reconnect() {
+      
+      var view = 'f31fc915-a37a-486b-b168-8fddfc3e054d';
+      
+      function getjson(view,callback) {
+        $.getJSON("/db/collections/e38201e5-e928-44a9-a17e-3ad3fd0a3ba7/views/" + view +"/ticket",function(data)
+          {
+          console.log('view is ' + view + ' ticket is ' + data.ticket);
+          ticket = {view: view, ticket : data.ticket};
+          callback();
+          });
+        }
+        
+      getjson(view,reconnect2);
+      }
+      
+      function reconnect2() {
+      
+      var url = "/db/stream?delta=true&	" + "view=" + ticket.view + "&ticket=" + ticket.ticket;
+      
+      var source = new EventSource(url);  
+      
+      source.addEventListener("f31fc915-a37a-486b-b168-8fddfc3e054d",
+      function(event) {
+      console.dir(event.data);
+      if (!myjson)
+      myjson = JSON.parse(event.data);
+      else
+      Symmetry.patch(myjson,JSON.parse(event.data));
+      drawTable(myjson, 'Tweeter',
+      t1, 'Top Retweets');
+      }, false);
+      }
+      function toUSD(number) {
+      var number = number.toString(), dollars = number.split('.')[0], cents = (number
+      .split('.')[1] || '')
+      + '00';
+      dollars = dollars.split('').reverse().join('').replace(/(\\d{3}(?!$))/g,
+      '$1,').split('').reverse().join('');
+      return '$' + dollars + '.' + cents.slice(0, 2);
+      }
+      function drawTable(myjson, columnheader, table, mytitle) {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', columnheader);
+      data.addColumn('number', 'Age');
+      data.addColumn('number', 'Count');
+      data.addColumn('string', 'Text');
+      //data.addColumn('string', 'Price');
+      var rows = [];
+      var now = new Date().getTime();
+      myjson.forEach(function(item)
+      {
+      rows.push([item[1].screen_name,now-item[1]._ts,item[1].retweet_count, item[1].text]);
+      })
+      data.addRows(rows);
+      table.draw(data, {
+      fontName : 'Verdana',
+      backgroundColor : '#F9F8F6',
+      allowHtml : true,
+      alternatingRowStyle : true,
+      showRowNumber : true,
+      title : mytitle
+      });
+      }
+block append content  
+    section#main.column
+      article.module.width_full
+        header
+          h3(style='line-height:inherit;') Most Popular in the Last 5 Minutes [php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5]
+        .module_content
+          article.stats_graph
+            #tweettable_div(style='float: left;')
+          .clear
+      

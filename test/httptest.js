@@ -47,7 +47,7 @@ describe('Suite', function() {
                 }
             });
         }
-        
+
         function post(url, data, status, done) {
             request.post({
                 url: url,
@@ -55,7 +55,7 @@ describe('Suite', function() {
                     user: 'admin',
                     pass: 'chang3m3'
                 },
-		json: true,
+                json: true,
                 body: data
             }, function(error, response, body) {
                 if (!error && response.statusCode === status) {
@@ -264,25 +264,25 @@ describe('Suite', function() {
 
         it('/db/collections/:parcels/load', function(done) {
 
-          var data;
-          post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/load',
+            var data;
+            post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/load',
                 data, 200, done);
         });
 
         it('/db/collections/:notfound/load', function(done) {
-          var data;
-          post( 'http://localhost:9001/db/collections/notfound/load',
-          data,404,done);
+            var data;
+            post('http://localhost:9001/db/collections/notfound/load',
+                data, 404, done);
         });
-        
+
         it('/db/collections/:notfound/views/:notfound/subscriptions/stream', function(done) {
-          get( 'http://localhost:9001/db/collections/notfound/views/notfound/subscriptions/stream',
-          404,done);
+            get('http://localhost:9001/db/collections/notfound/views/notfound/subscriptions/stream',
+                404, done);
         });
-        
+
         it('/db/collections/:notfound/views/stream', function(done) {
-          get( 'http://localhost:9001/db/collections/notfound/views/stream',
-          404,done);
+            get('http://localhost:9001/db/collections/notfound/views/stream',
+                404, done);
         });
 
         it('help', function(done) {
@@ -316,8 +316,7 @@ describe('Suite', function() {
                     return;
                 }
 
-                post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents',
-                     [JSON.parse(data)], 201, done);
+                post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/documents', [JSON.parse(data)], 201, done);
             });
         });
 
@@ -330,7 +329,7 @@ describe('Suite', function() {
                     return;
                 }
                 post('http://localhost:9001/db/collections/notfound/documents',
-                JSON.parse(data),404,done);
+                    JSON.parse(data), 404, done);
             });
         });
     });
