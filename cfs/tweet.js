@@ -1,5 +1,7 @@
 var util = require('util'),
-    twitter = require('twitter');
+    twitter = require('twitter'),
+	fs = require('fs'),
+	path = require('path');
 var twit = new twitter({
     consumer_key: process.env.TWITTER_CONSUMER_KEY, 
     consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
@@ -12,6 +14,30 @@ var http = require('http');
 
 function Tweet() {
 	return this;
+}
+
+function cleanup() {
+var uploadsDir = __dirname + '/../sampledb/collection/e38201e5-e928-44a9-a17e-3ad3fd0a3ba7/documents';
+
+fs.readdir(uploadsDir, function(err, files) {
+	if (!files) {
+		return;
+		}
+  files.forEach(function(file, index) {
+    fs.stat(path.join(uploadsDir, file), function(err, stat) {
+      var endTime, now;
+      if (err) {
+        return;
+      }
+      now = new Date().getTime();
+      endTime = new Date(stat.ctime).getTime() + 300000;
+      if (now > endTime) {
+        return fs.unlink(path.join(uploadsDir, file), function(err) {
+        });
+      }
+    });
+  });
+});
 }
 
 function doPost(data)
@@ -67,5 +93,7 @@ twit.stream('statuses/filter', { language: 'en', track: 'php,nosql,jquery,nodejs
 
     });
 });
+cleanup();
+setInterval(cleanup,60000);
 
 module.exports = Tweet;
