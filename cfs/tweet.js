@@ -25,7 +25,7 @@ var headers = {
 
 var options = {
   host: 'localhost',
-  port: 9001,
+  port: process.env.PORT || process.env.VCAP_APP_PORT || process.env.OPENSHIFT_NODEJS_PORT || 9001,
   path: '/db/collections/e38201e5-e928-44a9-a17e-3ad3fd0a3ba7/documents',
   method: 'POST',
   headers: headers
