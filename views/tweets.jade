@@ -82,7 +82,7 @@ block append head
       var now = new Date().getTime();
       myjson.forEach(function(item)
       {
-      rows.push([item[1].screen_name,now-item[1]._ts,item[1].retweet_count, item[1].text]);
+      rows.push(['<a href="https://twitter.com/' + item[1].screen_name +'">'+item[1].screen_name+'</a>',now-item[1]._ts,item[1].retweet_count, item[1].text]);
       })
       data.addRows(rows);
       table.draw(data, {
