@@ -82,7 +82,7 @@ req.end();
 
  global.logger.log('info', 'tweet - startup.');
 
-var match = 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5';
+var match = 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5,hadoop,mongodb,json,websockets,jenkins,ruby,chef,puppet,ubuntu,centos,linux,oracle,mysql,salesforce,datatorrent';
 var arrayMatch = match.split(',');
 
 twit.stream('statuses/filter', { language: 'en', track: match }, function(stream) {
