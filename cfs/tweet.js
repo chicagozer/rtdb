@@ -82,9 +82,16 @@ req.end();
 
  global.logger.log('info', 'tweet - startup.');
 
-twit.stream('statuses/filter', { language: 'en', track: 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5' }, function(stream) {
+var match = 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5';
+var arrayMatch = match.split(',');
+
+twit.stream('statuses/filter', { language: 'en', track: match }, function(stream) {
     stream.on('data', function(data) {
 //	global.logger.log('info','tweet - got something');
+	if (!arrayMatch.some(function(v) { return data.text.indexOf(v) >= 0; })) {
+    		return;
+  	}
+
     	if (data.retweeted_status)
     		{
     		 data.retweeted_status._ts = new Date().getTime();
