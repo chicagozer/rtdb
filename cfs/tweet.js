@@ -91,6 +91,10 @@ twit.stream('statuses/filter', { language: 'en', track: match }, function(stream
 		global.logger.log('error',error);
     		setTimeout(tweet,60000);
   });
+	stream.on('end', function(error) {
+		global.logger.log('warn','twitter closed the stream');
+    		setTimeout(tweet,60000);
+  });
     stream.on('data', function(data) {
 	if (!data.text)
 		return;
