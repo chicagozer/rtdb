@@ -83,17 +83,22 @@ req.end();
 
 var match = 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5,hadoop,mongodb,json,websockets,jenkins,ruby,chef,puppet,ubuntu,centos,linux,oracle,mysql,salesforce,datatorrent';
 var arrayMatch = match.split(',');
+var timeout;
 
 function tweet() {
  global.logger.log('info', 'tweet - startup.');
 twit.stream('statuses/filter', { language: 'en', track: match }, function(stream) {
 	stream.on('error', function(error) {
 		global.logger.log('error',error);
-    		setTimeout(tweet,60000);
+		if (timeout)
+			clearTimeout(timeout);
+    		timeout = setTimeout(tweet,60000);
   });
 	stream.on('end', function(error) {
 		global.logger.log('warn','twitter closed the stream');
-    		setTimeout(tweet,60000);
+ 		if (timeout)
+                        clearTimeout(timeout);
+                timeout = setTimeout(tweet,60000);
   });
     stream.on('data', function(data) {
 	if (!data.text)
