@@ -92,6 +92,8 @@ twit.stream('statuses/filter', { language: 'en', track: match }, function(stream
     		setTimeout(tweet,60000);
   });
     stream.on('data', function(data) {
+	if (!data.text)
+		return;
 	if (!arrayMatch.some(function(v) { return data.text.indexOf(v) >= 0; })) {
     		return;
   	}
