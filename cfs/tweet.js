@@ -91,10 +91,6 @@ twit.stream('statuses/filter', { language: 'en', track: match }, function(stream
 		global.logger.log('error',error);
     		setTimeout(tweet,60000);
   });
-	stream.on('end', function(error) {
-		global.logger.log('info','stream ended');
-    		setTimeout(tweet,60000);
-  });
     stream.on('data', function(data) {
 	if (!arrayMatch.some(function(v) { return data.text.indexOf(v) >= 0; })) {
     		return;
