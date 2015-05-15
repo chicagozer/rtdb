@@ -1,0 +1,239 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends mlayout
+block vars
+  - var title = 'Parcels'
+  
+block prepend head 
+  meta(name='viewport',content='width=device-width')
+     
+block append head 
+    link(rel='stylesheet', href='/stylesheets/layout.css', type='text/css', media='screen')
+    link(rel='stylesheet', href='//cdn.datatables.net/1.10.0/css/jquery.dataTables.css', type='text/css', media='screen')
+    link(href='//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css', rel='stylesheet')
+    // script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
+    script(type='text/javascript', src='http://code.highcharts.com/highcharts.js')
+    script(type='text/javascript', src='//cdn.datatables.net/1.10.0/js/jquery.dataTables.js')
+    script(type='text/javascript').
+      var doChart = 'pie';
+      var doTotal = false;
+      var c1;
+      var height;
+      var views  = { Borough: "90e40254-d57c-4ce5-88b5-20034c9511ec",
+        Zip : "18823768-0635-49bc-9053-ac2f212d066b",
+        Owner :  "5f1d54e6-01ef-4e09-87c5-0c0aa8aba5f3"
+      }
+      var source;
+      var ticket;
+      
+      function redraw() {
+      reconnect($("#selBy").val());
+      }
+      
+      window.addEventListener('online',  function() {
+      console.log('online called!');
+      
+      reconnect($("#selBy").val());
+      });
+     
+      function getjson(view,callback) {
+        $.getJSON("/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/" + view +"/ticket",function(data)
+          {
+          console.log('view is ' + view + ' ticket is ' + data.ticket);
+          ticket = {view: view, ticket : data.ticket};
+          callback();
+          });
+        }
+     
+      function reconnect(view) {
+      
+        c1 = $('#parcelchart_div').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: 1,//null,
+            plotShadow: false
+        },
+        plotOptions: {
+        series: {
+        animation: false
+        }
+        },
+        title: {
+            text: null  
+        },
+        xAxis: {
+                type: 'category'
+            },
+        credits: {
+            enabled: false
+        },
+        series: []});
+        
+        if (source)
+          source.close();
+        
+        getjson(views[view],reconnect2);
+        }
+        
+      function reconnect2() {
+      
+      var url = "/db/stream?" + "view=" + ticket.view + "&ticket=" + ticket.ticket;
+      
+      source = new EventSource(url);  
+      source.addEventListener(ticket.view,
+      function(event) {
+      drawTable(JSON.parse(event.data), $("#selBy").val(),
+        c1, 'Valuations by ' + $("#selBy").val(),doTotal);
+     
+      source.addEventListener('open', function(e) {
+      console.log('open called');
+      console.dir(e);
+      }, false);
+      source.addEventListener('error', function(e) {
+      console.log('error called');
+      console.dir(e);
+      }, false);
+      }
+      )}
+      
+      function toUSD(number) {
+      var number = number.toString(), dollars = number.split('.')[0], cents = (number
+      .split('.')[1] || '')
+      + '00';
+      dollars = dollars.split('').reverse().join('').replace(/(\\d{3}(?!$))/g,
+      '$1,').split('').reverse().join('');
+      return '$' + dollars + '.' + cents.slice(0, 2);
+      }
+      function drawTable(myjson, columnheader, table, mytitle, doTotal) {
+        if (!myjson || !myjson.length)
+          return;
+      
+        var mydata = [];
+        var mydata2 = [];
+        var valtotal = 0;
+        var counttotal = 0;
+        myjson.forEach(function(item) {
+          mydata.push( [ item[0], Math.round(item[1].fvTotal/1000000.0),item[1].count]);
+          mydata2.push ( [item[0],  item[1].count]);
+          valtotal = valtotal + Math.round(item[1].fvTotal/1000000.0);
+          counttotal = counttotal + item[1].count;
+          });
+        if (doTotal)
+          {
+          mydata.push([ 'Total', valtotal, counttotal]);
+          mydata2.push([ 'Total',  counttotal]);
+          }
+      
+        if (doChart === 'table') {
+          
+          $('#parcelchart_div').html( '<table cellpadding="0" cellspacing="0" border="0" class="display" id="example"></table>' );
+          
+          $('#example').dataTable( {
+             paging: false,
+             searching: false,
+             paging: false,
+             info: false,
+            data: mydata,
+            columns: [
+            { title: columnheader },
+            { title: "Val($M)" },
+            { title: "Count" }]});	
+        
+        }
+        else {
+          var chartdata =
+            {
+                type: doChart,
+                name: 'Val($M)',
+                color: '#0066FF',
+                data: mydata
+            };
+            
+          var chart = $('#parcelchart_div').highcharts();
+          if (chart.series && chart.series.length > 0) {
+            chart.series[0].setData(mydata);
+            if (doChart === 'bar')
+              chart.series[1].setData(mydata2);
+            }
+          else
+            {
+            chart.addSeries(chartdata);
+            chartdata.data = mydata2;
+            chartdata.name = 'Count';
+            chartdata.color =  '#FF0000';
+            if (doChart === 'bar')
+              chart.addSeries(chartdata);
+            }
+          }
+        }
+      
+    script.
+        jQuery(document).ready(
+
+        function() {
+        
+          $('#choosepie').click( function (event) {
+          doChart='pie';
+          doTotal = false;
+          console.log('pie clicked!');
+          redraw();
+          })
+      
+          $('#choosetable').click(function (event) {
+          doChart='table';
+          doTotal = true;
+          console.log('table clicked!');
+          redraw();
+          
+          })
+          
+          $('#choosebar').click(function (event) {
+          doChart='bar';
+          doTotal = false;
+          console.log('table clicked!');
+          redraw();
+          })
+          
+          reconnect($("#selBy").val());
+        })
+      
+ 
+  block append content
+    section#main.column(style='height:97%')
+      article.module.width_3_quarter(style='width: 100%;margin: 0px;')
+        header
+          div
+            #pick.input_prepend(style='float:left; margin-right: 8px;')
+              select(id='selBy',onchange='redraw();',style='width:150px;')
+                option Borough
+                option Zip
+                option Owner
+              .btn-group(data-toggle='buttons-radio',style='vertical-align: top;')
+                label#choosepie.btn.active
+                  i.fa.fa-tachometer
+                label#choosebar.btn
+                  i.fa.fa-bar-chart-o
+                label#choosetable.btn
+                  i.fa.fa-bars 
+          .dropdown.dropdown-btn(style='float:right;margin-right: 8px;margin-top: 8px;')
+              a.dropdown-toggle(href='#', data-toggle='dropdown')
+                i.fa.fa-folder-open
+              ul.dropdown-menu(style='left: -500%;')
+                li
+                  a(href='mparcels') Parcels
+                li
+                  a(href='mapples') Apples
+                li.divider  
+                li
+                  a(href='mparcelsws') WS Parcels
+                li.divider  
+                li
+                  a(href='/index') Index
+                li
+                  a(href='/about/') About  
+        .module_content(style='margin: 0px; height:100%; width:100%')
+          article#content.stats_graph(style='height:100%; width:100%')
+            #parcelchart(style='height:100%;')
+              #parcelchart_div(style='display:block; height:90%; width:100%; margin-bottom: 5px;')
+                
+ 

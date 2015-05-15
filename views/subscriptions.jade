@@ -1,0 +1,12 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'Subscriptions'
+block append content
+ h1 Subscriptions
+ p 
+   a.btn(href='/web/') Home
+   a.btn(href='/web/collections/#{cid}/views/#{vid}/') Up
+   a.btn(href='/db/collections/#{cid}/views/#{vid}/subscriptions') Json
+ mixin showJson(json,0,false)

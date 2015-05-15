@@ -1,0 +1,8 @@
+.gitmodules
+.project
+.settings
+.sonar
+.git
+.gitignore
+bower_components
+sonar-project.properties

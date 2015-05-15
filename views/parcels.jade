@@ -1,0 +1,190 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'Parcels'
+  
+block append head 
+    link(rel='stylesheet', href='/stylesheets/layout.css', type='text/css', media='screen')
+    //script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
+    script(type='text/javascript', src='https://www.google.com/jsapi')
+    script(type='text/javascript', src='/async/async.js')
+    script(type='text/javascript').
+      google.load("visualization", "1", {
+      packages : [ "corechart", "table" ]
+      });
+      google.setOnLoadCallback(registerStream);
+      window.addEventListener('online',  function() {
+      console.log('online called!');
+      reconnect();
+      });
+      var c1;
+      var t1;
+      var c2;
+      var t2;
+      var c3;
+      var t3;
+      var tickets = [];
+      function reconnect() {
+      
+      var views= ['90e40254-d57c-4ce5-88b5-20034c9511ec','18823768-0635-49bc-9053-ac2f212d066b','5f1d54e6-01ef-4e09-87c5-0c0aa8aba5f3'];
+     
+     
+      function getjson(view,callback)
+      {
+      $.getJSON("/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/" + view +"/ticket",function(data)
+        {
+        console.log('ticket is ' + data.ticket);
+        tickets.push({view: view, ticket : data.ticket});
+        callback();
+        });
+      }
+     
+     
+      async.each(views,getjson,reconnect2);
+      }  
+
+      function reconnect2(err)
+      {
+      if (err)
+      {
+      console.err(err);
+      return;
+      }
+      var url = "/db/stream?";
+      tickets.forEach(function(ticket)
+      {
+      url = url + "view=" + ticket.view + "&ticket=" + ticket.ticket + "&";
+      });
+      var source = new EventSource(url);
+      
+      source.onerror = function(e) {
+        console.log('Eventsource error');
+        console.dir(e);
+        //reconnect();
+        };
+      
+      source.addEventListener("90e40254-d57c-4ce5-88b5-20034c9511ec",
+      function(event) {
+      drawTable(JSON.parse(event.data), 'Borough',
+      c1, 'Valuations by Borough');
+      drawTable(JSON.parse(event.data), 'Borough',
+      t1, 'Valuations by Borough', true);
+      }, false);
+      source.addEventListener("18823768-0635-49bc-9053-ac2f212d066b",
+      function(event) {
+      drawTable(JSON.parse(event.data), 'Zipcode',
+      c2, 'Valuations by Zipcode');
+      drawTable(JSON.parse(event.data), 'Zipcode',
+      t2, 'Valuations by Zipcode');
+      }, false);
+      source.addEventListener("5f1d54e6-01ef-4e09-87c5-0c0aa8aba5f3",
+      function(event) {
+      drawTable(JSON.parse(event.data), 'Owner',
+      c3, 'Valuations by Owner');
+      drawTable(JSON.parse(event.data), 'Owner',
+      t3, 'Valuations by Owner');
+      }, false);
+      source.addEventListener('open', function(e) {
+      console.log('open called');
+      console.dir(e);
+      }, false);
+      source.addEventListener('error', function(e) {
+      console.log('error called');
+      console.dir(e);
+      }, false);
+      
+      }
+      function registerStream() {
+      c1 = new google.visualization.PieChart(document.getElementById('borochart_div'));
+      t1 = new google.visualization.Table(document.getElementById('borotable_div'));
+      c2 = new google.visualization.PieChart(document.getElementById('zipchart_div'));
+      t2 = new google.visualization.Table(document.getElementById('ziptable_div'));
+      c3 = new google.visualization.PieChart(document.getElementById('ownerchart_div'));
+      t3 = new google.visualization.Table(document.getElementById('ownertable_div'));
+      reconnect();
+      }
+      function toUSD(number) {
+      var number = number.toString(), dollars = number.split('.')[0], cents = (number
+      .split('.')[1] || '')
+      + '00';
+      dollars = dollars.split('').reverse().join('').replace(/(\\d{3}(?!$))/g,
+      '$1,').split('').reverse().join('');
+      return '$' + dollars + '.' + cents.slice(0, 2);
+      }
+      function drawTable(myjson, columnheader, table, mytitle, doTotal) {
+      if (!myjson || !myjson.length)
+      return;
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', columnheader);
+      data.addColumn('number', 'Val ($M)');
+      data.addColumn('number', 'Count');
+      var mydata = [];
+      var valtotal = 0;
+      var counttotal = 0;
+      myjson.forEach(function(item)
+      {
+      mydata.push([item[0],Math.round(item[1].fvTotal/1000000.0), item[1].count]);
+      valtotal = valtotal + Math.round(item[1].fvTotal/1000000.0);
+      counttotal = counttotal + item[1].count;
+      });
+      if (doTotal)
+        mydata.push(['<b>Total</b>',valtotal,counttotal]);
+      data.addRows(mydata);
+      table.draw(data, {
+      fontName : 'Verdana',
+      backgroundColor : 'white',
+      allowHtml : true,
+      alternatingRowStyle : true,
+       is3D: true,
+      showRowNumber : false
+      });
+      }
+ 
+  block append content
+    section#main.column
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Borough
+        .module_content
+          article.stats_graph
+            #borochart
+              #borochart_div(style='height: 400px;')
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Borough
+        .module_content
+          article.stats_graph
+            #borolist
+              #borotable_div
+      .clear
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Zip
+        .module_content
+          article.stats_graph
+            #zipchart
+              #zipchart_div(style='height: 400px;')
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Zip
+        .module_content
+          article.stats_graph
+            #ziplist
+              #ziptable_div
+      .clear
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Owner
+        .module_content
+          article.stats_graph
+            #ownerchart
+              #ownerchart_div(style='height: 400px;')
+      article.module.width_half
+        header
+          h3(style='line-height:inherit;') By Owner
+        .module_content
+          article.stats_graph
+            #ownerlist
+              #ownertable_div
+      .clear

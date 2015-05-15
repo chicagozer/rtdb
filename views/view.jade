@@ -1,0 +1,156 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'View'
+block append content
+ div.page-header
+   h1 View
+     small #{' ' + json._id}  
+   a.btn(href='/web/') Home
+   a.btn(href='/web/collections/#{cid}/views/') Up
+   a#savebtn.btn Save
+   a#delbtn.btn Remove
+   a.btn(href="subscriptions/") Subscriptions
+   a.btn(href="reduction/") Reduction
+   a.btn(href="/db/collections/#{cid}/views/#{json._id}/") Json
+ .well(style='background-color:white')
+   form.form-inline
+     fieldset
+       div.control-group
+         label.control-label(for='idkey') key:
+         div.controls
+           input#ikey.input-medium(type='text', value='#{json._key}')
+   div.tabbable
+     ul.nav.nav-tabs
+       li.active: a(href='#tab1',data-toggle='tab') map
+       li: a(href='#tab2', data-toggle='tab') reduce
+       li: a(href='#tab3', data-toggle='tab') finalize
+       li: a(href='#tab4', data-toggle='tab') personalize
+   
+     div.tab-content
+       div#tab1.tab-pane.active
+         p function (item,emit,database)
+         div#mapeditor.myeditor
+       div#tab2.tab-pane
+         p function (values,rereduce,emit,database)
+         div#reduceeditor.myeditor
+       div#tab3.tab-pane
+         p function (reduction,emit,database)
+         div#finalizeeditor.myeditor
+       div#tab4.tab-pane
+         p function (reduction,headers,emit,database)
+         div#personalizeeditor.myeditor
+ 
+   input(type='hidden', id='hcollection', value='#{cid}')
+   input(type='hidden', id='hid', value='#{json._id}')
+   input(type='hidden', id='hkey', value='#{json._key}')
+   input(type='hidden', id='hmap', value='#{json._map}')
+   input(type='hidden', id='hreduce', value='#{json._reduce}')
+   input(type='hidden', id='hfinalize', value='#{json._finalize}')
+   input(type='hidden', id='hpersonalize', value='#{json._personalize}')
+   
+   script(src='/ace-builds/src-noconflict/ace.js')
+     
+   script.
+        jQuery(document).ready(
+
+        function() {
+          //variable to hold request
+          var request;
+          
+          ace.edit("mapeditor").getSession().setMode("ace/mode/javascript")
+          ace.edit("mapeditor").setTheme("ace/theme/tomorrow");
+          ace.edit("reduceeditor").getSession().setMode("ace/mode/javascript")
+          ace.edit("reduceeditor").setTheme("ace/theme/tomorrow");
+          ace.edit("finalizeeditor").getSession().setMode("ace/mode/javascript")
+          ace.edit("finalizeeditor").setTheme("ace/theme/tomorrow");
+          ace.edit("personalizeeditor").getSession().setMode("ace/mode/javascript")
+          ace.edit("personalizeeditor").setTheme("ace/theme/tomorrow");
+          ace.edit("mapeditor").getSession().setValue( $("#hmap").val())
+          ace.edit("reduceeditor").getSession().setValue( $("#hreduce").val())
+          if ($("#hfinalize").val() !== 'undefined')
+            ace.edit("finalizeeditor").getSession().setValue($("#hfinalize").val())
+          if ($("#hpersonalize").val() !== 'undefined')
+            ace.edit("personalizeeditor").getSession().setValue($("#hpersonalize").val())
+          // bind to the submit event of our form
+          
+          $("#delbtn").click(function(event){
+             bootbox.confirm("Are you sure?", function(result) {
+             if (result)
+                {
+                var url = "/db/collections/" + $("#hcollection").val() + "/views/" + $("#hid").val();
+                request = $.ajax({
+                  contentType: "application/json",
+                  url: url,
+                  type: "delete",
+                  data: {}
+                  });
+                  
+                // callback handler that will be called on success
+                request.done(function(response, textStatus, jqXHR) {
+                   // log a message to the console
+                   console.log("Hooray, it worked!");
+                   var url = "/web/collections/"+ $("#hcollection").val() + "/views/";
+                   window.location.replace(url);
+                   });
+
+                // callback handler that will be called on failure
+                request.fail(function(jqXHR, textStatus, errorThrown) {
+                  // log the error to the console
+                  console.error("The following error occurred: " + textStatus, errorThrown);
+                  });    
+                }
+             }); 
+          });
+          
+          $("#savebtn").click(function(event) {
+            
+            console.log('submitting!')
+            // abort any pending request
+            if (request) {
+              request.abort();
+            }
+            
+            // let's disable the inputs for the duration of the ajax request
+           //$inputs.prop("disabled", true);
+
+            var url = "/db/collections/" + $("#hcollection").val() + "/views/" + $("#hid").val();
+            // fire off the request to /form.php
+            request = $.ajax({
+              contentType: "application/json",
+              url: url,
+              type: "put",
+              data: JSON.stringify({
+                      _key: $("#ikey").val(),
+                      _map: ace.edit("mapeditor").getSession().getValue(),
+                      _reduce: ace.edit("reduceeditor").getSession().getValue(),
+                      _finalize: ace.edit("finalizeeditor").getSession().getValue(),
+                      _personalize: ace.edit("personalizeeditor").getSession().getValue()
+                    })
+            });
+
+            // callback handler that will be called on success
+            request.done(function(response, textStatus, jqXHR) {
+              // log a message to the console
+              console.log("Hooray, it worked!");
+            });
+
+            // callback handler that will be called on failure
+            request.fail(function(jqXHR, textStatus,
+            errorThrown) {
+              // log the error to the console
+              console.error("The following error occurred: " + textStatus, errorThrown);
+            });
+
+            // callback handler that will be called regardless
+            // if the request failed or succeeded
+            request.always(function() {
+              // reenable the inputs
+              //$inputs.prop("disabled", false);
+            });
+
+            // prevent default posting of form
+            event.preventDefault();
+          });
+        });

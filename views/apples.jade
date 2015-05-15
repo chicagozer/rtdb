@@ -1,0 +1,275 @@
+-# © 2014 by Rheosoft. All rights reserved. 
+-# Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'Apples'
+  
+block append head 
+    //script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+    script(type='text/javascript', src='/async/async.js')
+    script(type='text/javascript').
+      $(document).ready(
+      function() {
+      //variable to hold request
+      var request;
+      $.fn.serializeObject = function()
+      {
+      var o = {};
+      var a = this.serializeArray();
+      $.each(a, function() {
+      if (o[this.name] !== undefined) {
+      if (!o[this.name].push) {
+      o[this.name] = [o[this.name]];
+      }
+      o[this.name].push(this.value || '');
+      } else {
+      o[this.name] = this.value || '';
+      }
+      });
+      return o;
+      };
+      // bind to the submit event of our form
+      $("#apple").submit(
+      function(event) {
+      // abort any pending request
+      if (request) {
+      request.abort();
+      }
+      // setup some local variables
+      var $form = $(this);
+      // let's select and cache all the fields
+      var $inputs = $form
+      .find("input, select, button, textarea");
+      // serialize the data in the form
+      var serializedData = $form.serialize();
+      var jsonData  = $form.serializeObject();
+      var appleData = [];
+      jsonData.quantity = Math.min(Math.max(0,jsonData.quantity),100);
+      for (var i=0;i<jsonData.quantity; i++)
+      appleData.push({ color : jsonData.color, cultivar : jsonData.cultivar, price : parseFloat(jsonData.price)});
+      console.log(JSON.stringify(appleData));
+      // let's disable the inputs for the duration of the ajax request
+      $inputs.prop("disabled", true);
+      // fire off the request to /form.php
+      request = $.ajax({
+      contentType : "application/json",
+      url : "/db/collections/cb43defb-f406-47c3-90aa-7c4195d519a7/documents",
+      type : "post",
+      data : JSON.stringify(appleData)
+      });
+      // callback handler that will be called on success
+      request.done(function(response, textStatus, jqXHR) {
+      // log a message to the console
+      console.log("Hooray, it worked!");
+      });
+      // callback handler that will be called on failure
+      request.fail(function(jqXHR, textStatus,
+      errorThrown) {
+      // log the error to the console
+      console.error("The following error occured: "
+      + textStatus, errorThrown);
+      });
+      // callback handler that will be called regardless
+      // if the request failed or succeeded
+      request.always(function() {
+      // reenable the inputs
+      $inputs.prop("disabled", false);
+      });
+      // prevent default posting of form
+      event.preventDefault();
+      });
+      });
+    script(type='text/javascript', src='https://www.google.com/jsapi')
+    script(type='text/javascript').
+      google.load("visualization", "1", {
+      packages : [ "corechart", "table" ]
+      });
+      google.setOnLoadCallback(registerStream);
+      window.addEventListener('online',  function() {
+      console.log('online called!');
+      reconnect();
+      });
+      var myjson;
+      var myjson2;
+      var table;
+      var piechart;
+      var chart;
+      function registerStream() {
+      table = new google.visualization.Table(document
+      .getElementById('table_div'));
+      piechart = new google.visualization.PieChart(document
+      .getElementById('piechart_div'));
+      chart = new google.visualization.ColumnChart(document
+      .getElementById('chart_div'));
+      reconnect();
+      }
+      
+       var tickets = [];
+      function reconnect() {
+      
+      var views= ['6f57030d-ccad-41df-aa92-689292fa2c42','ec537999-60a5-41f3-9036-fcd3d5356ae2'];
+     
+      function getjson(view,callback)
+      {
+      $.getJSON("/db/collections/cb43defb-f406-47c3-90aa-7c4195d519a7/views/" + view +"/ticket",function(data)
+        {
+        console.log('ticket is ' + data.ticket);
+        tickets.push({view: view, ticket : data.ticket});
+        callback();
+        });
+      }
+     
+     
+      async.each(views,getjson,reconnect2);
+      }  
+
+      function reconnect2(err)
+      {
+      if (err)
+      {
+      console.err(err);
+      return;
+      }
+      var url = "/db/stream?";
+      tickets.forEach(function(ticket)
+      {
+      url = url + "view=" + ticket.view + "&ticket=" + ticket.ticket + "&";
+      });
+      var source = new EventSource(url);
+      
+      source.addEventListener("6f57030d-ccad-41df-aa92-689292fa2c42", function(event) {
+      console.log(event.data);
+      myjson = JSON.parse(event.data);
+      drawChart();
+      drawPieChart();
+      }, false);
+      source.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2", function(event) {
+      console.log(event.data);
+      myjson2 = JSON.parse(event.data);
+      drawTable();
+      }, false);
+      }
+      function toUSD(number) {
+      var number = number.toString(), dollars = number.split('.')[0], cents = (number
+      .split('.')[1] || '')
+      + '00';
+      dollars = dollars.split('').reverse().join('').replace(/(\\d{3}(?!$))/g,
+      '$1,').split('').reverse().join('');
+      return '$' + dollars + '.' + cents.slice(0, 2);
+      }
+      function drawTable() {
+      if (!myjson2) {
+      return;
+      }
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Cultivar');
+      data.addColumn('number', 'Unit Price');
+      //data.addColumn('string', 'Price');
+      myjson2.forEach(function(cultivar,idx)
+      {
+      cultivar[1] = { v : cultivar[1], f : toUSD(cultivar[1])};
+      });
+      data.addRows(myjson2);
+      table.draw(data, {
+      fontName : 'Verdana',
+      backgroundColor : 'white',
+      allowHtml : true,
+      alternatingRowStyle: true,
+      showRowNumber : true,
+      tile : 'Cultivars'
+      });
+      }
+      function drawPieChart() {
+      if (!myjson) {
+      return;
+      }
+      var arr = [['color','total price']];
+      var chartcolor = [];
+      myjson.forEach(function(item) {
+      arr.push([item[0],Math.round(item[1].total*100)/100]);
+      chartcolor.push(item[0]);
+      });
+      var data = google.visualization.arrayToDataTable(arr);
+      var options = {
+      fontName : 'Verdana',
+      title : 'Sales by Color',
+      colors : chartcolor,
+      backgroundColor : 'white',
+      pieSliceBorderColor : 'black'
+      };
+      piechart.draw(data, options);
+      }
+      function drawChart() {
+      if (!myjson) {
+      return;
+      }
+      var arr = [];
+      var header = [];
+      header.push('color', '$Total Sales', 'Units Sold');
+      arr.push(header);
+      myjson.forEach(function(item) {
+      arr.push([item[0],Math.round(item[1].total*100)/100,item[1].count]);
+      });
+      //    var data = google.visualization.arrayToDataTable([
+      //       ['Brand', 'Leads', 'Sales'],
+      //       ['BMW',  json.leadsBMW,      json.salesBMW],
+      //       ['MINI',  json.leadsMINI,      json.salesMINI],
+      //     ]);
+      var data = google.visualization.arrayToDataTable(arr);
+      var options = {
+      fontName : 'Verdana',
+      backgroundColor : 'white',
+      title : 'Overall Apple Sales',
+      hAxis : {
+      title : 'Last update: ' + new Date(),
+      titleTextStyle : {
+      color : 'red'
+      }
+      }
+      };
+      chart.draw(data, options);
+      }
+block append content
+  
+    section#main.column
+      article.module.width_full
+        form#apple(action='/db/loadapple')
+          header
+            h3(style='line-height:inherit;') New Apple
+          .module_content
+            div
+              fieldset(style='width: 20%; float: left; margin-left: 3%; margin-right: 3%;')
+                label Variety
+                input(type='text', name='cultivar', style='width: 80%;', value='Golden Delicious', pattern='.{1,20}')
+              fieldset(style='width: 15%; float: left; margin-right: 3%;')
+                label Quantity
+                input(type='number', style='width: 80%;', name='quantity', min='1', max='100', value='1')
+              .clear
+            div
+              fieldset(style='width: 20%; float: left; margin-left: 3%; margin-right: 3%;')
+                label Color
+                select(name='color', style='width: 80%;')
+                  option(value='gold') gold
+                  option(value='red') red
+                  option(value='green') green
+                  option(value='brown') brown
+                  option(value='yellow') yellow
+              fieldset(style='width: 15%; float: left; margin-right: 3%;')
+                label Price
+                input(type='number', step='0.01', min='0.01', max='9.99', name='price', style='width: 80%;', value='0.99')
+              .clear
+          footer
+            .submit_link
+              input(type='submit', value='Submit')
+      //
+         end of stats article 
+      article.module.width_full
+        header
+          h3(style='line-height:inherit;') Apple Sales
+        .module_content
+          #chart_div(style='height: 400px; width: 550px; float: left;')
+          #piechart_div(style='height: 400px; float: left;')
+          .clear
+      article.module.width_full
+        .module_content
+          #table_div

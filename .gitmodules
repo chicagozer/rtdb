@@ -1,0 +1,9 @@
+[submodule "public/ace-builds"]
+	path = public/ace-builds
+	url = https://github.com/ajaxorg/ace-builds.git
+[submodule "public/bootbox"]
+	path = public/bootbox
+	url = https://github.com/makeusabrew/bootbox.git
+[submodule "public/jstorage"]
+	path = public/jstorage
+	url = https://github.com/andris9/jStorage.git

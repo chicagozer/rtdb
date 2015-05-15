@@ -1,0 +1,1 @@
+{"_id":"ec537999-60a5-41f3-9036-fcd3d5356ae2","_key":"price","_map":"emit(item.cultivar, item.price);","_reduce":"emit(values[0]);","_personalize":"var reply = [];\nreduction.forEach(function(item) {\n    reply.push([item[0] + '@' + headers.host, item[1]]);\n});\nemit(reply);"}

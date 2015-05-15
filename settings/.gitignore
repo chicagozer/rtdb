@@ -1,0 +1,5 @@
+.elasticbeanstalk/
+*.json
+!heroku.json
+!settings.json
+!mocha.json

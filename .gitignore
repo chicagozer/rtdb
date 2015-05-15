@@ -1,0 +1,18 @@
+# ignore this stuff
+strongloop.json
+coverage
+node_modules
+.sonar
+.c9revisions
+.dropbox
+.project
+.settings.xml
+/.settings
+settings
+!settings/mocha.json
+!settings/settings.json
+#public
+/sandbox
+.elasticbeanstalk/
+sampledb/collection/**/reduction
+sampledb/collection/**/view

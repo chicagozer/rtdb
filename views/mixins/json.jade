@@ -1,0 +1,52 @@
+mixin prettyDate(uglyDate)
+  - var daysAgo = ((((new Date() - uglyDate) / 1000) / 60) / 60) / 24
+  - var hours = uglyDate.getHours()
+  - var minutes = uglyDate.getMinutes()
+  - var ampm = hours >= 12 ? 'pm' : 'am'
+  - hours = hours % 12
+  - hours = hours ? hours : 12 
+  - minutes = minutes < 10 ? '0'+minutes : minutes
+  - var strTime = hours + ':' + minutes + ' ' + ampm
+  if daysAgo < 1
+    | Today at #{strTime}
+  else if daysAgo <= 7
+    - var weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    - var day = uglyDate.getDay()
+    | #{weekDays[day]} at #{strTime}
+  else
+    | #{uglyDate.getMonth() + 1 + '/' + uglyDate.getDate() + '/' + uglyDate.getFullYear()}
+
+mixin showJson(myJsonObject, level, href)
+  if typeof level == 'undefined'
+    - var level = 0
+  - level++
+    .well(style='background-color:transparent')
+      //.badge(style='width:1em;text-align:center;background-color:#cccccc').pull-center #{level}
+      unless typeof myJsonObject == 'undefined'
+        
+        if myJsonObject instanceof Array
+           each aValue, aIndex  in myJsonObject
+            if (myJsonObject.length > 2)
+              p #{aIndex+1} of #{myJsonObject.length}: 
+            mixin showJson(aValue, level,href)
+        else if myJsonObject instanceof Object
+          each value, key in myJsonObject
+            if value instanceof Date
+              p #{key}:&nbsp;
+                mixin prettyDate(value)
+            else if value instanceof Object
+              p #{key}:
+              if typeof value == 'undefined' || value.length == 0
+                | &nbsp;(empty)
+              else
+                mixin showJson(value, level, href)
+            else if key === '_id' && href
+              p #{key}: 
+                a(href=value+'/') #{value}
+            else
+              p #{key}: #{value}
+        else if myJsonObject instanceof Date
+          p
+            mixin prettyDate(myJsonObject)
+        else    
+          p #{myJsonObject}   
