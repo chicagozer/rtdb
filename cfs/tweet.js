@@ -80,14 +80,22 @@ req.write(userString);
 req.end();
 }
 
- global.logger.log('info', 'tweet - startup.');
 
 var match = 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5,hadoop,mongodb,json,websockets,jenkins,ruby,chef,puppet,ubuntu,centos,linux,oracle,mysql,salesforce,datatorrent';
 var arrayMatch = match.split(',');
 
+function tweet() {
+ global.logger.log('info', 'tweet - startup.');
 twit.stream('statuses/filter', { language: 'en', track: match }, function(stream) {
+	stream.on('error', function(error) {
+		global.logger.log('error',error);
+    		setTimeout(tweet,60000);
+  });
+	stream.on('end', function(error) {
+		global.logger.log('info','stream ended');
+    		setTimeout(tweet,60000);
+  });
     stream.on('data', function(data) {
-//	global.logger.log('info','tweet - got something');
 	if (!arrayMatch.some(function(v) { return data.text.indexOf(v) >= 0; })) {
     		return;
   	}
@@ -100,7 +108,10 @@ twit.stream('statuses/filter', { language: 'en', track: match }, function(stream
 
     });
 });
+}
+
 cleanup();
 setInterval(cleanup,60000);
+tweet();
 
 module.exports = Tweet;
