@@ -41,9 +41,13 @@ node rtdb.js --settings settings/settings.json
 
 Online demo versions of **rtdb** are available.
 
-[http://rtdb.herokuapp.com](http://rtdb.herokuapp.com)
+[https://rtdb.herokuapp.com](https://rtdb.herokuapp.com)
 
-[http://rtdb-rheosoft.rhcloud.com](http://rtdb-rheosoft.rhcloud.com)
+[https://rtdb-rheosoft.rhcloud.com](https://rtdb-rheosoft.rhcloud.com)
+
+[https://rtdb.mybluemix.net](https://rtdb.mybluemix.net)
+
+[https://rtdb.cfapps.io](https://rtdb.cfapps.io)
 
 ## Acknowledgements
 
