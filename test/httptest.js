@@ -264,13 +264,13 @@ describe('Suite', function() {
 
         it('/db/collections/:parcels/load', function(done) {
 
-            var data = null;
+            var data = undefined;
             post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/load',
                 data, 200, done);
         });
 
         it('/db/collections/:notfound/load', function(done) {
-            var data = null;
+            var data = undefined;
             post('http://localhost:9001/db/collections/notfound/load',
                 data, 404, done);
         });
