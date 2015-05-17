@@ -1,6 +1,6 @@
 // © 2014 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
-/*jslint node: true, white: true, nomen: true */
+/*jslint unparam: true, node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
 /*global describe, it, before, after*/
 "use strict";
@@ -37,7 +37,7 @@ describe('Suite', function() {
                     pass: 'chang3m3'
                 },
                 json: true
-            }, function(error, response, body) {
+            }, function(error, response, ignore) {
                 if (!error && response.statusCode === status) {
                     done();
                 } else if (error) {
@@ -147,7 +147,7 @@ describe('Suite', function() {
             var es = new EventSource('http://localhost:9001/db/stream?view=ec537999-60a5-41f3-9036-fcd3d5356ae2');
 
             es.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2",
-                function(event) {
+                function(ignore) {
                     es.close();
                     done();
                 }, false);
@@ -158,7 +158,7 @@ describe('Suite', function() {
             var es = new EventSource('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/views/18823768-0635-49bc-9053-ac2f212d066b/stream');
 
             es.addEventListener("18823768-0635-49bc-9053-ac2f212d066b",
-                function(event) {
+                function(ignore) {
                     es.close();
                     done();
                 }, false);
@@ -264,13 +264,13 @@ describe('Suite', function() {
 
         it('/db/collections/:parcels/load', function(done) {
 
-            var data;
+            var data = null;
             post('http://localhost:9001/db/collections/e08e31fa-f414-4f2f-b067-6bce67fae7b0/load',
                 data, 200, done);
         });
 
         it('/db/collections/:notfound/load', function(done) {
-            var data;
+            var data = null;
             post('http://localhost:9001/db/collections/notfound/load',
                 data, 404, done);
         });
