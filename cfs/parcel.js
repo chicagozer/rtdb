@@ -15,7 +15,7 @@ function Parcel() {
     return this;
 }
 
-var dir = __dirname + path.sep + 'sampledb' + path.sep + parcels + path.sep;
+var dir = __dirname + path.sep + 'sampledb' + path.sep + 'parcels' + path.sep;
 
 var poptions = {
     host: process.env.OPENSHIFT_NODEJS_IP || 'localhost',
