@@ -9,12 +9,13 @@
 var http = require('http');
 var fs = require('fs');
 var async = require('async');
+var path = require('path');
 
 function Parcel() {
     return this;
 }
 
-var dir = 'sampledb/parcels/';
+var dir = __dirname + path.sep + 'sampledb' + path.sep + parcels + path.sep;
 
 var poptions = {
     host: process.env.OPENSHIFT_NODEJS_IP || 'localhost',
