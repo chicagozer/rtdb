@@ -1,4 +1,4 @@
-/'/ © 2014 by Rheosoft. All rights reserved.
+// © 2014 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 
 // parcels.js supports the demo for Tax Parcels. Because it's in the cfs subfolder
