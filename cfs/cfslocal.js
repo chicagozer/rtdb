@@ -13,7 +13,7 @@ function CFSL() {
 }
 
 CFSL.prototype.init = function(parms) {
-    this.root = parms.root;
+    this.root = parms.root + path.sep;
 };
 
 CFSL.prototype.name = function() {

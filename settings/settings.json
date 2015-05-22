@@ -9,7 +9,7 @@
 "reduceInterval" : 1000,
 "expirationInterval" : 3000000,
 "cfsinit" : {
-	"root" : "sampledb/",
+	"root" : "sampledb",
 	"config" : { "accessKeyId" : "xxx", 
 		"secretAccessKey": "xxx", 
 		"region": "us-east-1" 
