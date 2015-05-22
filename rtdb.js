@@ -14,6 +14,7 @@ var View = require('./view');
 var Identity = require('./identity');
 var argv = require('optimist').argv;
 var fs = require('fs');
+var path = require('path');
 var winston = require('winston');
 var http = require('http');
 var Symmetry = require('symmetry');
@@ -113,7 +114,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // serve up statics if we aren't running under another web server
     // I think this is clever
-    app.use(express.static(__dirname + '/public'));
+    app.use(express.static(__dirname + path.sep + 'public'));
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
     app.set('wsport', database.globalSettings.wsport);
