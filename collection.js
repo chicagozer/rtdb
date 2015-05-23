@@ -182,7 +182,7 @@ Collection.prototype.push = function() {
             self._workingdocs.push(item);
         });
         // signal for reduce.
-        global.logger.log('debug', 'emitting change for ', self._identity._id);
+        global.logger.log('silly', 'emitting change for ', self._identity._id);
 
         self._emitter.emit('change');
     }

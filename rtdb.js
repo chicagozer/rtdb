@@ -851,7 +851,7 @@ function loadExpress(rtdb, database, startTime, done) {
                         });
                         global.logger.log('debug', 'Database.socket - subscribe view:' + view._identity._id + ' subscription:' + sub._identity._id);
                         myReduction = view.personalize(sub._identity._id);
-                        socket.volatile.emit(vid, myReduction);
+                        socket.emit(view._identity._id, myReduction);
                     }
                 }
             });
