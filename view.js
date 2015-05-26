@@ -111,7 +111,13 @@ function View(database, collection, obj) {
                         }
                     }
                     if (socket) {
-                        socket.emit(self._identity._id, data);
+                      if (sub.volatile) {
+                         socket.volatile.emit(self._identity._id, data);
+                      }
+                      else {
+                         socket.emit(self._identity._id, data);
+                      }
+                       
                     }
                 }
 
