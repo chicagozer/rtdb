@@ -106,9 +106,9 @@ function loadExpress(rtdb, database, startTime, done) {
     }
     // if you want to handle POSTS, you need this
     // add all the plugins
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({limit: '50mb'}));
     app.use(bodyParser.urlencoded({
-        extended: true
+        extended: true, limit: '50mb'
     }));
     app.use(methodOverride());
 
