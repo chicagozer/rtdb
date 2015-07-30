@@ -841,7 +841,7 @@ function loadExpress(rtdb, database, startTime, done) {
                                   // stage in the pipeline
                                   sub._identity = new Identity();
                                   sub._identity.headers = socket.handshake.headers;
-                                  sub._identity.delta = data.delta;
+                                  sub._identity.delta = vid.delta;
 
                                   // throw this in our hash
                                   view.subscriptions[sub._identity._id] = sub;
