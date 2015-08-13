@@ -237,7 +237,20 @@ function loadExpress(rtdb, database, startTime, done) {
         res.status(202).end();
     });
     /*jslint unparam:false */
+    /*jslint unparam:true */
+    app.post('/db/admin/gc', function(req, res) {
+        if (global.gc) {
+           global.gc();
+                global.logger.log('info', 'gc - gc called.');
+        }
+        else {
+                global.logger.log('warn', 'gc - set --enable-gc to allow gc.');
+                }
+        global.logger.log('info','gc - ' +  JSON.stringify(process.memoryUsage()));
 
+        res.send(process.memoryUsage());
+    });
+    /*jslint unparam:false */
     // method to reload the documents
     // useful if we are messing with the disk
     app.post('/db/collections/:id/load', function(req, res) {
