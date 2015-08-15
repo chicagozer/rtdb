@@ -106,9 +106,9 @@ function loadExpress(rtdb, database, startTime, done) {
     }
     // if you want to handle POSTS, you need this
     // add all the plugins
-    app.use(bodyParser.json());
+    app.use(bodyParser.json({limit: '50mb'}));
     app.use(bodyParser.urlencoded({
-        extended: true
+        extended: true, limit: '50mb'
     }));
     app.use(methodOverride());
 
@@ -807,55 +807,70 @@ function loadExpress(rtdb, database, startTime, done) {
     database.io = require('socket.io').listen(server, {
         'logger': global.logger
     });
-
+    
     database.io.on('connection', function(socket) {
 
         var idlist = [];
+        
+        function subscribe(data,volatile) {
+                      var vidlist = [];
+                      if (Array.isArray(data)) {
+                          vidlist = data;
+                      } else {
+                          vidlist.push(data);
+                      }
 
-        socket.on('subscribe', function(data) {
+                      vidlist.forEach(function(vid) {
 
-            var vidlist = [];
-            if (Array.isArray(data)) {
-                vidlist = data;
-            } else {
-                vidlist.push(data);
-            }
+                          var myReduction, sub, view = database.viewAt(vid.view);
+                          if (!view) {
+                              global.logger.log('warn', 'Database.subscribe - view [' + vid + '] not found.');
+                          } else {
 
-            vidlist.forEach(function(vid) {
+                              if (!database.getSettings().useACLTicket || view.checkTicket(vid.ticket)) {
+                                  // socket.join(vid);
 
-                var myReduction, sub, view = database.viewAt(vid.view);
-                if (!view) {
-                    global.logger.log('warn', 'Database.subscribe - view [' + vid + '] not found.');
-                } else {
+                                  sub = {
+                                      socket: socket,
+                                    volatile: volatile
+                                  };
 
-                    if (!database.getSettings().useACLTicket || view.checkTicket(vid.ticket)) {
-                        // socket.join(vid);
+                                  // give him an identity and save his headers
+                                  // note we will use the headers for our
+                                  // "personalization"
+                                  // stage in the pipeline
+                                  sub._identity = new Identity();
+                                  sub._identity.headers = socket.handshake.headers;
+                                  sub._identity.delta = data.delta;
 
-                        sub = {
-                            socket: socket
-                        };
+                                  // throw this in our hash
+                                  view.subscriptions[sub._identity._id] = sub;
+                                  idlist.push({
+                                      view: view,
+                                      id: sub._identity._id
+                                  });
+                                  global.logger.log('debug', 'Database.socket - subscribe view:' + view._identity._id + ' subscription:' + sub._identity._id);
+                                  myReduction = view.personalize(sub._identity._id);
+                                  if (volatile) {
+                                    socket.volatile.emit(view._identity._id, myReduction);
+                                  }
+                                  else {
+                                    socket.emit(view._identity._id, myReduction);
+                                  }
+                              }
+                          }
+                      });
+                  }
 
-                        // give him an identity and save his headers
-                        // note we will use the headers for our
-                        // "personalization"
-                        // stage in the pipeline
-                        sub._identity = new Identity();
-                        sub._identity.headers = socket.handshake.headers;
-                        sub._identity.delta = data.delta;
-
-                        // throw this in our hash
-                        view.subscriptions[sub._identity._id] = sub;
-                        idlist.push({
-                            view: view,
-                            id: sub._identity._id
-                        });
-                        global.logger.log('debug', 'Database.socket - subscribe view:' + view._identity._id + ' subscription:' + sub._identity._id);
-                        myReduction = view.personalize(sub._identity._id);
-                        socket.volatile.emit(vid, myReduction);
-                    }
-                }
-            });
-        });
+                  socket.on('subscribe', function(data) {
+                     global.logger.log('debug', 'Database.socket -subscribe');
+                     subscribe(data,false);
+                  });
+                  
+                  socket.on('subscribev', function(data) {
+                    global.logger.log('debug', 'Database.socket -subscribev');
+                    subscribe(data,true);
+                  });
 
         socket.on('disconnect', function() {
             idlist.forEach(function(key) {
