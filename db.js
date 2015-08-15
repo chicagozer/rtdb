@@ -28,8 +28,11 @@ function Database(settings, callback) {
     /*jslint stupid: false */
 
     cfslist.forEach(function(file) {
-        var cfs = require('./cfs/' + file);
-        cfsTypes[cfs.name] = cfs;
+        if (fs.lstatSync('./cfs/' + file).isFile())
+                {
+                var cfs = require('./cfs/' + file);
+                cfsTypes[cfs.name] = cfs;
+                }
     });
 
     // load our collections
