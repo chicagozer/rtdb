@@ -325,7 +325,7 @@ View.prototype.mapreduce = function(documents, notify) {
     }
 
     // rebuild the hash index
-    self._reductionhash = {};
+    self._reductionHash = {};
     self.reduction.forEach(function(r, idx) {
         self._reductionHash[r[0]] = idx;
     });
