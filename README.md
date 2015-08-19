@@ -1,6 +1,6 @@
 # rtdb
 
-© 2014 by Rheosoft. All rights reserved. 
+© 2015 by Rheosoft. All rights reserved. 
 Licensed under the [RTDB Software License version 1.0](public/license.pdf).
  
 Comments, questions? <info@rheosoft.com>
