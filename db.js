@@ -10,6 +10,8 @@ var async = require('async');
 var Identity = require('./identity');
 var Collection = require('./collection');
 var uuid = require('node-uuid');
+var Map = require('core-js/library/fn/map');
+require('core-js/fn/array/from');
 
 function Database(settings, callback) {
 
@@ -25,15 +27,14 @@ function Database(settings, callback) {
 
     /*jslint stupid: true */
     cfslist = fs.readdirSync('./cfs');
-    /*jslint stupid: false */
 
     cfslist.forEach(function(file) {
-        if (fs.lstatSync('./cfs/' + file).isFile())
-                {
-                var cfs = require('./cfs/' + file);
-                cfsTypes[cfs.name] = cfs;
-                }
+        if (fs.lstatSync('./cfs/' + file).isFile()) {
+            var cfs = require('./cfs/' + file);
+            cfsTypes[cfs.name] = cfs;
+        }
     });
+    /*jslint stupid: false */
 
     // load our collections
     function loadCollections(callback) {
@@ -50,8 +51,8 @@ function Database(settings, callback) {
                         callback(err);
                         return;
                     }
-                    c.views.forEach(function(v) {
-                        self._viewsHash[v.getId()] = v;
+                    Array.from(c.views.values()).forEach(function(v) {
+                        self.views.set(v.getId(), v);
                     });
 
                     global.logger
@@ -62,7 +63,7 @@ function Database(settings, callback) {
 
                     c
                         .loadDocuments(
-                            c.views,
+                            Array.from(c.views.values()),
                             function(err) {
                                 if (err) {
                                     global.logger
@@ -99,14 +100,17 @@ function Database(settings, callback) {
             // in the views. If you need a collection in your view, the priority
             // ensures it gets loaded beforehand
 
-            self.collections.sort(function(a, b) {
-                return a._identity._priority ? a._identity._priority - b._identity._priority : 1;
-            });
+            //self.collections.sort(function(a, b) {
+            //    return a._identity._priority ? a._identity._priority - b._identity._priority : 1;
+            //});
+            self.collections = new Map(Array.from(self.collections.entries()).sort(function(a, b) {
+                return a[1]._identity._priority ? a[1]._identity._priority - b[1]._identity._priority : 1;
+            }));
 
             // lets initialize the hash while we are here
-            self.collections.forEach(function(c) {
-                self._collectionsHash[c.getId()] = c;
-            });
+            //self.collections.forEach(function(c) {
+            //    self._collectionsHash[c.getId()] = c;
+            //});
 
             if (global.logger.level === 'debug') {
                 global.logger.log('debug',
@@ -116,7 +120,7 @@ function Database(settings, callback) {
             // do this in sequential order
             async
                 .eachSeries(
-                    self.collections,
+                    Array.from(self.collections.values()),
                     loadViewsAndDocuments,
                     function(err) {
                         if (err) {
@@ -165,8 +169,7 @@ function Database(settings, callback) {
                     // in
                     // our
                     // hashes
-                    self._collectionsHash[c.getId()] = c;
-                    self.collections.push(c);
+                    self.collections.set(c.getId(), c);
                     callback();
 
                 });
@@ -180,7 +183,7 @@ function Database(settings, callback) {
     this._identity = new Identity();
 
     this._identity._pjson = pjson;
-    this._identity.copyright = '© 2014 by Rheosoft. All rights reserved.';
+    this._identity.copyright = '© 2013-2015 by Rheosoft. All rights reserved.';
 
     // save some process information for our info page
     this._identity.process = {
@@ -194,9 +197,9 @@ function Database(settings, callback) {
     };
 
     // this can't be private because the prototype needs it.
-    this.collections = [];
-    this._collectionsHash = {};
-    this._viewsHash = {};
+    this.collections = new Map();
+    this.views = new Map();
+    //_viewsHash = {};
     this.tokens = {};
 
     // CFS is our configurable file system
@@ -260,14 +263,14 @@ Database.prototype.saveViews = function(callback) {
     if (global.logger.level === 'debug') {
         global.logger.log('debug', 'Database.saveViews - started');
     }
-    async.each(self.collections, function(c, callback) {
+    async.each(Array.from(self.collections.values()), function(c, callback) {
             global.logger.debug('Database.saveViews - collection ', c
                 .getId());
             // transient or not, save a copy of the views
             // I think we are going to reverse that decision
 
             if (!c.isTransient()) {
-                async.each(c.views, function(v, callback) {
+                async.each(Array.from(c.views.values()), function(v, callback) {
                     global.logger.debug('Database.saveViews - view ', v
                         .getId());
                     var vd = 'collection/' + c.getId() + '/view/';
@@ -291,11 +294,11 @@ Database.prototype.saveViews = function(callback) {
 };
 
 Database.prototype.addView = function(v) {
-    this._viewsHash[v.getId()] = v;
+    this.views.set(v.getId(), v);
 };
 
 Database.prototype.removeView = function(vid) {
-    delete this._viewsHash[vid];
+    this.views.delete(vid);
 };
 
 Database.prototype.getToken = function(viewid) {
@@ -307,7 +310,6 @@ Database.prototype.getToken = function(viewid) {
 };
 
 Database.prototype.addCollection = function(c, callback) {
-    this.collections.push(c);
     this.setCollectionAt(c.getId(), c);
     var dn = 'collections/';
     this.cfs.put(dn, c._identity, callback);
@@ -319,21 +321,14 @@ Database.prototype.updateCollection = function(c, callback) {
 };
 
 Database.prototype.removeCollection = function(cid, callback) {
-    var dn, idx, c, fn;
+    var dn, c, fn;
 
-    c = this.collectionAt(cid);
+    c = this.collections.delete(cid);
     if (!c) {
         callback(new Error(cid + ' is not found'));
         return;
     }
-    idx = this.collections.indexOf(c);
-    if (idx === -1) {
-        callback(new Error(cid + ' is not found'));
-        return;
-    }
     dn = 'collections/';
-    this.collections.splice(idx, 1);
-    delete this._collectionsHash[cid];
     fn = dn + cid + '.json';
     this.cfs.del(fn, callback);
 };
@@ -347,15 +342,15 @@ Database.prototype.getIdentity = function() {
 };
 // return collection based on hash
 Database.prototype.collectionAt = function(idx) {
-    return this._collectionsHash[idx];
+    return this.collections.get(idx);
 };
 
 Database.prototype.setCollectionAt = function(idx, c) {
-    this._collectionsHash[idx] = c;
+    this.collections.set(idx, c);
 };
 
-// return collection based on hash
+// return view based on hash
 Database.prototype.viewAt = function(idx) {
-    return this._viewsHash[idx];
+    return this.views.get(idx);
 };
 module.exports = Database;

@@ -13,6 +13,7 @@ var View = require('../view');
 var winston = require('winston');
 var Tempdir = require('temporary/lib/dir');
 var async = require('async');
+require('core-js/fn/array/from');
 
 describe(
     'Suite',
@@ -112,12 +113,16 @@ describe(
                                 'emit(reduction);');
                         c.addView(v, done);
                     });
+                it('check view', function() {
+                  assert(c.views.size === 1);
+                 });
 
                 it('check reduction', function() {
-                    assert(v.reduction[0][0] === 'test');
-                    assert(v.reduction[0][1] === 24);
-                    assert(v.reduction[1][0] === 'test2');
-                    assert(v.reduction[1][1] === 13);
+                    var reduction = Array.from(v.reduction.entries());
+                    assert(reduction[0][0] === 'test');
+                    assert(reduction[0][1] === 24);
+                    assert(reduction[1][0] === 'test2');
+                    assert(reduction[1][1] === 13);
 
                 });
 
@@ -134,12 +139,14 @@ describe(
 
                 it('check reduction', function(done) {
                     setTimeout(function() {
-                        assert(v.reduction[0][0] === 'test2');
-                        assert(v.reduction[0][1] === 28);
-                        assert(v.reduction[1][0] === 'test');
-                        assert(v.reduction[1][1] === 24);
-                        assert(v.reduction[2][0] === 'test3');
-                        assert(v.reduction[2][1] === 10);
+                        //console.dir(v.reduction);
+			var reduction = Array.from(v.reduction.entries());
+                        assert(reduction[0][0] === 'test2');
+                        assert(reduction[0][1] === 28);
+                        assert(reduction[1][0] === 'test');
+                        assert(reduction[1][1] === 24);
+                        assert(reduction[2][0] === 'test3');
+                        assert(reduction[2][1] === 10);
                         done();
                     }, 1000);
                 });
@@ -157,12 +164,13 @@ describe(
 
                 it('check reduction', function(done) {
                     setTimeout(function() {
-                        assert(v.reduction[0][0] === 'test2');
-                        assert(v.reduction[0][1] === 38);
-                        assert(v.reduction[1][0] === 'test');
-                        assert(v.reduction[1][1] === 24);
-                        assert(v.reduction[2][0] === 'test3');
-                        assert(v.reduction[2][1] === 20);
+			var reduction = Array.from(v.reduction.entries());
+                        assert(reduction[0][0] === 'test2');
+                        assert(reduction[0][1] === 38);
+                        assert(reduction[1][0] === 'test');
+                        assert(reduction[1][1] === 24);
+                        assert(reduction[2][0] === 'test3');
+                        assert(reduction[2][1] === 20);
                         done();
                     }, 100);
                 });
@@ -190,12 +198,13 @@ describe(
 
                 it('check reduction again ', function(done) {
                     setTimeout(function() {
-                        assert(v.reduction[0][0] === 'test2');
-                        assert(v.reduction[0][1] === 238);
-                        assert(v.reduction[1][0] === 'test');
-                        assert(v.reduction[1][1] === 224);
-                        assert(v.reduction[2][0] === 'test3');
-                        assert(v.reduction[2][1] === 220);
+			var reduction = Array.from(v.reduction.entries());
+                        assert(reduction[0][0] === 'test2');
+                        assert(reduction[0][1] === 238);
+                        assert(reduction[1][0] === 'test');
+                        assert(reduction[1][1] === 224);
+                        assert(reduction[2][0] === 'test3');
+                        assert(reduction[2][1] === 220);
                         done();
                     }, 1000);
                 });
@@ -214,12 +223,13 @@ describe(
 
                 it('check reduction v2', function(done) {
                     setTimeout(function() {
-                        assert(v2.reduction[0][0] === 'test2');
-                        assert(v2.reduction[0][1] === 238);
-                        assert(v2.reduction[1][0] === 'test');
-                        assert(v2.reduction[1][1] === 224);
-                        assert(v2.reduction[2][0] === 'test3');
-                        assert(v2.reduction[2][1] === 220);
+			var reduction = Array.from(v2.reduction.entries());
+                        assert(reduction[0][0] === 'test2');
+                        assert(reduction[0][1] === 238);
+                        assert(reduction[1][0] === 'test');
+                        assert(reduction[1][1] === 224);
+                        assert(reduction[2][0] === 'test3');
+                        assert(reduction[2][1] === 220);
                         done();
                     }, 1000);
                 });
@@ -245,12 +255,13 @@ describe(
                         c = db.collectionAt(cid);
                         v = c.viewAt(vid);
                         v2 = c.viewAt(vid2);
-                        assert(v.reduction[0][0] === 'test2');
-                        assert(v.reduction[0][1] === 238);
-                        assert(v.reduction[1][0] === 'test');
-                        assert(v.reduction[1][1] === 224);
-                        assert(v.reduction[2][0] === 'test3');
-                        assert(v.reduction[2][1] === 220);
+			var reduction = Array.from(v.reduction.entries());
+                        assert(reduction[0][0] === 'test2');
+                        assert(reduction[0][1] === 238);
+                        assert(reduction[1][0] === 'test');
+                        assert(reduction[1][1] === 224);
+                        assert(reduction[2][0] === 'test3');
+                        assert(reduction[2][1] === 220);
                         done();
                     }, 0);
                 });
@@ -297,7 +308,7 @@ describe(
                 });
 
                 it('reload the documents', function(done) {
-                    c.loadDocuments(c.views, done);
+                    c.loadDocuments(Array.from(c.views.values()), done);
                 });
 
                 it('recheck reduction after restart ', function(done) {
@@ -305,12 +316,13 @@ describe(
                         c = db.collectionAt(cid);
                         v = c.viewAt(vid);
                         v2 = c.viewAt(vid2);
-                        assert(v.reduction[0][0] === 'test2');
-                        assert(v.reduction[0][1] === 238);
-                        assert(v.reduction[1][0] === 'test');
-                        assert(v.reduction[1][1] === 224);
-                        assert(v.reduction[2][0] === 'test3');
-                        assert(v.reduction[2][1] === 220);
+			var reduction = Array.from(v.reduction.entries());
+                        assert(reduction[0][0] === 'test2');
+                        assert(reduction[0][1] === 238);
+                        assert(reduction[1][0] === 'test');
+                        assert(reduction[1][1] === 224);
+                        assert(reduction[2][0] === 'test3');
+                        assert(reduction[2][1] === 220);
                         done();
                     }, 0);
                 });

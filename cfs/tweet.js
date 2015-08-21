@@ -36,7 +36,9 @@ function cleanup() {
                 now = new Date().getTime();
                 endTime = new Date(stat.ctime).getTime() + 300000;
                 if (now > endTime) {
-                    return fs.unlink(path.join(uploadsDir, file), function(err) { return undefined; });
+                    return fs.unlink(path.join(uploadsDir, file), function(err) {
+                        return undefined;
+                    });
                 }
             });
         });
@@ -46,28 +48,30 @@ function cleanup() {
 function doPost(data) {
 
     var userString = JSON.stringify(data),
-    headers = {
-        'Content-Type': 'application/json; charset=utf-8'
-    },
-    options = {
-        host: process.env.OPENSHIFT_NODEJS_IP || 'localhost',
-        port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.VCAP_APP_PORT || 9001,
-        path: '/db/collections/e38201e5-e928-44a9-a17e-3ad3fd0a3ba7/documents',
-        method: 'POST',
-        headers: headers
-    },
+        headers = {
+            'Content-Type': 'application/json; charset=utf-8'
+        },
+        options = {
+            host: process.env.OPENSHIFT_NODEJS_IP || 'localhost',
+            port: process.env.OPENSHIFT_NODEJS_PORT || process.env.PORT || process.env.VCAP_APP_PORT || 9001,
+            path: '/db/collections/e38201e5-e928-44a9-a17e-3ad3fd0a3ba7/documents',
+            method: 'POST',
+            headers: headers
+        },
 
-    // Setup the request.  The options parameter is
-    // the object we defined above.
-    req = http.request(options, function(res) {
-        res.setEncoding('utf-8');
+        // Setup the request.  The options parameter is
+        // the object we defined above.
+        req = http.request(options, function(res) {
+            res.setEncoding('utf-8');
 
-        res.on('data', function(ignore) {
-            return undefined;
+            res.on('data', function(ignore) {
+                return undefined;
+            });
+
+            res.on('end', function() {
+                return undefined;
+            });
         });
-
-        res.on('end', function() { return undefined; });
-    });
 
     req.on('error', function(ignore) {
         // not much we can do here

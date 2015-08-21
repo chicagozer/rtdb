@@ -18,6 +18,7 @@ var path = require('path');
 var winston = require('winston');
 var http = require('http');
 var Symmetry = require('symmetry');
+require('core-js/fn/array/from');
 
 function Rtdb() {
     this.servers = [];
@@ -106,9 +107,12 @@ function loadExpress(rtdb, database, startTime, done) {
     }
     // if you want to handle POSTS, you need this
     // add all the plugins
-    app.use(bodyParser.json({limit: '50mb'}));
+    app.use(bodyParser.json({
+        limit: '50mb'
+    }));
     app.use(bodyParser.urlencoded({
-        extended: true, limit: '50mb'
+        extended: true,
+        limit: '50mb'
     }));
     app.use(methodOverride());
 
@@ -240,13 +244,12 @@ function loadExpress(rtdb, database, startTime, done) {
     /*jslint unparam:true */
     app.post('/db/admin/gc', function(req, res) {
         if (global.gc) {
-           global.gc();
-                global.logger.log('info', 'gc - gc called.');
+            global.gc();
+            global.logger.log('info', 'gc - gc called.');
+        } else {
+            global.logger.log('warn', 'gc - set --enable-gc to allow gc.');
         }
-        else {
-                global.logger.log('warn', 'gc - set --enable-gc to allow gc.');
-                }
-        global.logger.log('info','gc - ' +  JSON.stringify(process.memoryUsage()));
+        global.logger.log('info', 'gc - ' + JSON.stringify(process.memoryUsage()));
 
         res.send(process.memoryUsage());
     });
@@ -265,7 +268,7 @@ function loadExpress(rtdb, database, startTime, done) {
                 res.status(500).send(err);
                 return;
             }
-            c.loadDocuments(c.views, function(err) {
+            c.loadDocuments(Array.from(c.views.values()), function(err) {
                 if (!err) {
                     res.status(200).end();
                 } else {
@@ -457,7 +460,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     app.get('/web/collections', function(req, res) {
         var list = [];
-        database.collections.forEach(function(item) {
+        Array.from(database.collections.values()).forEach(function(item) {
             list.push(item.getIdentity());
         });
 
@@ -491,7 +494,7 @@ function loadExpress(rtdb, database, startTime, done) {
         if (!c) {
             return;
         }
-        c.views.forEach(function(item) {
+        Array.from(c.views.values()).forEach(function(item) {
             list.push(item._identity);
         });
         res.render('views', {
@@ -520,7 +523,7 @@ function loadExpress(rtdb, database, startTime, done) {
         }
 
         res.render('reduction', {
-            json: view.reduction,
+            json: Array.from(view.reduction.entries()),
             cid: req.params.cid,
             vid: req.params.vid,
             rid: view._redcontainer._identity._id
@@ -554,7 +557,7 @@ function loadExpress(rtdb, database, startTime, done) {
     app.get('/db/collections', function(req, res) {
 
         var list = [];
-        database.collections.forEach(function(item) {
+        Array.from(database.collections.values()).forEach(function(item) {
             list.push(item._identity);
         });
         res.send(list);
@@ -723,7 +726,7 @@ function loadExpress(rtdb, database, startTime, done) {
             return;
         }
 
-        c.views.forEach(function(item) {
+        Array.from(c.views.values()).forEach(function(item) {
             list.push(item._identity);
         });
         res.send(list);
@@ -820,70 +823,69 @@ function loadExpress(rtdb, database, startTime, done) {
     database.io = require('socket.io').listen(server, {
         'logger': global.logger
     });
-    
+
     database.io.on('connection', function(socket) {
 
         var idlist = [];
-        
-        function subscribe(data,volatile) {
-                      var vidlist = [];
-                      if (Array.isArray(data)) {
-                          vidlist = data;
-                      } else {
-                          vidlist.push(data);
-                      }
 
-                      vidlist.forEach(function(vid) {
+        function subscribe(data, volatile) {
+            var vidlist = [];
+            if (Array.isArray(data)) {
+                vidlist = data;
+            } else {
+                vidlist.push(data);
+            }
 
-                          var myReduction, sub, view = database.viewAt(vid.view);
-                          if (!view) {
-                              global.logger.log('warn', 'Database.subscribe - view [' + vid + '] not found.');
-                          } else {
+            vidlist.forEach(function(vid) {
 
-                              if (!database.getSettings().useACLTicket || view.checkTicket(vid.ticket)) {
-                                  // socket.join(vid);
+                var myReduction, sub, view = database.viewAt(vid.view);
+                if (!view) {
+                    global.logger.log('warn', 'Database.subscribe - view [' + vid + '] not found.');
+                } else {
 
-                                  sub = {
-                                      socket: socket,
-                                    volatile: volatile
-                                  };
+                    if (!database.getSettings().useACLTicket || view.checkTicket(vid.ticket)) {
+                        // socket.join(vid);
 
-                                  // give him an identity and save his headers
-                                  // note we will use the headers for our
-                                  // "personalization"
-                                  // stage in the pipeline
-                                  sub._identity = new Identity();
-                                  sub._identity.headers = socket.handshake.headers;
-                                  sub._identity.delta = vid.delta;
+                        sub = {
+                            socket: socket,
+                            volatile: volatile
+                        };
 
-                                  // throw this in our hash
-                                  view.subscriptions[sub._identity._id] = sub;
-                                  idlist.push({
-                                      view: view,
-                                      id: sub._identity._id
-                                  });
-                                  global.logger.log('debug', 'Database.socket - subscribe view:' + view._identity._id + ' subscription:' + sub._identity._id);
-                                  myReduction = view.personalize(sub._identity._id);
-                                  if (volatile) {
-                                    socket.volatile.emit(view._identity._id, myReduction);
-                                  }
-                                  else {
-                                    socket.emit(view._identity._id, myReduction);
-                                  }
-                              }
-                          }
-                      });
-                  }
+                        // give him an identity and save his headers
+                        // note we will use the headers for our
+                        // "personalization"
+                        // stage in the pipeline
+                        sub._identity = new Identity();
+                        sub._identity.headers = socket.handshake.headers;
+                        sub._identity.delta = vid.delta;
 
-                  socket.on('subscribe', function(data) {
-                     global.logger.log('debug', 'Database.socket -subscribe');
-                     subscribe(data,false);
-                  });
-                  
-                  socket.on('subscribev', function(data) {
-                    global.logger.log('debug', 'Database.socket -subscribev');
-                    subscribe(data,true);
-                  });
+                        // throw this in our hash
+                        view.subscriptions[sub._identity._id] = sub;
+                        idlist.push({
+                            view: view,
+                            id: sub._identity._id
+                        });
+                        global.logger.log('debug', 'Database.socket - subscribe view:' + view._identity._id + ' subscription:' + sub._identity._id);
+                        myReduction = view.personalize(sub._identity._id);
+                        if (volatile) {
+                            socket.volatile.emit(view._identity._id, myReduction);
+                        } else {
+                            socket.emit(view._identity._id, myReduction);
+                        }
+                    }
+                }
+            });
+        }
+
+        socket.on('subscribe', function(data) {
+            global.logger.log('debug', 'Database.socket -subscribe');
+            subscribe(data, false);
+        });
+
+        socket.on('subscribev', function(data) {
+            global.logger.log('debug', 'Database.socket -subscribev');
+            subscribe(data, true);
+        });
 
         socket.on('disconnect', function() {
             idlist.forEach(function(key) {

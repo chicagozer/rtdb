@@ -8,6 +8,9 @@ var vm = require('vm');
 var _ = require("underscore");
 var Symmetry = require('symmetry');
 var crypto = require('crypto');
+//var Map = require('es6-map');
+var Map = require('core-js/library/fn/map');
+require('core-js/fn/array/from');
 // constructor
 
 // arguments: reference to database and optional json from filesystem
@@ -111,13 +114,12 @@ function View(database, collection, obj) {
                         }
                     }
                     if (socket) {
-                      if (sub.volatile) {
-                         socket.volatile.emit(self._identity._id, data);
-                      }
-                      else {
-                         socket.emit(self._identity._id, data);
-                      }
-                       
+                        if (sub.volatile) {
+                            socket.volatile.emit(self._identity._id, data);
+                        } else {
+                            socket.emit(self._identity._id, data);
+                        }
+
                     }
                 }
 
@@ -130,7 +132,7 @@ View.prototype.personalize = function(key) {
 
     sub = self.subscriptions[key];
 
-    myReduction = self.reduction;
+    myReduction = Array.from(self.reduction.entries());
     // lets personalize it
     if (self._identity._personalize) {
         personalizeEmit = function(result) {
@@ -145,7 +147,7 @@ View.prototype.personalize = function(key) {
 
 // reduction@ does a lookup via hash instead of index
 View.prototype.reductionAt = function(idx) {
-    return this.reduction[this._reductionHash[idx]];
+    return [idx, this.reduction.get(idx)];
 };
 
 // initialize from starting values.
@@ -208,8 +210,8 @@ View.prototype.mapreduce = function(documents, notify) {
     // we will compare it at the end to decide if notifications are
     // necessary
     // LATER  what's most efficient??
-    // var clone = _.clone(self.reduction);
-    clone = JSON.parse(JSON.stringify(self.reduction));
+    // var clone = _.clone(Array.from(self.reduction.entries()));
+    clone = JSON.parse(JSON.stringify(Array.from(self.reduction.entries())));
 
     // heres the map emit function - save each emitted value in mapResult
     // according
@@ -238,11 +240,10 @@ View.prototype.mapreduce = function(documents, notify) {
 
             // if we don't have a result, then
             // add it to our hashes or push it
-            if (!(self._reduceResultHash.hasOwnProperty(key))) {
-                self._reduceResultHash[key] = self._reduceResult.length;
-                self._reduceResult.push([results]);
+            if (!(self._reduceResult.get(key))) {
+                self._reduceResult.set(key, [results]);
             } else {
-                self._reduceResult[self._reduceResultHash[key]].push(results);
+                self._reduceResult.get(key).push(results);
             }
 
         }, self.database);
@@ -267,17 +268,15 @@ View.prototype.mapreduce = function(documents, notify) {
 
     function innerReReduce(key2) {
         // only need to mess with hashes that have > 1 element
-        if (self._reduceResult[self._reduceResultHash[key2]].length > 1) {
+        if (self._reduceResult.get(key2).length > 1) {
             self
                 ._freduce(
-                    self._reduceResult[self._reduceResultHash[key2]],
+                    self._reduceResult.get(key2),
                     true,
                     function(results) {
                         // we are expecting a single value. so update
                         // our hashes
-                        self._reduceResult[self._reduceResultHash[key2]].length = 0;
-                        self._reduceResult[self._reduceResultHash[key2]]
-                            .push(results);
+                        self._reduceResult.set(key2, [results]);
 
                     }, self.database);
             // self._reduceScript.runInNewContext({ values :
@@ -289,16 +288,13 @@ View.prototype.mapreduce = function(documents, notify) {
 
     self._redcontainer.reduction = [];
     // run through and do a re-reduce
-    for (key in self._reduceResultHash) {
-
-        if (self._reduceResultHash.hasOwnProperty(key)) {
-            innerReReduce(key);
-            // FIXME do we really need to rebuild this??
-            self._redcontainer.reduction.push([key,
-                self._reduceResult[self._reduceResultHash[key]][0]
-            ]);
-        }
-    }
+    self._reduceResult.forEach(function(value, key) {
+        innerReReduce(key);
+        // FIXME do we really need to rebuild this??
+        self._redcontainer.reduction.push([key,
+            self._reduceResult.get(key)[0]
+        ]);
+    });
 
     // console.log('after..._reduceResultHash');
     // console.dir(self._reduceResultHash);
@@ -310,7 +306,7 @@ View.prototype.mapreduce = function(documents, notify) {
     // finalize function is easy - we just spit out what gets emitted to us
     // finalize is good for sorting/top x/averages/etc
     finalizeEmit = function(result) {
-        self.reduction = result;
+        self.reduction = new Map(result);
     };
 
     // if there is a finalize, do it - otherwise return current reduction
@@ -321,14 +317,9 @@ View.prototype.mapreduce = function(documents, notify) {
         self._ffinalize(self._redcontainer.reduction, finalizeEmit,
             self.database);
     } else {
-        self.reduction = self._redcontainer.reduction;
+        self.reduction = new Map(self._redcontainer.reduction);
     }
 
-    // rebuild the hash index
-    self._reductionHash = {};
-    self.reduction.forEach(function(r, idx) {
-        self._reductionHash[r[0]] = idx;
-    });
 
     // self._finalizeScript.runInNewContext({ reduction :
     // this.redcontainer.reduction, emit : finalizeEmit, database :
@@ -341,7 +332,7 @@ View.prototype.mapreduce = function(documents, notify) {
     self.stats.totalReduceTime += (hrDiff[0] + (hrDiff[1] / 1e9));
 
     // if the reduction changed, emit!
-    if (notify && !_.isEqual(clone, self.reduction)) {
+    if (notify && !_.isEqual(clone, Array.from(self.reduction.entries()))) {
         self._emitter.emit('change');
     }
 };
@@ -356,17 +347,17 @@ View.prototype.saveReduction = function(dir, callback) {
 
 // clear out all the _privates and the reduction
 View.prototype.reset = function() {
-    this._reduceResult = [];
-    this._reduceResultHash = {};
-    this._reductionHash = {};
-    this.reduction = [];
+    this._reduceResult = new Map();
+    this.reduction = new Map();
     this._redcontainer = {};
     this.stats = {
         reduceCount: 0,
         totalReduceTime: 0.0
     };
     // reduction container will be used to save the reduction to filesystem
-    this._redcontainer._identity = new Identity();
+    if (!this._redcontainer._identity) {
+        this._redcontainer._identity = new Identity();
+    }
 
     this._redcontainer.reduction = [];
 
@@ -399,12 +390,9 @@ View.prototype.loadReduction = function(dir, callback) {
 
                 // setup our hashes
                 self._redcontainer.reduction
-                    .forEach(function(key, idx) {
-
-                        self._reduceResultHash[key[0]] = idx;
-                        self._reduceResult.push([key[1]]);
-                        self._reductionHash[key[0]] = idx;
-                        self.reduction.push(key);
+                    .forEach(function(key) {
+                        self._reduceResult.set(key[0], [key[1]]);
+                        self.reduction.set(key[0], [key[1]]);
                     });
 
                 callback();
