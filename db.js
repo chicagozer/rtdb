@@ -269,7 +269,7 @@ Database.prototype.saveViews = function(callback) {
             // transient or not, save a copy of the views
             // I think we are going to reverse that decision
 
-            if (!c.isTransient()) {
+            if (c.isTransient()) {
                 async.each(Array.from(c.views.values()), function(v, callback) {
                     global.logger.debug('Database.saveViews - view ', v
                         .getId());

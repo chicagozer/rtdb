@@ -256,6 +256,7 @@ describe(
                         v = c.viewAt(vid);
                         v2 = c.viewAt(vid2);
 			var reduction = Array.from(v.reduction.entries());
+                        //console.dir(reduction);
                         assert(reduction[0][0] === 'test2');
                         assert(reduction[0][1] === 238);
                         assert(reduction[1][0] === 'test');

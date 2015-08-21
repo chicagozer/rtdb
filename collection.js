@@ -357,19 +357,16 @@ Collection.prototype.loadViews = function(callback) {
                                                             data);
 
                                                         self.views.set(v.getId(), v);
-                                                        //if (self._identity._transient) 
-                                                        global.logger
-                                                            .log(
+                                                        if (self._identity._transient) {
+                                                            global.logger.log(
                                                                 'debug',
                                                                 'Collection.loadViews - [' + self._identity._id + '] loading reduction ',
                                                                 v
                                                                 .getId());
-                                                        global.logger
-                                                            .log(
+                                                            global.logger.log(
                                                                 'debug',
                                                                 'Collection.loadViews - [' + self._identity._id + '] loading reduction from  ' + dir + '/view/');
-                                                        v
-                                                            .loadReduction(
+                                                            v.loadReduction(
                                                                 dir + '/view/',
                                                                 function(
                                                                     err) {
@@ -383,6 +380,7 @@ Collection.prototype.loadViews = function(callback) {
                                                                         return;
                                                                     }
                                                                 });
+                                                        }
                                                         callback();
 
                                                     });
