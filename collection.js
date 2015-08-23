@@ -556,8 +556,10 @@ Collection.prototype.getId = function() {
 
 Collection.prototype.getStats = function() {
     var val = { stats: this.stats, views: {}};
+    val.stats.totalReduceTime = 0;
     this.views.forEach(function(value, key) {
         val.views[key] = value.stats;
+        val.stats.totalReduceTime += value.stats.totalReduceTime;
     });
 
    return val;

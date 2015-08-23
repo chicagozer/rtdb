@@ -303,16 +303,30 @@ function loadExpress(rtdb, database, startTime, done) {
         });
     });
 
-    // serve up some stats
-    /*jslint unparam:true */
-    app.get("/db/admin/stats", function(req, res) {
-
-        // get current memory and uptime
+    function updateDatabaseStats(database) {
+          // get current memory and uptime
         database.getIdentity().hosts = database.globalSettings.hosts;
         database.getIdentity().port = database.globalSettings.port;
         database.getIdentity().memory = process.memoryUsage();
         database.getIdentity().uptime = process.uptime();
         database.getIdentity().dirname = __dirname;
+
+        // LATER merge this with the web version
+        var val = { totalReduceTime : 0 , collections: {}};
+        database.collections.forEach(function(value, key) {
+            val.collections[key] = value.getStats();
+            val.totalReduceTime += val.collections[key].stats.totalReduceTime;
+        });
+
+        database.getIdentity().stats = val;
+    }
+        
+
+    // serve up some stats
+    /*jslint unparam:true */
+    app.get("/db/admin/stats", function(req, res) {
+
+        updateDatabaseStats(database);
         res.send(database.getIdentity());
 
     });
@@ -441,12 +455,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     app.get("/web/admin/stats", function(req, res) {
 
-        // get current memory and uptime
-        database.getIdentity().hosts = database.globalSettings.hosts;
-        database.getIdentity().port = database.globalSettings.port;
-        database.getIdentity().memory = process.memoryUsage();
-        database.getIdentity().uptime = process.uptime();
-        database.getIdentity().dirname = __dirname;
+        updateDatabaseStats(database);
         res.render('stats', {
             json: database.getIdentity()
         });
