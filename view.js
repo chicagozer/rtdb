@@ -349,12 +349,14 @@ View.prototype.saveReduction = function(dir, callback) {
 View.prototype.reset = function() {
     this._reduceResult = new Map();
     this.reduction = new Map();
-    this._redcontainer = {};
     this.stats = {
         reduceCount: 0,
         totalReduceTime: 0.0
     };
     // reduction container will be used to save the reduction to filesystem
+    if (!this._redcontainer) {
+        this._redcontainer = {};
+    }
     if (!this._redcontainer._identity) {
         this._redcontainer._identity = new Identity();
     }
