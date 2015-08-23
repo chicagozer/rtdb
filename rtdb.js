@@ -432,7 +432,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
         var c = getCollection(database, req, res);
         if (c) {
-            res.send(c.stats);
+            res.send(c.getStats());
         }
     });
 
@@ -527,6 +527,20 @@ function loadExpress(rtdb, database, startTime, done) {
             cid: req.params.cid,
             vid: req.params.vid,
             rid: view._redcontainer._identity._id
+        });
+    });
+    
+    // templated stats
+    app.get('/web/collections/:cid/stats', function(req,
+        res) {
+        var c = getCollection(database, req, res);
+        if (!c) {
+            return;
+        }
+
+        res.render('cstats', {
+            json: c.getStats(),
+            cid: req.params.cid
         });
     });
 

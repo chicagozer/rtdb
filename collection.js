@@ -554,6 +554,15 @@ Collection.prototype.getId = function() {
     return this._identity._id;
 };
 
+Collection.prototype.getStats = function() {
+    var val = { stats: this.stats, views: {}};
+    this.views.forEach(function(value, key) {
+        val.views[key] = value.stats;
+    });
+
+   return val;
+}
+
 Collection.prototype.isTransient = function() {
     return this._identity._transient;
 };
