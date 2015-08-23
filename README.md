@@ -47,8 +47,6 @@ Online demo versions of **rtdb** are available.
 
 [https://rtdb.mybluemix.net](https://rtdb.mybluemix.net)
 
-[https://rtdb.cfapps.io](https://rtdb.cfapps.io)
-
 ## Acknowledgements
 
 **rtdb** was inspired by and indebted to several projects.
