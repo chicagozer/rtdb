@@ -530,6 +530,22 @@ function loadExpress(rtdb, database, startTime, done) {
         });
     });
 
+    // templated stats 
+    app.get('/web/collections/:cid/views/:vid/stats', function(req,
+        res) {
+        var view = getView(database, req, res);
+        if (!view) {
+            return;
+        }
+
+        res.render('vstats', {
+            json: view.stats,
+            cid: req.params.cid,
+            vid: req.params.vid,
+            rid: view._redcontainer._identity._id
+        });
+    });
+
     // return templated list of subscriptions
     app.get('/web/collections/:cid/views/:vid/subscriptions', function(
         req, res) {
