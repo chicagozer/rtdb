@@ -203,7 +203,7 @@ View.prototype.mapreduce = function(documents, notify) {
     hrStart = process.hrtime();
 
     // local map result
-    mapResult = {};
+    mapResult = new Map();
     global.logger.log('debug', 'View.mapreduce - started for ' + self._identity._id);
 
     // make a copy of our current reduction.
@@ -217,10 +217,10 @@ View.prototype.mapreduce = function(documents, notify) {
     // according
     // to the key
     mapEmit = function(key, value) {
-        if (!mapResult[key]) {
-            mapResult[key] = [];
+        if (!mapResult.has(key)) {
+            mapResult.set(key,[]);
         }
-        mapResult[key].push(value);
+        mapResult.get(key).push(value);
     };
 
     // do the map function
@@ -236,7 +236,7 @@ View.prototype.mapreduce = function(documents, notify) {
     function innerReduce(key) {
 
         // call the reduce method
-        self._freduce(mapResult[key], false, function(results) {
+        self._freduce(mapResult.get(key), false, function(results) {
 
             // if we don't have a result, then
             // add it to our hashes or push it
@@ -250,11 +250,9 @@ View.prototype.mapreduce = function(documents, notify) {
     }
 
     // do our reduce for each key
-    for (key in mapResult) {
-        if (mapResult.hasOwnProperty(key)) {
-            innerReduce(key);
-        }
-    }
+    mapResult.forEach(function(value,key) {
+        innerReduce(key);
+        });
 
     // now we are going to "re-reduce". This part combines the keys that have >1
     // element.
