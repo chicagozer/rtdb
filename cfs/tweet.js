@@ -34,7 +34,7 @@ function cleanup() {
                     return;
                 }
                 now = new Date().getTime();
-                endTime = new Date(stat.ctime).getTime() + 300000;
+                endTime = new Date(stat.ctime).getTime() + 1800000;
                 if (now > endTime) {
                     return fs.unlink(path.join(uploadsDir, file), function(err) {
                         return undefined;
@@ -84,7 +84,7 @@ function doPost(data) {
 
 
 //var match = 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5,hadoop,mongodb,json,websockets,jenkins,ruby,chef,puppet,ubuntu,centos,linux,oracle,mysql,salesforce,datatorrent';
-var match = 'insight2015,rtdb';
+var match = 'insight2015,rtdb,nodejs,websockets,bluemix,watson,iot'
 var arrayMatch = match.split(',');
 var timeout;
 
