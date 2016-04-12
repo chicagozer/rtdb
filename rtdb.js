@@ -4,6 +4,7 @@
 /*jshint laxbreak: true */
 "use strict";
 var express = require('express');
+var compression = require('compression')
 var auth = require('http-auth');
 var errorHandler = require('errorhandler');
 var bodyParser = require('body-parser');
@@ -118,7 +119,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // serve up statics if we aren't running under another web server
     // I think this is clever
-    app.use(express.compress());  
+    app.use(compression());  
     app.use(express.static(__dirname + path.sep + 'public'));
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
