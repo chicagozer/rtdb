@@ -1,6 +1,6 @@
 {
   "name": "rtdb",
-  "version": "0.5.22",
+  "version": "0.5.23",
   "dependencies": {
     "abbrev": {
       "version": "1.0.7",

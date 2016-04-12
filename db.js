@@ -183,7 +183,7 @@ function Database(settings, callback) {
     this._identity = new Identity();
 
     this._identity._pjson = pjson;
-    this._identity.copyright = '© 2013-2015 by Rheosoft. All rights reserved.';
+    this._identity.copyright = '© 2013-2016 by Rheosoft. All rights reserved.';
 
     // save some process information for our info page
     this._identity.process = {
