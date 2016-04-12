@@ -112,6 +112,7 @@ function View(database, collection, obj) {
                                 'View.onChange - buffer full:', key);
                             sub.overflow = true;
                         }
+			res.flush();
                     }
                     if (socket) {
                         if (sub.volatile) {
