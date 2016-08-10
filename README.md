@@ -531,7 +531,7 @@ The templates are contained in the /views subdirectory. Templates may be added o
 
 ### Licensing
 
-**rtdb** is licensed under the [RTDB Software License version 1.0](/license.pdf).
+**rtdb** is licensed under the [RTDB Software License version 1.0](public/license.pdf).
 Commercial licenses and support are also available @<info@rheosoft.com>.
 
 ### Custom Persistence
