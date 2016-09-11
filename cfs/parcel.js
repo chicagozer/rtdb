@@ -62,6 +62,7 @@ function readFile(file, callback) {
                 // we are going to slow this down to a max of 100
                 // inserts per sec
                 delay = Math.max(0, 10 - (now - start));
+                //delay = 0;
                 setTimeout(callback, delay);
             });
 

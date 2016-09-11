@@ -1,5 +1,6 @@
 {
 "useACLTicket" : false,
+"corsOrigin" : "*",
 "winston" : {
 	"transports" :
 	[[ "Console", { "timestamp":true, "level" : "info" }]],

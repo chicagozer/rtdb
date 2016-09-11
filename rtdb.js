@@ -125,6 +125,12 @@ function loadExpress(rtdb, database, startTime, done) {
     app.set('view engine', 'jade');
     app.set('wsport', database.globalSettings.wsport);
 
+    app.use(function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", database.getSettings().corsOrigin);
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+
     env = process.env.NODE_ENV || 'development';
     if ('development' === env) {
         app.use(errorHandler());
@@ -147,7 +153,6 @@ function loadExpress(rtdb, database, startTime, done) {
 
     app.all('/web/*', auth.connect(basic));
     app.all('/db/admin/*', auth.connect(basic));
-
 
     app.get('/db/stream', function(req, res) {
 
