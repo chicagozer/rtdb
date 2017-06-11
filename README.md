@@ -385,7 +385,7 @@ There are two default settings files in /settings
 
 settings.json - a basic startup settings file. It will run the demo database provided
 in the sampledb subdirectory.  
-mocha.json - used for [mocha](http://visionmedia.github.io/mocha/) testing. 
+mocha.json - used for [mocha](http://mochajs.org/) testing. 
 Note, to run all the mocha tests successfully, you will need to provide valid S3 connection params in this file.  
 
 ### Database file structure
