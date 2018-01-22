@@ -392,7 +392,7 @@ View.prototype.loadReduction = function(dir, callback) {
                 // setup our hashes
                 self._redcontainer.reduction
                     .forEach(function(key) {
-                        self._reduceResult.set(key[0], key[1]);
+                        self._reduceResult.set(key[0], [key[1]]);
                         self.reduction.set(key[0], key[1]);
                     });
 
