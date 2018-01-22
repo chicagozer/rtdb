@@ -57,7 +57,7 @@
   "license": "MIT",
   "subdomain": "rtdb",
   "engines": {
-    "node": ">=0.10.x <0.12"
+    "node": ">=4.0.x"
   },
   "bugs": {
     "url": "https://github.com/chicagozer/rtdb/issues"
