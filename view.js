@@ -395,6 +395,9 @@ View.prototype.loadReduction = function(dir, callback) {
                         self._reduceResult.set(key[0], [key[1]]);
                         self.reduction.set(key[0], key[1]);
                     });
+		
+		// force a mapreduce so the finalizer runs
+                self.mapreduce([],false);
 
                 callback();
 
