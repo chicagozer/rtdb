@@ -7,8 +7,6 @@ var events = require('events');
 var Identity = require('./identity');
 var async = require('async');
 var View = require('./view');
-var Map = require('core-js/library/fn/map');
-require('core-js/fn/array/from');
 
 // this controls concurrency when dealing with files
 var eachLimit = 10;

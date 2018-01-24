@@ -1,17 +1,15 @@
 {
   "name": "rtdb",
-  "version": "0.5.30",
+  "version": "0.5.31",
   "description": "Real Time Database",
   "private": false,
   "main": "index.js",
   "dependencies": {
     "async": "^2.6.0",
-    "aws-sdk": "^2.185.0",
+    "aws-sdk": "^2.186.0",
     "body-parser": "^1.18.2",
     "compression": "^1.7.1",
-    "core-js": "^2.5.3",
     "errorhandler": "^1.5.0",
-    "es6-map": "^0.1.5",
     "expect.js": "^0.3.1",
     "express": "^4.16.2",
     "fs.extra": "^1.3.2",
@@ -20,7 +18,6 @@
     "jstransformer-markdown": "^1.2.1",
     "marked": "^0.3.12",
     "method-override": "^2.3.10",
-    "node-uuid": "^1.4.8",
     "optimist": "^0.6.1",
     "request": "^2.83.0",
     "socket.io": "^2.0.4",
@@ -28,6 +25,7 @@
     "temporary": "^0.0.8",
     "twitter": "^1.7.1",
     "underscore": "^1.8.3",
+    "uuid": "^3.2.1",
     "winston": "^2.4.0"
   },
   "directories": {
@@ -40,7 +38,7 @@
   "devDependencies": {
     "mocha": "^5.0.0",
     "istanbul": "^0.4.5",
-    "eventsource": "^1.0.2"
+    "eventsource": "^1.0.5"
   },
   "scripts": {
     "start": "node index.js",

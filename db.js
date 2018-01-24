@@ -9,9 +9,7 @@ var async = require('async');
 
 var Identity = require('./identity');
 var Collection = require('./collection');
-var uuid = require('node-uuid');
-var Map = require('core-js/library/fn/map');
-require('core-js/fn/array/from');
+var uuid = require('uuid/v4');
 
 function Database(settings, callback) {
 
@@ -303,7 +301,7 @@ Database.prototype.removeView = function(vid) {
 
 Database.prototype.getToken = function(viewid) {
     if (!this.tokens[viewid]) {
-        this.tokens[viewid] = uuid.v4();
+        this.tokens[viewid] = uuid();
     }
 
     return this.tokens[viewid];

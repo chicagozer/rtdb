@@ -4,7 +4,8 @@
 /*jshint laxbreak: true */
 "use strict";
 var express = require('express');
-var compression = require('compression')
+var async = require('async');
+var compression = require('compression');
 var auth = require('http-auth');
 var errorHandler = require('errorhandler');
 var bodyParser = require('body-parser');
@@ -19,7 +20,6 @@ var path = require('path');
 var winston = require('winston');
 var http = require('http');
 var Symmetry = require('symmetry');
-require('core-js/fn/array/from');
 
 function Rtdb() {
     this.servers = [];
@@ -215,23 +215,29 @@ function loadExpress(rtdb, database, startTime, done) {
             }
         }
         global.logger.log('debug', 'app.get stream: writing stream!!');
-        // setup the SEE
+        // setup the SSE
         if (res.setTimeout) {
             res.setTimeout(0);
         }
         res.writeHead(200, {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
-            "Connection": "keep-alive"
+            //"Connection": "keep-alive"
         });
 
         // LATER maybe make this a setting
         res.write("retry: 1000\n");
+        res.flush();
+        
 
         // for each view in our list
-        vlist.forEach(function(v) {
+        /* vlist.forEach(function(v) {
             addStream(req, res, v, delta);
-        });
+        }); */
+        async.each(vlist,function(v,callback) {
+  	  addStream(req, res, v, delta);
+	  callback();
+  	  });
     });
 
     // write the headers; diagnostic function
@@ -869,6 +875,7 @@ function loadExpress(rtdb, database, startTime, done) {
     database.io = require('socket.io').listen(server, {
         'logger': global.logger
     });
+    database.io.set('transports', ['websocket']);
 
     database.io.on('connection', function(socket) {
 

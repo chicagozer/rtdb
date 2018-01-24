@@ -13,7 +13,6 @@ var View = require('../view');
 var winston = require('winston');
 var Tempdir = require('temporary/lib/dir');
 var async = require('async');
-require('core-js/fn/array/from');
 
 describe(
     'Suite',

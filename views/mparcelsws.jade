@@ -72,7 +72,7 @@ block append head
       if (socket)
         socket.disconnect();
       
-      socket = io.connect( wsurl, {'force new connection' : true});	
+      socket = io.connect( wsurl, {'force new connection' : true,'transports' : ['websocket']});	
       socket.on('error',function() {
         console.log('socket error');
       });

@@ -8,9 +8,6 @@ var vm = require('vm');
 var _ = require("underscore");
 var Symmetry = require('symmetry');
 var crypto = require('crypto');
-//var Map = require('es6-map');
-var Map = require('core-js/library/fn/map');
-require('core-js/fn/array/from');
 // constructor
 
 // arguments: reference to database and optional json from filesystem

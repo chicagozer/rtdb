@@ -130,24 +130,25 @@ block append head
       console.err(err);
       return;
       }
-      var url = "/db/stream?";
+      var url = "";
       tickets.forEach(function(ticket)
       {
       url = url + "view=" + ticket.view + "&ticket=" + ticket.ticket + "&";
       });
-      var source = new EventSource(url);
-      
+      console.log('adding /db/stream?' + url);
+      var source = new EventSource("/db/stream?" + url);
+    
       source.addEventListener("6f57030d-ccad-41df-aa92-689292fa2c42", function(event) {
-      console.log(event.data);
+      console.dir(event.data);
       myjson = JSON.parse(event.data);
       drawChart();
       drawPieChart();
       }, false);
       source.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2", function(event) {
-      console.log(event.data);
+      console.dir(event.data);
       myjson2 = JSON.parse(event.data);
       drawTable();
-      }, false);
+      }, false); 
       }
       function toUSD(number) {
       var number = number.toString(), dollars = number.split('.')[0], cents = (number
