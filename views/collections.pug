@@ -1,5 +1,5 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends nav
 block vars
   - var title = 'Collections'
@@ -9,7 +9,7 @@ block append content
    a.btn(href='/web/') Home
    a#addbtn.btn Add
    a.btn(href='/db/collections/') Json
- mixin showJson(json,0,true)
+ +showJson(json,0,true)
  script.
         jQuery(document).ready(
 

@@ -1,5 +1,5 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends nav
 block vars
   - var title = 'Views'
@@ -7,11 +7,11 @@ block append content
  h1 Views
  p 
    a.btn(href='/web/') Home
-   a.btn(href='/web/collections/#{cid}/') Up
+   a.btn(href='/web/collections/' + cid + '/') Up
    a#addbtn.btn Add
-   a.btn(href='/db/collections/#{cid}/views/') Json
- mixin showJson(json,0,true)
- input(type='hidden', id='hcollection', value='#{cid}')
+   a.btn(href='/db/collections/' + cid + '/views/') Json
+ +showJson(json,0,true)
+ input(type='hidden', id='hcollection', value=cid)
  script.
         jQuery(document).ready(
 

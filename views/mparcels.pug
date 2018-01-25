@@ -1,5 +1,5 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends mlayout
 block vars
   - var title = 'Parcels'
@@ -11,9 +11,7 @@ block append head
     link(rel='stylesheet', href='/stylesheets/layout.css', type='text/css', media='screen')
     link(href='//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css', rel='stylesheet')
     // script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js')
-    script(type='text/javascript', src='//www.google.com/jsapi')
-    //script(type='text/javascript', src='/socket.io/socket.io.js')
-    script(type='text/javascript', src='//cdn.socket.io/socket.io-1.3.5.js')
+    script(type='text/javascript', src='https://www.google.com/jsapi')
     script(type='text/javascript').
       google.load("visualization", "1", {
       packages : [ "corechart", "table" ]
@@ -27,8 +25,8 @@ block append head
         Zip : "18823768-0635-49bc-9053-ac2f212d066b",
         Owner :  "5f1d54e6-01ef-4e09-87c5-0c0aa8aba5f3"
       }
+      var source;
       var ticket;
-      var socket;
       
       function redraw() {
       reconnect($("#selBy").val());
@@ -58,45 +56,33 @@ block append head
         c1 = new google.visualization.Table(document.getElementById('parcelchart_div'));
       else 
         c1 = new google.visualization.ColumnChart(document.getElementById('parcelchart_div'));
-      getjson(views[view],reconnect2);
-      }
+        
+      if (source)
+        source.close();
+        
+       getjson(views[view],reconnect2);
+        }
         
       function reconnect2() {
-      var wsurl = window.location.protocol + "//" + window.location.hostname ;
-      var wsport = "#{settings.wsport}";
-      if ("" === wsport)
-        wsport = window.location.port;
-        
-      wsurl = wsurl + ":" + wsport;
       
-      if (socket)
-        socket.disconnect();
+      var url = "/db/stream?" + "view=" + ticket.view + "&ticket=" + ticket.ticket;
       
-      socket = io.connect( wsurl, {'force new connection' : true,'transports' : ['websocket']});	
-      socket.on('error',function() {
-        console.log('socket error');
-      });
-      
-      socket.on('disconnect',function() {
-        console.log('socket disconnect');
-      });
-      
-      socket.on('reconnect',function() {
-        console.log('socket reconnect');
-      });
-      
-      socket.on('connect', function () {
-      console.log('socket connect');
-      socket.emit('subscribe', ticket);
-      
-      socket.on(ticket.view,
-         function(data) {
-         drawTable(data, $("#selBy").val(),
-         c1, 'Valuations by ' + $("#selBy").val(),doTotal);
-         }
-         );
-      });
+      source = new EventSource(url);  
+      source.addEventListener(ticket.view,
+      function(event) {
+      drawTable(JSON.parse(event.data), $("#selBy").val(),
+        c1, 'Valuations by ' + $("#selBy").val(),doTotal);
+     
+      source.addEventListener('open', function(e) {
+      console.log('open called');
+      console.dir(e);
+      }, false);
+      source.addEventListener('error', function(e) {
+      console.log('error called');
+      console.dir(e);
+      }, false);
       }
+      )}
       function registerStream() {
       
       reconnect($("#selBy").val());
@@ -168,7 +154,7 @@ block append head
         })
       
  
-  block append content
+block append content
     section#main.column(style='height:97%')
       article.module.width_3_quarter(style='width: 100%;margin: 0px;')
         header

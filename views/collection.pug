@@ -1,5 +1,5 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends nav
 block vars
   - var title = 'Collection'
@@ -16,13 +16,13 @@ block append content
    a#clearbtn.btn Clear
    a.btn(href="views/") Views
    a.btn(href="stats/") Stats 
-   a.btn(href='/db/collections/#{json._id}/') Json
+   a.btn(href='/db/collections/' + json._id + '/') Json
  .well(style='background-color:white')
    form
      fieldset(style='height:120px')
        div.control-group
          label.control-label(for='ikey') key:
-         input#ikey.input-small(type='text', value='#{json._key}')
+         input#ikey.input-small(type='text', value=json._key)
        div.control-group
          div.controls
            label.control-label(for='itransient') Transient:
@@ -31,9 +31,9 @@ block append content
              else
                input#itransient(type='checkbox')
            label.control-label(for='ipriority') priority:
-             input#ipriority.input-mini(type='number', min='0', value='#{json._priority}')
+             input#ipriority.input-mini(type='number', min='0', value=json._priority)
            label.control-label(for='iexpiration') expiration:
-             input#iexpiration.input-mini(type='number', min='0', value='#{json._expiration}')
+             input#iexpiration.input-mini(type='number', min='0', value=json._expiration)
    div.tabbable
      ul.nav.nav-tabs
        li.active: a(href='#tab1',data-toggle='tab') onAdd
@@ -45,8 +45,8 @@ block append content
       
        
  script(src='/ace-builds/src-noconflict/ace.js')
- input(type='hidden', id='hid', value='#{json._id}')
- input(type='hidden', id='honadd', value='#{json._onAdd}')
+ input(type='hidden', id='hid', value=json._id)
+ input(type='hidden', id='honadd', value=json._onAdd)
  script.
         jQuery(document).ready(
 

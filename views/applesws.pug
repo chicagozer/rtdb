@@ -1,5 +1,5 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends nav
 block vars
   - var title = 'Apples'
@@ -80,6 +80,7 @@ block append head
       });
       });
     script(type='text/javascript', src='https://www.google.com/jsapi')
+    script(type='text/javascript', src='//cdn.socket.io/socket.io-1.3.5.js')
     script(type='text/javascript').
       google.load("visualization", "1", {
       packages : [ "corechart", "table" ]
@@ -105,9 +106,11 @@ block append head
       }
       
        var tickets = [];
+       var socket;
       function reconnect() {
       
       var views= ['6f57030d-ccad-41df-aa92-689292fa2c42','ec537999-60a5-41f3-9036-fcd3d5356ae2'];
+     
      
       function getjson(view,callback)
       {
@@ -119,37 +122,53 @@ block append head
         });
       }
      
-     
       async.each(views,getjson,reconnect2);
       }  
+      
+      function reconnect2() {
+      var wsurl = window.location.protocol + "//" + window.location.hostname ;
+      var wsport = "#{settings.wsport}";
+      if ("" === wsport)
+        wsport = window.location.port;
 
-      function reconnect2(err)
-      {
-      if (err)
-      {
-      console.err(err);
-      return;
-      }
-      var url = "";
-      tickets.forEach(function(ticket)
-      {
-      url = url + "view=" + ticket.view + "&ticket=" + ticket.ticket + "&";
+      wsurl = wsurl + ":" + wsport;
+
+      if (socket)
+        socket.disconnect();
+
+      socket = io.connect( wsurl, {'force new connection' : true,'transports' : ['websocket']});
+      
+      socket.on('error',function() {
+        console.log('socket error');
       });
-      console.log('adding /db/stream?' + url);
-      var source = new EventSource("/db/stream?" + url);
-    
-      source.addEventListener("6f57030d-ccad-41df-aa92-689292fa2c42", function(event) {
-      console.dir(event.data);
-      myjson = JSON.parse(event.data);
+      
+      socket.on('disconnect',function() {
+        console.log('socket disconnect');
+      });
+      
+      socket.on('reconnect',function() {
+        console.log('socket reconnect');
+      });
+      
+      socket.on('connect', function () {
+      console.log('socket connect');
+      socket.emit('subscribe', tickets);
+      socket.on("6f57030d-ccad-41df-aa92-689292fa2c42", function (data) {
+      console.dir(data);
+      myjson = data;
       drawChart();
       drawPieChart();
       }, false);
-      source.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2", function(event) {
-      console.dir(event.data);
-      myjson2 = JSON.parse(event.data);
+      socket.on("ec537999-60a5-41f3-9036-fcd3d5356ae2", function (data) {
+      console.dir(data);
+      myjson2 = data;
       drawTable();
-      }, false); 
+      },false);
+
+      });
       }
+
+
       function toUSD(number) {
       var number = number.toString(), dollars = number.split('.')[0], cents = (number
       .split('.')[1] || '')

@@ -1,5 +1,5 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends nav
 block vars
   - var title = 'View'
@@ -8,20 +8,20 @@ block append content
    h1 View
      small #{' ' + json._id}  
    a.btn(href='/web/') Home
-   a.btn(href='/web/collections/#{cid}/views/') Up
+   a.btn(href='/web/collections/' + cid + '/views/') Up
    a#savebtn.btn Save
    a#delbtn.btn Remove
    a.btn(href="subscriptions/") Subscriptions
    a.btn(href="reduction/") Reduction
    a.btn(href="stats/") Stats 
-   a.btn(href="/db/collections/#{cid}/views/#{json._id}/") Json
+   a.btn(href='/db/collections/' + cid + '/views/' + json._id + '/') Json
  .well(style='background-color:white')
    form.form-inline
      fieldset
        div.control-group
          label.control-label(for='idkey') key:
          div.controls
-           input#ikey.input-medium(type='text', value='#{json._key}')
+           input#ikey.input-medium(type='text', value=json._key)
    div.tabbable
      ul.nav.nav-tabs
        li.active: a(href='#tab1',data-toggle='tab') map
@@ -43,13 +43,13 @@ block append content
          p function (reduction,headers,emit,database)
          div#personalizeeditor.myeditor
  
-   input(type='hidden', id='hcollection', value='#{cid}')
-   input(type='hidden', id='hid', value='#{json._id}')
-   input(type='hidden', id='hkey', value='#{json._key}')
-   input(type='hidden', id='hmap', value='#{json._map}')
-   input(type='hidden', id='hreduce', value='#{json._reduce}')
-   input(type='hidden', id='hfinalize', value='#{json._finalize}')
-   input(type='hidden', id='hpersonalize', value='#{json._personalize}')
+   input(type='hidden', id='hcollection', value=cid)
+   input(type='hidden', id='hid', value=json._id)
+   input(type='hidden', id='hkey', value=json._key)
+   input(type='hidden', id='hmap', value=json._map)
+   input(type='hidden', id='hreduce', value=json._reduce)
+   input(type='hidden', id='hfinalize', value=json._finalize)
+   input(type='hidden', id='hpersonalize', value=json._personalize)
    
    script(src='/ace-builds/src-noconflict/ace.js')
      

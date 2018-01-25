@@ -122,7 +122,7 @@ function loadExpress(rtdb, database, startTime, done) {
     app.use(compression());  
     app.use(express.static(__dirname + path.sep + 'public'));
     app.set('views', __dirname + '/views');
-    app.set('view engine', 'jade');
+    app.set('view engine', 'pug');
     app.set('wsport', database.globalSettings.wsport);
 
     app.use(function(req, res, next) {

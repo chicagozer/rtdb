@@ -28,18 +28,18 @@ mixin showJson(myJsonObject, level, href)
            each aValue, aIndex  in myJsonObject
             if (myJsonObject.length > 2)
               p #{aIndex+1} of #{myJsonObject.length}: 
-            mixin showJson(aValue, level,href)
+            +showJson(aValue, level,href)
         else if myJsonObject instanceof Object
           each value, key in myJsonObject
             if value instanceof Date
               p #{key}:&nbsp;
-                mixin prettyDate(value)
+                +prettyDate(value)
             else if value instanceof Object
               p #{key}:
               if typeof value == 'undefined' || value.length == 0
                 | &nbsp;(empty)
               else
-                mixin showJson(value, level, href)
+                +showJson(value, level, href)
             else if key === '_id' && href
               p #{key}: 
                 a(href=value+'/') #{value}
@@ -47,6 +47,6 @@ mixin showJson(myJsonObject, level, href)
               p #{key}: #{value}
         else if myJsonObject instanceof Date
           p
-            mixin prettyDate(myJsonObject)
+            +prettyDate(myJsonObject)
         else    
           p #{myJsonObject}   

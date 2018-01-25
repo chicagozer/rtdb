@@ -1,12 +1,11 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends nav
 block vars
   - var title = 'Apples'
   
 block append head 
     //script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
-    script(type='text/javascript',src='/symmetry/patch.js')
     script(type='text/javascript', src='/async/async.js')
     script(type='text/javascript').
       $(document).ready(
@@ -131,30 +130,25 @@ block append head
       console.err(err);
       return;
       }
-      var url = "/db/stream?delta=true&";
+      var url = "";
       tickets.forEach(function(ticket)
       {
       url = url + "view=" + ticket.view + "&ticket=" + ticket.ticket + "&";
       });
-      var source = new EventSource(url);
-      
+      console.log('adding /db/stream?' + url);
+      var source = new EventSource("/db/stream?" + url);
+    
       source.addEventListener("6f57030d-ccad-41df-aa92-689292fa2c42", function(event) {
-      console.log(event.data);
-      if (!myjson)
+      console.dir(event.data);
       myjson = JSON.parse(event.data);
-      else
-      Symmetry.patch(myjson,JSON.parse(event.data));
       drawChart();
       drawPieChart();
       }, false);
       source.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2", function(event) {
-      console.log(event.data);
-      if (!myjson2)
+      console.dir(event.data);
       myjson2 = JSON.parse(event.data);
-      else
-      Symmetry.patch(myjson2,JSON.parse(event.data));
       drawTable();
-      }, false);
+      }, false); 
       }
       function toUSD(number) {
       var number = number.toString(), dollars = number.split('.')[0], cents = (number

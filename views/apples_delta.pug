@@ -1,11 +1,12 @@
--# © 2014 by Rheosoft. All rights reserved. 
--# Licensed under the RTDB Software License version 1.0
+//-# © 2014 by Rheosoft. All rights reserved. 
+//-# Licensed under the RTDB Software License version 1.0
 extends nav
 block vars
   - var title = 'Apples'
   
 block append head 
     //script(type='text/javascript', src='//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+    script(type='text/javascript',src='/symmetry/patch.js')
     script(type='text/javascript', src='/async/async.js')
     script(type='text/javascript').
       $(document).ready(
@@ -80,7 +81,6 @@ block append head
       });
       });
     script(type='text/javascript', src='https://www.google.com/jsapi')
-    script(type='text/javascript', src='//cdn.socket.io/socket.io-1.3.5.js')
     script(type='text/javascript').
       google.load("visualization", "1", {
       packages : [ "corechart", "table" ]
@@ -106,11 +106,9 @@ block append head
       }
       
        var tickets = [];
-       var socket;
       function reconnect() {
       
       var views= ['6f57030d-ccad-41df-aa92-689292fa2c42','ec537999-60a5-41f3-9036-fcd3d5356ae2'];
-     
      
       function getjson(view,callback)
       {
@@ -122,53 +120,42 @@ block append head
         });
       }
      
+     
       async.each(views,getjson,reconnect2);
       }  
-      
-      function reconnect2() {
-      var wsurl = window.location.protocol + "//" + window.location.hostname ;
-      var wsport = "#{settings.wsport}";
-      if ("" === wsport)
-        wsport = window.location.port;
 
-      wsurl = wsurl + ":" + wsport;
-
-      if (socket)
-        socket.disconnect();
-
-      socket = io.connect( wsurl, {'force new connection' : true,'transports' : ['websocket']});
-      
-      socket.on('error',function() {
-        console.log('socket error');
+      function reconnect2(err)
+      {
+      if (err)
+      {
+      console.err(err);
+      return;
+      }
+      var url = "/db/stream?delta=true&";
+      tickets.forEach(function(ticket)
+      {
+      url = url + "view=" + ticket.view + "&ticket=" + ticket.ticket + "&";
       });
+      var source = new EventSource(url);
       
-      socket.on('disconnect',function() {
-        console.log('socket disconnect');
-      });
-      
-      socket.on('reconnect',function() {
-        console.log('socket reconnect');
-      });
-      
-      socket.on('connect', function () {
-      console.log('socket connect');
-      socket.emit('subscribe', tickets);
-      socket.on("6f57030d-ccad-41df-aa92-689292fa2c42", function (data) {
-      console.dir(data);
-      myjson = data;
+      source.addEventListener("6f57030d-ccad-41df-aa92-689292fa2c42", function(event) {
+      console.log(event.data);
+      if (!myjson)
+      myjson = JSON.parse(event.data);
+      else
+      Symmetry.patch(myjson,JSON.parse(event.data));
       drawChart();
       drawPieChart();
       }, false);
-      socket.on("ec537999-60a5-41f3-9036-fcd3d5356ae2", function (data) {
-      console.dir(data);
-      myjson2 = data;
+      source.addEventListener("ec537999-60a5-41f3-9036-fcd3d5356ae2", function(event) {
+      console.log(event.data);
+      if (!myjson2)
+      myjson2 = JSON.parse(event.data);
+      else
+      Symmetry.patch(myjson2,JSON.parse(event.data));
       drawTable();
-      },false);
-
-      });
+      }, false);
       }
-
-
       function toUSD(number) {
       var number = number.toString(), dollars = number.split('.')[0], cents = (number
       .split('.')[1] || '')
