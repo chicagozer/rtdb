@@ -14,6 +14,7 @@ function CFSL() {
 
 CFSL.prototype.init = function(parms) {
     this.root = parms.root + path.sep;
+    return true;
 };
 
 CFSL.prototype.name = function() {

@@ -31,8 +31,15 @@ CFSS3.prototype.init = function(parms) {
     if (process.env.AWS_BUCKET) {
         parms.params.Bucket = process.env.AWS_BUCKET;
     }
+
+    else {
+       return false;
+    }
+      
     AWS.config.update(parms.config);
     this.s3 = new AWS.S3(parms);
+    return true;
+
 };
 
 CFSS3.prototype.name = function() {
@@ -60,7 +67,7 @@ CFSS3.prototype.del = function(fn, callback) {
 };
 
 CFSS3.prototype.put = function(prefix, item, callback, expires) {
-    var buf = new Buffer(JSON.stringify(item)),
+    var buf = Buffer.from(JSON.stringify(item)),
         key, expireDate = null;
 
     if (item._identity) {

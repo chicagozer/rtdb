@@ -9,7 +9,7 @@ var winston = require('winston');
 var argv = require('optimist').argv;
 var Identity = require('../identity');
 var fs = require('fs');
-var Tempdir = require('temporary/lib/dir');
+var tmp = require('temporary');
 var assert = require('assert');
 
 
@@ -31,7 +31,7 @@ describe('CFS plugins', function() {
             settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
         }
         global.logger = new(winston.Logger)(settings.winston.options);
-        dir = new Tempdir();
+        dir = new tmp.Dir();
         settings.cfsinit.root = dir.path;
 
         var cfslist = fs.readdirSync('cfs');
@@ -42,8 +42,7 @@ describe('CFS plugins', function() {
             var mycfs, Cfs = require('../cfs/' + file);
 
             mycfs = new Cfs();
-            if (mycfs.init) {
-                mycfs.init(settings.cfsinit);
+            if (mycfs.init && mycfs.init(settings.cfsinit) ) {
                 cfsTypes.push(mycfs);
             }
         });
@@ -108,7 +107,7 @@ describe('CFS plugins', function() {
 
     after(function() {
         if (dir) {
-            dir.rmdir();
+            fs.rmdirSync(dir.path, { recursive: true });
         }
     });
 
