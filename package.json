@@ -43,7 +43,8 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "istanbul cover _mocha -- -u exports --exit -R spec"
+    "test": "istanbul cover _mocha -- -u exports --exit -R spec",
+    "test1": "mocha"
   },
   "repository": {
     "type": "git",
