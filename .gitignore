@@ -14,6 +14,7 @@ settings
 #public
 /sandbox
 .elasticbeanstalk/
+.nyc_output/
 sampledb/collection/**/reduction
 sampledb/collection/**/view
 sampledb/collection/cb43defb-f406-47c3-90aa-7c4195d519a7/documents/**
