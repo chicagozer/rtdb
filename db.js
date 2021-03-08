@@ -9,7 +9,7 @@ var async = require('async');
 
 var Identity = require('./identity');
 var Collection = require('./collection');
-var uuid = require('uuid/v4');
+const { v4: uuidv4 } = require('uuid');
 
 function Database(settings, callback) {
 
@@ -301,7 +301,7 @@ Database.prototype.removeView = function(vid) {
 
 Database.prototype.getToken = function(viewid) {
     if (!this.tokens[viewid]) {
-        this.tokens[viewid] = uuid();
+        this.tokens[viewid] = uuidv4();
     }
 
     return this.tokens[viewid];
