@@ -84,7 +84,7 @@ function doPost(data) {
 
 
 //var match = 'php,nosql,jquery,nodejs,paas,clouddb,heroku,javascript,HTML5,hadoop,mongodb,json,websockets,jenkins,ruby,chef,puppet,ubuntu,centos,linux,oracle,mysql,salesforce,datatorrent';
-var match = 'insight2015,rtdb,nodejs,websockets,bluemix,watson,iot'
+var match = 'wanda,wandavision,insight2015,rtdb,nodejs,websockets,bluemix,watson,iot'
 var arrayMatch = match.split(',');
 var timeout;
 
