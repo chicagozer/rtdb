@@ -23,10 +23,10 @@
     "request": "^2.88.2",
     "socket.io": "^2.4.1",
     "symmetry": "^0.5.1",
-    "temporary": "^0.0.8",
+    "temporary": "^1.1.0",
     "twitter": "^1.7.1",
     "underscore": "^1.12.0",
-    "uuid": "^3.4.0",
+    "uuid": "^8.3.2",
     "winston": "^2.4.5"
   },
   "directories": {
@@ -39,12 +39,14 @@
   "devDependencies": {
     "eventsource": "^1.0.7",
     "istanbul": "^0.4.5",
+    "handlebars": ">=4.5.3",
+    "constantinople": ">=3.1.1",
+    "js-yaml": ">=3.13.1",
     "mocha": "^5.2.0"
   },
   "scripts": {
     "start": "node index.js",
-    "test": "istanbul cover _mocha -- -u exports --exit -R spec",
-    "test1": "mocha"
+    "test": "istanbul cover _mocha -- -u exports --exit -R spec"
   },
   "repository": {
     "type": "git",
