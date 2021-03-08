@@ -19,7 +19,7 @@
     "marked": "^0.3.19",
     "method-override": "^2.3.10",
     "optimist": "^0.6.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.2",
     "request": "^2.88.2",
     "socket.io": "^2.4.1",
     "symmetry": "^0.5.1",
