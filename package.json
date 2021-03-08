@@ -41,7 +41,7 @@
     "istanbul": "^0.4.5",
     "handlebars": ">=4.5.3",
     "constantinople": ">=3.1.1",
-     "js-yaml": ">=3.13.1",
+    "js-yaml": ">=3.13.1",
     "mocha": "^5.2.0"
   },
   "scripts": {
