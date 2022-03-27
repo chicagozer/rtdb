@@ -6,7 +6,7 @@ steps:
 #- name: test
 #  image: node
 #  commands:
-#    - npm install
+#    - npm install 
 - name: docker  
   image: plugins/docker
   settings:
