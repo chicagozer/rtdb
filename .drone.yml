@@ -1,0 +1,12 @@
+steps:
+- name: test
+  image: node
+  commands:
+    - npm install
+- name: docker  
+  image: plugins/docker
+  settings:
+    username: chicagozer
+    password:
+          from_secret: docker_password
+    repo: chicagozer/rtdb
