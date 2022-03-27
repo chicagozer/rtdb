@@ -1,12 +1,18 @@
+kind: pipeline
+type: docker
+name: default
+
 steps:
-- name: test
-  image: node
-  commands:
-    - npm install
+#- name: test
+#  image: node
+#  commands:
+#    - npm install
 - name: docker  
   image: plugins/docker
   settings:
     username: chicagozer
     password:
-          from_secret: docker_password
+      from_secret: docker_password
     repo: chicagozer/rtdb
+    tags:
+      - harness
