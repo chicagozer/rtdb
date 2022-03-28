@@ -8,6 +8,8 @@ steps:
 #  commands:
 #    - npm install 
 - name: docker  
+  environment:
+    container: kube
   image: banzaicloud/drone-kaniko
   settings:
     username: chicagozer
