@@ -3,12 +3,12 @@ type: docker
 name: default
 
 steps:
-#- name: test 
+#- name: test  
 #  image: node
 #  commands:
 #    - npm install 
 - name: docker  
-  image: plugins/docker
+  image: banzaicloud/drone-kaniko
   settings:
     username: chicagozer
     password:
