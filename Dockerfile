@@ -1,5 +1,6 @@
 # DOCKER-VERSION 1.2.0
-FROM node:argon
+#FROM node:argon
+FROM node:14
 # Bundle app source
 COPY . /rtdb
 WORKDIR /rtdb
