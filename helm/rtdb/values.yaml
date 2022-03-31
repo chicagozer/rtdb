@@ -2,6 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+twitterConsumerKey: fixme
+twitterConsumerSecret: fixme
+twitterTokenKey: fixme
+twitterTokenSecret: fixme
+
+
 replicaCount: 1
 
 image:

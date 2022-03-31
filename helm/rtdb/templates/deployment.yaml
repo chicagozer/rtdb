@@ -25,6 +25,15 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
+          env:
+            - name: "TWITTER_CONSUMER_KEY"
+              value: {{ .Values.twitterConsumerKey }}
+            - name: "TWITTER_CONSUMER_SECRET"
+              value: {{ .Values.twitterConsumerSecret }}
+            - name: "TWITTER_TOKEN_KEY"
+              value: {{ .Values.twitterTokenKey }}
+            - name: "TWITTER_TOKEN_SECRET"
+              value: {{ .Values.twitterTokenSecret }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
