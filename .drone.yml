@@ -1,5 +1,6 @@
 kind: pipeline
 name: build
+type: kubernetes
 
 # test      
 steps:
