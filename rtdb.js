@@ -3,24 +3,25 @@
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
 "use strict";
-var express = require('express');
-var async = require('async');
-var compression = require('compression');
-var auth = require('http-auth');
+const express = require('express');
+const async = require('async');
+const compression = require('compression');
+const auth = require('http-auth');
 const authConnect = require("http-auth-connect");
-var errorHandler = require('errorhandler');
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
-var Database = require('./db');
-var Collection = require('./collection');
-var View = require('./view');
-var Identity = require('./identity');
-var argv = require('optimist').argv;
-var fs = require('fs');
-var path = require('path');
-var winston = require('winston');
-var http = require('http');
-var Symmetry = require('symmetry');
+const errorHandler = require('errorhandler');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+const Database = require('./db');
+const Collection = require('./collection');
+const View = require('./view');
+const Identity = require('./identity');
+const argv = require('optimist').argv;
+const fs = require('fs');
+const path = require('path');
+const winston = require('winston');
+const http = require('http');
+const Symmetry = require('symmetry');
+const socketio = require('socket.io');
 
 function Rtdb() {
     this.servers = [];
@@ -873,10 +874,11 @@ function loadExpress(rtdb, database, startTime, done) {
     /*jslint unparam:false */
 
     server = require('http').createServer(app);
-    database.io = require('socket.io').listen(server, {
-        'logger': global.logger
+    database.io = socketio(server, {
+        'logger': global.logger,
+        'transports': ['websocket']
     });
-    database.io.set('transports', ['websocket']);
+    //database.io.set('transports', ['websocket']);
 
     database.io.on('connection', function(socket) {
 

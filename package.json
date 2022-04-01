@@ -20,7 +20,7 @@
     "optimist": "^0.6.1",
     "pug": "^3.0.2",
     "request": "^2.88.2",
-    "socket.io": "^2.4.1",
+    "socket.io": "^4.4.1",
     "symmetry": "^0.6.0",
     "temporary": "^1.1.0",
     "twitter": "^1.7.1",
