@@ -16,7 +16,8 @@ var assert = require('assert');
 describe('CFS plugins', function() {
     var dn = 'junk/',
         id = null,
-        settings, dir = null,
+        dir = null,
+        globalSettings = null,
         cfsTypes = [];
 
     before(function() {
@@ -24,15 +25,19 @@ describe('CFS plugins', function() {
         /*jslint stupid: true */
 
         if (argv.settings) {
-            settings = JSON.parse(fs.readFileSync(argv.settings));
+            globalSettings = JSON.parse(fs.readFileSync(argv.settings));
         } else if (process.env.MOCHA_SETTINGS) {
-            settings = JSON.parse(fs.readFileSync(process.env.MOCHA_SETTINGS));
+            globalSettings = JSON.parse(fs.readFileSync(process.env.MOCHA_SETTINGS));
         } else {
-            settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
+            globalSettings = JSON.parse(fs.readFileSync('settings/mocha.json'));
         }
-        global.logger = winston.createLogger(settings.winston.options);
+        global.logger = winston.createLogger(globalSettings.winston.options);
+        globalSettings.winston.transports.forEach(function(item) {
+                global.logger.add(new winston.transports[item[0]](item[1]) );
+            });
+
         dir = new tmp.Dir();
-        settings.cfsinit.root = dir.path;
+        globalSettings.cfsinit.root = dir.path;
 
         var cfslist = fs.readdirSync('cfs');
 
@@ -42,7 +47,7 @@ describe('CFS plugins', function() {
             var mycfs, Cfs = require('../cfs/' + file);
 
             mycfs = new Cfs();
-            if (mycfs.init && mycfs.init(settings.cfsinit) ) {
+            if (mycfs.init && mycfs.init(globalSettings.cfsinit) ) {
                 cfsTypes.push(mycfs);
             }
         });
