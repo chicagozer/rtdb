@@ -7,6 +7,7 @@ var express = require('express');
 var async = require('async');
 var compression = require('compression');
 var auth = require('http-auth');
+const authConnect = require("http-auth-connect");
 var errorHandler = require('errorhandler');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
@@ -151,8 +152,8 @@ function loadExpress(rtdb, database, startTime, done) {
         callback(reply);
     });
 
-    app.all('/web/*', auth.connect(basic));
-    app.all('/db/admin/*', auth.connect(basic));
+    app.all('/web/*', authConnect(basic));
+    app.all('/db/admin/*', authConnect(basic));
 
     app.get('/db/stream', function(req, res) {
 

@@ -107,7 +107,7 @@ describe('CFS plugins', function() {
 
     after(function() {
         if (dir) {
-            fs.rmdirSync(dir.path, { recursive: true });
+            fs.rmSync(dir.path, { recursive: true });
         }
     });
 
