@@ -2,7 +2,7 @@ kind: pipeline
 name: build
 type: kubernetes
 
-# test   
+# test     
 steps:
 - name: test
   image: node:17
