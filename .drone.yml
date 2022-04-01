@@ -20,4 +20,5 @@ steps:
     dockerfile: Dockerfile
     tags:
       - kaniko
+      - latest
 
