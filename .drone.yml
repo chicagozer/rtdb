@@ -5,7 +5,7 @@ type: kubernetes
 # test       
 steps:
 - name: test
-  image: node:stable
+  image: node:17
   commands:
   - npm install
   - npm test
