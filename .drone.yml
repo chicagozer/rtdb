@@ -4,8 +4,12 @@ type: kubernetes
 
 # test       
 steps:
+- name: test
+  image: node:14
+  commands:
+  - npm install
+  - npm test
 - name: build-rtdb
-#  image: plugins/kaniko:1.3.1 
   image: plugins/kaniko:1.4.1
   settings:
     username:
