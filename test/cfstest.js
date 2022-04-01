@@ -30,7 +30,7 @@ describe('CFS plugins', function() {
         } else {
             settings = JSON.parse(fs.readFileSync('settings/mocha.json'));
         }
-        global.logger = new(winston.Logger)(settings.winston.options);
+        global.logger = winston.createLogger(settings.winston.options);
         dir = new tmp.Dir();
         settings.cfsinit.root = dir.path;
 

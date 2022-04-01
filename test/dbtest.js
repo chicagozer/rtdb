@@ -42,11 +42,12 @@ describe(
             /*jslint stupid: false */
             // global on purpose
             // we are going to put this in global.
-            global.logger = new(winston.Logger)(
+            global.logger = winston.createLogger(
                 globalSettings.winston.options);
 
             globalSettings.winston.transports.forEach(function(item) {
-                global.logger.add(winston.transports[item[0]], item[1]);
+                //global.logger.add(winston.transports[item[0]], item[1]);
+                global.logger.add(new winston.transports[item[0]](item[1]) );
             });
 
             dir = new Tempdir();
