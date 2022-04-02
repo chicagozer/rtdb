@@ -44,7 +44,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "test": "nyc mocha --exit"
+    "test": "nyc mocha --timeout 10000 --exit"
   },
   "repository": {
     "type": "git",
