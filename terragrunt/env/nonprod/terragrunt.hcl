@@ -3,7 +3,8 @@ include {
 }
 
 terraform {
-    source = "git::git@github.com:chicagozer/rtdb.git//terraform?ref=kaniko"
+#    source = "git::git@github.com:chicagozer/rtdb.git//terraform?ref=kaniko"
+    source = "git::https://github.com:chicagozer/rtdb.git//terraform?ref=kaniko"
 }
 
 
