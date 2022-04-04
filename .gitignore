@@ -22,3 +22,5 @@ sampledb/collection/46a5dc92-58f8-429d-9339-d4b6eef65ac4/**
 sampledb/collections/*
 terraform/terraform.tfstate*
 terraform/.terraform*
+.terraform.lock.hcl
+.terragrunt-cache
