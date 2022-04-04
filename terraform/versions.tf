@@ -1,4 +1,13 @@
 terraform {
+  
+   backend "remote" {
+    organization = "rheosoft"
+
+    workspaces {
+      name = "rtdb"
+    }
+  }
+
   required_providers {
     helm = {
       source  = "hashicorp/helm"
@@ -9,5 +18,5 @@ terraform {
       version = "~> 3.0"
     }
   }
-  required_version = "~> 1.0.11"
+  required_version = "~> 1.1.7"
 }
