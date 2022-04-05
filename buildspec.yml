@@ -11,6 +11,7 @@ phases:
       nodejs: 14
     commands:
       - echo Installing Mocha...
+      - export
   pre_build:
     commands:
       - AWS_ACCOUNT_ID=${CODEBUILD_BUILD_ARN} && IFS=':' && set -- $AWS_ACCOUNT_ID && AWS_ACCOUNT_ID=$5
