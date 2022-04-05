@@ -17,6 +17,7 @@ phases:
       - AWS_ACCOUNT_ID=${CODEBUILD_BUILD_ARN} && IFS=':' && set -- $AWS_ACCOUNT_ID && AWS_ACCOUNT_ID=$5
       - echo Installing source NPM dependencies...
       - npm install
+      - aws sts get-caller-identity --query "Account" --output text
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo "aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
 #      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/d5y7k0n6
@@ -33,6 +34,6 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
 #      - docker push public.ecr.aws/d5y7k0n6/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+#      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
