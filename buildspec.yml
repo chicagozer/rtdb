@@ -21,6 +21,7 @@ phases:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo "aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
 #      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/d5y7k0n6
+      - if [ -z "$CODEBUILD_WEBHOOK_TRIGGER ]; then CODEBUILD_WEBHOOK_TRIGGER=unknown fi
       - IMAGE_TAG=`echo $CODEBUILD_WEBHOOK_TRIGGER | tr / _`
       - IMAGE_TAG=$IMAGE_TAG.$CODEBUILD_BUILD_NUMBER
       - HASH=`echo $CODEBUILD_SOURCE_VERSION |  cut -c1-7`
