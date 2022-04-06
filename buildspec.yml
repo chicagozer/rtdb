@@ -23,6 +23,7 @@ phases:
 #      - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/d5y7k0n6
       - IMAGE_TAG=`echo $CODEBUILD_WEBHOOK_TRIGGER | tr / _`
       - IMAGE_TAG=$IMAGE_TAG.$CODEBUILD_BUILD_NUMBER
+      - HASH=`echo $CODEBUILD_SOURCE_VERSION |  cut -c1-7`
   build:
     commands:
       - echo Build started on `date`
@@ -31,11 +32,14 @@ phases:
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
 #      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG public.ecr.aws/d5y7k0n6/$IMAGE_REPO_NAME:$IMAGE_TAG      
       - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG      
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$HASH
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
 #      - docker push public.ecr.aws/d5y7k0n6/$IMAGE_REPO_NAME:$IMAGE_TAG
 #      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - echo docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$HASH
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:lastest
