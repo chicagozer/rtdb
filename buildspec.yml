@@ -1,5 +1,5 @@
 # Do not change version. This is the version of aws buildspec, not the version of your buldspec file.
-# attempting a generic template
+# attempting a generic template 
 version: 0.2
 
 phases:
