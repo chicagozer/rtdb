@@ -8,7 +8,6 @@ phases:
       nodejs: latest
     commands:
       - echo Installing Mocha...
-      - export
   pre_build:
     commands:
       - AWS_ACCOUNT_ID=${CODEBUILD_BUILD_ARN} && IFS=':' && set -- $AWS_ACCOUNT_ID && AWS_ACCOUNT_ID=$5
@@ -21,8 +20,9 @@ phases:
       - CODEBUILD_WEBHOOK_TRIGGER=${CODEBUILD_WEBHOOK_TRIGGER:-unknown}
       - IMAGE_TAG=`echo $CODEBUILD_WEBHOOK_TRIGGER | tr / _`
       - IMAGE_TAG=$IMAGE_TAG.$CODEBUILD_BUILD_NUMBER
-      - HASH=`echo $CODEBUILD_SOURCE_VERSION |  cut -c1-7`
+      - HASH=`echo $CODEBUILD_RESOLVED_SOURCE_VERSION|  cut -c1-7`
       - IMAGE_REPO_NAME=${CODEBUILD_BUILD_ID%:*}
+      - export
   build:
     commands:
       - echo Build started on `date`
