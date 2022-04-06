@@ -1,14 +1,10 @@
 # Do not change version. This is the version of aws buildspec, not the version of your buldspec file.
 version: 0.2
-env:
-  variables:
-    IMAGE_REPO_NAME: "rtdb"
-    IMAGE_TAG: "unknown"
 
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: latest
     commands:
       - echo Installing Mocha...
       - export
