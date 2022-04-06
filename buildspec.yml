@@ -25,6 +25,7 @@ phases:
       - IMAGE_TAG=`echo $CODEBUILD_WEBHOOK_TRIGGER | tr / _`
       - IMAGE_TAG=$IMAGE_TAG.$CODEBUILD_BUILD_NUMBER
       - HASH=`echo $CODEBUILD_SOURCE_VERSION |  cut -c1-7`
+      - IMAGE_REPO_NAME=${CODEBUILD_BUILD_ID%:*}
   build:
     commands:
       - echo Build started on `date`
