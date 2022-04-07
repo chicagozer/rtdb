@@ -6,8 +6,13 @@ variable "namespace" {
    default = "rtdb3"
 }
 
-variable "application_name" {
-  type    = string
-  default = "terramino"
+variable "tag" {
+   default = "latest"
 }
+
+variable "app_version" {
+  type = "map"
+  description = "version to deploy"
+}
+
 

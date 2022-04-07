@@ -9,4 +9,9 @@ resource "helm_release" "rtdb" {
   name       = "rtdb"
   repository = "https://chicagozer.github.io/helm-chart/"
   chart      = "rtdb"
+  
+  set {
+    name  = "image.tag"
+    value = "${lookup(var.app_version,"rtdb")}";
+  }
 }
