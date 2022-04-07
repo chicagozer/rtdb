@@ -11,7 +11,7 @@ variable "tag" {
 }
 
 variable "app_version" {
-  type = "map"
+  type = map
   description = "version to deploy"
 }
 
