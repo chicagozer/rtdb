@@ -12,6 +12,6 @@ resource "helm_release" "rtdb" {
   
   set {
     name  = "image.tag"
-    value = "${lookup(var.app_version,"rtdb")}";
+    value = "${lookup(var.app_version,"rtdb")}"
   }
 }
