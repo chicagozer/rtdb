@@ -54,6 +54,6 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$HASH
       - docker push public.ecr.aws/d5y7k0n6/$IMAGE_REPO_NAME:latest
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
-      - jq  '.app_version[].${IMAGE_REPO_NAME} = \"${IMAGE_TAG}\"' /rtdbtg/terragrunt/env/nonprod/appversion.tfvars.json > appvars.auto.tfvars.json.tmp
+      - jq  ".app_version[].${IMAGE_REPO_NAME} = \"${IMAGE_TAG}\"" /rtdbtg/terragrunt/env/nonprod/appversion.tfvars.json > appvars.auto.tfvars.json.tmp
       - mv -f appvars.auto.tfvars.json.tmp appversion.tfvars.json /rtdbtg/terragrunt/env/nonprod/appversion.tfvars.json
       - cd /rtdbtg ; git commit -am 'successful AWS code build ${IMAGE_TAG}' ;  git push --set-upstream origin main
