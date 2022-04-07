@@ -11,7 +11,7 @@ variable "tag" {
 }
 
 variable "repository" {
-   defafult = "public.ecr.aws/d5y7k0n6/rtdb"
+   default = "public.ecr.aws/d5y7k0n6/rtdb"
 }
 
 variable "app_version" {
