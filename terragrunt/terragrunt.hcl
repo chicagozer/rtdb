@@ -1,6 +1,6 @@
 terraform {
   extra_arguments "vars" {
-    commands = ["init","plan"]
+    commands = ["init","plan","refresh"]
 # get_terraform_commands_that_need_vars()
 
     optional_var_files = [
