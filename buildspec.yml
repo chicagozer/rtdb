@@ -1,6 +1,10 @@
 # Do not change version. This is the version of aws buildspec, not the version of your buldspec file.
 # attempting a generic template 
 version: 0.2
+env:
+  secrets-manager:
+    GH_PASSWORD: "github:password"
+    GH_USER: "github:username"
 
 phases:
   install:
@@ -8,6 +12,11 @@ phases:
       nodejs: latest
     commands:
       - echo Installing Mocha...
+      - mkdir -p ~/.ssh
+      - echo "$GH_PASSWORD" > ~/.ssh/id_ed25519
+      - chmod 600 ~/.ssh/id_ed25519
+      - ssh-keygen -F github.com || ssh-keyscan github.com >>~/.ssh/known_hosts
+      - git clone git@github.com:chicagozer/rtdbtg.git /rtdbtg
   pre_build:
     commands:
       - AWS_ACCOUNT_ID=${CODEBUILD_BUILD_ARN} && IFS=':' && set -- $AWS_ACCOUNT_ID && AWS_ACCOUNT_ID=$5
