@@ -17,6 +17,8 @@ phases:
       - chmod 600 ~/.ssh/id_ed25519
       - ssh-keygen -F github.com || ssh-keyscan github.com >>~/.ssh/known_hosts
       - git clone git@github.com:chicagozer/rtdbtg.git /rtdbtg
+      - git config --global user.email "chicagozer@gmail.com"
+      - git config --global user.name "Jim Mittler"
   pre_build:
     commands:
       - AWS_ACCOUNT_ID=${CODEBUILD_BUILD_ARN} && IFS=':' && set -- $AWS_ACCOUNT_ID && AWS_ACCOUNT_ID=$5
@@ -56,4 +58,5 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
       - jq  ".app_version.${IMAGE_REPO_NAME} = \"${IMAGE_TAG}\"" /rtdbtg/terragrunt/appversion.tfvars.json > appvars.auto.tfvars.json.tmp
       - mv -f appvars.auto.tfvars.json.tmp /rtdbtg/terragrunt/appversion.tfvars.json
+      - cat /rtdbtg/terragrunt/appversion.tfvars.json
       - cd /rtdbtg ; git commit -am 'successful AWS code build ${IMAGE_TAG}' ;  git push --set-upstream origin main
