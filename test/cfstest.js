@@ -5,8 +5,10 @@
 /*global describe, it, before, after */
 "use strict";
 var winston = require('winston');
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
+const argv = yargs(hideBin(process.argv)).argv;
 
-var argv = require('optimist').argv;
 var Identity = require('../identity');
 var fs = require('fs');
 var tmp = require('temporary');

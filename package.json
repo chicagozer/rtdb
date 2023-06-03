@@ -17,7 +17,6 @@
     "http-auth-connect": "^1.0.5",
     "jstransformer-markdown": "^1.2.1",
     "method-override": "^3.0.0",
-    "optimist": "^0.6.1",
     "pug": "^3.0.2",
     "request": "^2.88.2",
     "socket.io": "^4.4.1",
@@ -28,7 +27,8 @@
     "uuid": "^8.3.2",
     "why-is-node-running": "^2.2.1",
     "winston": "^3.6.0",
-    "x-hub-signature": "^1.4.0"
+    "x-hub-signature": "^1.4.0",
+    "yargs": "^17.7.2"
   },
   "directories": {
     "public": "public",

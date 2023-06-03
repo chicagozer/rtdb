@@ -5,7 +5,9 @@
 /*global describe, it, before, after*/
 "use strict";
 var assert = require('assert');
-var argv = require('optimist').argv;
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
+const argv = yargs(hideBin(process.argv)).argv;
 var fs = require('fs.extra');
 var Database = require('../db');
 var Collection = require('../collection');

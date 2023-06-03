@@ -15,13 +15,16 @@ const Database = require('./db');
 const Collection = require('./collection');
 const View = require('./view');
 const Identity = require('./identity');
-const argv = require('optimist').argv;
 const fs = require('fs');
 const path = require('path');
 const winston = require('winston');
 const http = require('http');
 const Symmetry = require('symmetry');
 const socketio = require('socket.io');
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
+const argv = yargs(hideBin(process.argv)).argv;
+
 
 function Rtdb() {
     this.servers = [];
