@@ -1,15 +1,20 @@
-# DOCKER-VERSION 1.2.0
-#FROM node:argon
-#FROM node:17
-#FROM public.ecr.aws/bitnami/node:20
-FROM node:lts-alpine
-#RUN apt-get update; apt-get upgrade
-RUN apk update ; apk upgrade --available
-# Bundle app source
-COPY . /rtdb
+FROM node:22-alpine
+
+# Apply security updates
+RUN apk update && apk upgrade --available
+
+# Create app directory
 WORKDIR /rtdb
-# Install app dependencies
-RUN npm install
+
+# Install dependencies first to leverage Docker layer caching
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# Bundle app source
+COPY . .
+
+# Set node environment
+ENV NODE_ENV=production
 
 EXPOSE 9001
 CMD ["npm", "start"]

@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved.
+// © 2014-2026 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
@@ -6,7 +6,7 @@
 var Rtdb = require('./rtdb');
 
 var myrtdb = new Rtdb();
-myrtdb.start(function(err) {
+myrtdb.start(function (err) {
     if (err) {
         console.dir(err);
         process.exit();

@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved.
+// © 2014-2026 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
@@ -67,6 +67,9 @@ function addStream(req, res, view, delta) {
             res.write(view._identity._id + '\n');
             res.write("data: ");
             sub.overflow = !res.write(JSON.stringify(draindata) + '\n\n');
+            if (res.flush) {
+                res.flush();
+            }
         }
         delete sub.data;
     }
@@ -93,6 +96,9 @@ function addStream(req, res, view, delta) {
     res.write(view._identity._id + '\n');
     res.write("data: ");
     sub.overflow = !res.write(data + '\n\n');
+    if (res.flush) {
+        res.flush();
+    }
 
 }
 
@@ -124,13 +130,13 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // serve up statics if we aren't running under another web server
     // I think this is clever
-    app.use(compression());  
+    app.use(compression());
     app.use(express.static(__dirname + path.sep + 'public'));
     app.set('views', __dirname + '/views');
     app.set('view engine', 'pug');
     app.set('wsport', database.globalSettings.wsport);
 
-    app.use(function(req, res, next) {
+    app.use(function (req, res, next) {
         res.header("Access-Control-Allow-Origin", database.getSettings().corsOrigin);
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         next();
@@ -144,7 +150,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     basic = auth.basic({
         realm: "rtdb"
-    }, function(username, password, callback) {
+    }, function (username, password, callback) {
         // Custom authentication method.
         var reply;
 
@@ -156,10 +162,10 @@ function loadExpress(rtdb, database, startTime, done) {
         callback(reply);
     });
 
-    app.all('/web/*', authConnect(basic));
-    app.all('/db/admin/*', authConnect(basic));
+    app.all('/web/*splat', authConnect(basic));
+    app.all('/db/admin/*splat', authConnect(basic));
 
-    app.get('/db/stream', function(req, res) {
+    app.get('/db/stream', function (req, res) {
 
         var vlist = [],
             verrlist = [],
@@ -183,7 +189,7 @@ function loadExpress(rtdb, database, startTime, done) {
         }
 
         // for each view id, go find the actual view
-        vidlist.forEach(function(vid) {
+        vidlist.forEach(function (vid) {
             var view = database.viewAt(vid);
             if (!view) {
                 global.logger.log('warn', 'Database.stream - view [' + vid + '] not found.');
@@ -209,7 +215,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
 
 
-            vlist.forEach(function(view, index) {
+            vlist.forEach(function (view, index) {
                 if (!view.checkTicket(ticketlist[index])) {
                     fail = true;
                 }
@@ -233,34 +239,34 @@ function loadExpress(rtdb, database, startTime, done) {
         // LATER maybe make this a setting
         res.write("retry: 1000\n");
         res.flush();
-        
+
 
         // for each view in our list
         /* vlist.forEach(function(v) {
             addStream(req, res, v, delta);
         }); */
-        async.each(vlist,function(v,callback) {
-  	  addStream(req, res, v, delta);
-	  callback();
-  	  });
+        async.each(vlist, function (v, callback) {
+            addStream(req, res, v, delta);
+            callback();
+        });
     });
 
     // write the headers; diagnostic function
-    app.get('/db/admin/echo', function(req, res) {
+    app.get('/db/admin/echo', function (req, res) {
         res.send(req.headers);
     });
 
     // quick little function that will shutdown the DB
     /*jslint unparam:true */
-    app.post('/db/admin/stop', function(req, res) {
-        database.saveViews(function(err) {
+    app.post('/db/admin/stop', function (req, res) {
+        database.saveViews(function (err) {
             process.exit();
         });
         res.status(202).end();
     });
     /*jslint unparam:false */
     /*jslint unparam:true */
-    app.post('/db/admin/gc', function(req, res) {
+    app.post('/db/admin/gc', function (req, res) {
         if (global.gc) {
             global.gc();
             global.logger.log('info', 'gc - gc called.');
@@ -274,19 +280,19 @@ function loadExpress(rtdb, database, startTime, done) {
     /*jslint unparam:false */
     // method to reload the documents
     // useful if we are messing with the disk
-    app.post('/db/collections/:id/load', function(req, res) {
+    app.post('/db/collections/:id/load', function (req, res) {
         var c = database.collectionAt(req.params.id);
         if (!c) {
             res.status(404).send("collection " + req.params.id + " is not in the database.");
             return;
         }
         // reset the collection
-        c.clear(false, false, function(err) {
+        c.clear(false, false, function (err) {
             if (err) {
                 res.status(500).send(err);
                 return;
             }
-            c.loadDocuments(Array.from(c.views.values()), function(err) {
+            c.loadDocuments(Array.from(c.views.values()), function (err) {
                 if (!err) {
                     res.status(200).end();
                 } else {
@@ -297,7 +303,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // add a document or array of documents
-    app.post('/db/collections/:id/documents', function(req, res) {
+    app.post('/db/collections/:id/documents', function (req, res) {
 
         var docs = [],
             c = database.collectionAt(req.params.id);
@@ -312,7 +318,7 @@ function loadExpress(rtdb, database, startTime, done) {
             docs = req.body;
         }
 
-        c.put(docs, function(err) {
+        c.put(docs, function (err) {
             if (!err) {
                 res.status(201).end();
             } else {
@@ -322,7 +328,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     function updateDatabaseStats(database) {
-          // get current memory and uptime
+        // get current memory and uptime
         database.getIdentity().hosts = database.globalSettings.hosts;
         database.getIdentity().port = database.globalSettings.port;
         database.getIdentity().memory = process.memoryUsage();
@@ -330,19 +336,19 @@ function loadExpress(rtdb, database, startTime, done) {
         database.getIdentity().dirname = __dirname;
 
         // LATER merge this with the web version
-        var val = { totalReduceTime : 0 , collections: {}};
-        database.collections.forEach(function(value, key) {
+        var val = { totalReduceTime: 0, collections: {} };
+        database.collections.forEach(function (value, key) {
             val.collections[key] = value.getStats();
             val.totalReduceTime += val.collections[key].stats.totalReduceTime;
         });
 
         database.getIdentity().stats = val;
     }
-        
+
 
     // serve up some stats
     /*jslint unparam:true */
-    app.get("/db/admin/stats", function(req, res) {
+    app.get("/db/admin/stats", function (req, res) {
 
         updateDatabaseStats(database);
         res.send(database.getIdentity());
@@ -351,7 +357,7 @@ function loadExpress(rtdb, database, startTime, done) {
     /*jslint unparam:false */
 
     // this is the standard way to get to a stream
-    app.get('/db/collections/:cid/views/:vid/stream', function(req, res) {
+    app.get('/db/collections/:cid/views/:vid/stream', function (req, res) {
 
         var view, c = database.collectionAt(req.params.cid);
         if (!c) {
@@ -383,35 +389,35 @@ function loadExpress(rtdb, database, startTime, done) {
 
     /*jslint unparam:true */
 
-    app.get('/about', function(req, res) {
+    app.get('/about', function (req, res) {
         res.render('about');
     });
 
-    app.get('/help/:id', function(req, res) {
+    app.get('/help/:id', function (req, res) {
         res.render('help/' + req.params.id);
     });
 
-    app.get('/index', function(req, res) {
+    app.get('/index', function (req, res) {
         res.render('index', {
             json: database._identity
         });
     });
 
-    app.get('/demo/:dpage', function(req, res) {
+    app.get('/demo/:dpage', function (req, res) {
         res.render(req.params.dpage, {
             json: database._identity
         });
     });
 
     // home page
-    app.get("/", function(req, res) {
+    app.get("/", function (req, res) {
         res.render('home', {
             json: database._identity
         });
     });
 
     // main web page
-    app.get("/web", function(req, res) {
+    app.get("/web", function (req, res) {
         res.render('main', {
             json: database._identity
         });
@@ -441,7 +447,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
 
 
-    app.get('/db/collections/:cid/views/:vid/stats', function(req, res) {
+    app.get('/db/collections/:cid/views/:vid/stats', function (req, res) {
 
         var view = getView(database, req, res);
         if (view) {
@@ -449,7 +455,7 @@ function loadExpress(rtdb, database, startTime, done) {
         }
     });
 
-    app.get('/db/collections/:cid/views/:vid/ticket', function(req, res) {
+    app.get('/db/collections/:cid/views/:vid/ticket', function (req, res) {
 
         var view = getView(database, req, res);
         if (view) {
@@ -460,7 +466,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     /** collection stats */
-    app.get('/db/collections/:cid/stats', function(req, res) {
+    app.get('/db/collections/:cid/stats', function (req, res) {
 
         var c = getCollection(database, req, res);
         if (c) {
@@ -471,7 +477,7 @@ function loadExpress(rtdb, database, startTime, done) {
     /** templated db stats */
     /*jslint unparam:true */
 
-    app.get("/web/admin/stats", function(req, res) {
+    app.get("/web/admin/stats", function (req, res) {
 
         updateDatabaseStats(database);
         res.render('stats', {
@@ -485,9 +491,9 @@ function loadExpress(rtdb, database, startTime, done) {
     /** templated list of collections */
     /*jslint unparam:true */
 
-    app.get('/web/collections', function(req, res) {
+    app.get('/web/collections', function (req, res) {
         var list = [];
-        Array.from(database.collections.values()).forEach(function(item) {
+        Array.from(database.collections.values()).forEach(function (item) {
             list.push(item.getIdentity());
         });
 
@@ -502,7 +508,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     /*jslint unparam:true */
 
-    app.get('/web/collections/:cid', function(req, res) {
+    app.get('/web/collections/:cid', function (req, res) {
         var c = getCollection(database, req, res);
         if (c) {
             res.render('collection', {
@@ -515,13 +521,13 @@ function loadExpress(rtdb, database, startTime, done) {
 
     /** templated list of views */
 
-    app.get('/web/collections/:cid/views', function(req, res) {
+    app.get('/web/collections/:cid/views', function (req, res) {
         var list = [],
             c = getCollection(database, req, res);
         if (!c) {
             return;
         }
-        Array.from(c.views.values()).forEach(function(item) {
+        Array.from(c.views.values()).forEach(function (item) {
             list.push(item._identity);
         });
         res.render('views', {
@@ -531,7 +537,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // templated view
-    app.get('/web/collections/:cid/views/:vid', function(req, res) {
+    app.get('/web/collections/:cid/views/:vid', function (req, res) {
         var view = getView(database, req, res);
         if (view) {
             res.render('view', {
@@ -542,7 +548,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // templated reduction
-    app.get('/web/collections/:cid/views/:vid/reduction', function(req,
+    app.get('/web/collections/:cid/views/:vid/reduction', function (req,
         res) {
         var view = getView(database, req, res);
         if (!view) {
@@ -556,9 +562,9 @@ function loadExpress(rtdb, database, startTime, done) {
             rid: view._redcontainer._identity._id
         });
     });
-    
+
     // templated stats
-    app.get('/web/collections/:cid/stats', function(req,
+    app.get('/web/collections/:cid/stats', function (req,
         res) {
         var c = getCollection(database, req, res);
         if (!c) {
@@ -572,7 +578,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // templated stats 
-    app.get('/web/collections/:cid/views/:vid/stats', function(req,
+    app.get('/web/collections/:cid/views/:vid/stats', function (req,
         res) {
         var view = getView(database, req, res);
         if (!view) {
@@ -588,7 +594,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // return templated list of subscriptions
-    app.get('/web/collections/:cid/views/:vid/subscriptions', function(
+    app.get('/web/collections/:cid/views/:vid/subscriptions', function (
         req, res) {
         var index, list = [],
             view = getView(database, req, res);
@@ -611,23 +617,23 @@ function loadExpress(rtdb, database, startTime, done) {
     // get a list of collections
     /*jslint unparam:true */
 
-    app.get('/db/collections', function(req, res) {
+    app.get('/db/collections', function (req, res) {
 
         var list = [];
-        Array.from(database.collections.values()).forEach(function(item) {
+        Array.from(database.collections.values()).forEach(function (item) {
             list.push(item._identity);
         });
         res.send(list);
     });
 
 
-    app.get('/db/collections/stream', function(req, res) {
+    app.get('/db/collections/stream', function (req, res) {
 
         // LATER STREAM changes to the collections
         res.status(404).send("Method not yet implemented.");
     });
 
-    app.get('/db/collections/:id/documents/stream', function(req, res) {
+    app.get('/db/collections/:id/documents/stream', function (req, res) {
 
         // LATER STREAM documents
         res.status(404).send("Method not yet implemented.");
@@ -637,7 +643,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // add collection
 
-    app.post('/db/collections', function(req, res) {
+    app.post('/db/collections', function (req, res) {
 
         var c;
         if (req.body._id) {
@@ -646,7 +652,7 @@ function loadExpress(rtdb, database, startTime, done) {
             c = new Collection(database).init();
         }
 
-        database.addCollection(c, function(err) {
+        database.addCollection(c, function (err) {
             if (err) {
                 global.logger.log('error', 'app.post - collections', err);
                 res.status(500).send(err);
@@ -658,7 +664,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // add a view
 
-    app.post('/db/collections/:cid/views', function(req, res) {
+    app.post('/db/collections/:cid/views', function (req, res) {
 
         global.logger.debug('App.post - adding view to ' + req.params.id);
         var v, c = getCollection(database, req, res);
@@ -672,7 +678,7 @@ function loadExpress(rtdb, database, startTime, done) {
         } else {
             v = new View(database, c).init();
         }
-        c.addView(v, function(err) {
+        c.addView(v, function (err) {
             if (err) {
                 global.logger.log('error', 'app.post - collections/view: ' + req.params.id + '/' + req.params.vid, err);
                 res.status(500).send(err);
@@ -683,7 +689,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // update an existing collection
-    app.put('/db/collections/:cid', function(req, res) {
+    app.put('/db/collections/:cid', function (req, res) {
 
         var c = getCollection(database, req, res);
         if (!c) {
@@ -691,7 +697,7 @@ function loadExpress(rtdb, database, startTime, done) {
         }
         c.init(req.body._key, req.body._transient, req.body._priority,
             req.body._expiration, req.body._onAdd);
-        database.updateCollection(c, function(err) {
+        database.updateCollection(c, function (err) {
             if (err) {
                 res.status(500).send(err);
             } else {
@@ -701,9 +707,9 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // remove an existing collection
-    app.delete('/db/collections/:cid', function(req, res) {
+    app.delete('/db/collections/:cid', function (req, res) {
 
-        database.removeCollection(req.params.cid, function(err) {
+        database.removeCollection(req.params.cid, function (err) {
             if (!err) {
                 res.status(200).end();
             } else {
@@ -714,7 +720,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // update an existing view.
-    app.put('/db/collections/:cid/views/:vid', function(req, res) {
+    app.put('/db/collections/:cid/views/:vid', function (req, res) {
 
         global.logger.debug('App.put - updating  view: ' + req.params.vid);
         var v, c = getCollection(database, req, res);
@@ -731,7 +737,7 @@ function loadExpress(rtdb, database, startTime, done) {
         v.init(req.body._key, req.body._map, req.body._reduce,
             req.body._finalize, req.body._personalize);
 
-        c.updateView(v, function(err) {
+        c.updateView(v, function (err) {
             if (err) {
                 global.logger.log('error', 'app.put - collections/view: ' + req.params.id + '/' + req.params.vid, err);
                 res.status(500).send(err);
@@ -742,7 +748,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     /** return the indicated collection */
-    app.get('/db/collections/:cid', function(req, res) {
+    app.get('/db/collections/:cid', function (req, res) {
         var c = getCollection(database, req, res);
         if (!c) {
             return;
@@ -752,7 +758,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     // remove the documents. Option to delete from disk with 'permanent' parm
-    app.delete('/db/collections/:cid/documents', function(req, res) {
+    app.delete('/db/collections/:cid/documents', function (req, res) {
 
         var deleteFromDisk = false,
             c = getCollection(database, req, res);
@@ -765,7 +771,7 @@ function loadExpress(rtdb, database, startTime, done) {
             deleteFromDisk = true;
         }
 
-        c.clear(deleteFromDisk, true, function(err) {
+        c.clear(deleteFromDisk, true, function (err) {
             if (err) {
                 res.status(500).send(err);
             } else {
@@ -775,7 +781,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     /** get a list of views */
-    app.get('/db/collections/:cid/views', function(req, res) {
+    app.get('/db/collections/:cid/views', function (req, res) {
 
         var list = [],
             c = getCollection(database, req, res);
@@ -783,7 +789,7 @@ function loadExpress(rtdb, database, startTime, done) {
             return;
         }
 
-        Array.from(c.views.values()).forEach(function(item) {
+        Array.from(c.views.values()).forEach(function (item) {
             list.push(item._identity);
         });
         res.send(list);
@@ -791,7 +797,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     /*jslint unparam:true */
 
-    app.get('/db/collections/:id/views/stream', function(req, res) {
+    app.get('/db/collections/:id/views/stream', function (req, res) {
 
         res.status(404).send("Method not yet implemented.");
     });
@@ -799,7 +805,7 @@ function loadExpress(rtdb, database, startTime, done) {
     /*jslint unparam:false */
 
     // send back the view
-    app.get('/db/collections/:cid/views/:vid', function(req, res) {
+    app.get('/db/collections/:cid/views/:vid', function (req, res) {
 
         var v = getView(database, req, res);
         if (!v) {
@@ -814,7 +820,7 @@ function loadExpress(rtdb, database, startTime, done) {
      *
      */
 
-    app.get('/db/collections/:cid/views/:vid/reduction', function(req, res) {
+    app.get('/db/collections/:cid/views/:vid/reduction', function (req, res) {
 
         var v = getView(database, req, res);
         if (!v) {
@@ -824,7 +830,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
 
     /** remove a view */
-    app.delete('/db/collections/:cid/views/:vid', function(req, res) {
+    app.delete('/db/collections/:cid/views/:vid', function (req, res) {
         var v, c = getCollection(database, req, res);
         if (!c) {
             return;
@@ -835,7 +841,7 @@ function loadExpress(rtdb, database, startTime, done) {
             return;
         }
 
-        c.removeView(req.params.vid, function(err) {
+        c.removeView(req.params.vid, function (err) {
             if (err) {
                 global.logger.log('error', err);
                 res.status(500).send(err);
@@ -849,7 +855,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // send back a list of subscribers
     app.get('/db/collections/:cid/views/:vid/subscriptions',
-        function(req, res) {
+        function (req, res) {
 
             var index, list = [],
                 v = getView(database, req, res);
@@ -869,7 +875,7 @@ function loadExpress(rtdb, database, startTime, done) {
     // some descriptive methods still need to work on
     /*jslint unparam:true */
 
-    app.get('/db/collections/:cid/views/:vid/subscriptions/stream', function(
+    app.get('/db/collections/:cid/views/:vid/subscriptions/stream', function (
         req, res) {
         res.status(404).send("Work in progress.");
     });
@@ -883,7 +889,7 @@ function loadExpress(rtdb, database, startTime, done) {
     });
     //database.io.set('transports', ['websocket']);
 
-    database.io.on('connection', function(socket) {
+    database.io.on('connection', function (socket) {
 
         var idlist = [];
 
@@ -895,7 +901,7 @@ function loadExpress(rtdb, database, startTime, done) {
                 vidlist.push(data);
             }
 
-            vidlist.forEach(function(vid) {
+            vidlist.forEach(function (vid) {
 
                 var myReduction, sub, view = database.viewAt(vid.view);
                 if (!view) {
@@ -936,18 +942,18 @@ function loadExpress(rtdb, database, startTime, done) {
             });
         }
 
-        socket.on('subscribe', function(data) {
+        socket.on('subscribe', function (data) {
             global.logger.log('debug', 'Database.socket -subscribe');
             subscribe(data, false);
         });
 
-        socket.on('subscribev', function(data) {
+        socket.on('subscribev', function (data) {
             global.logger.log('debug', 'Database.socket -subscribev');
             subscribe(data, true);
         });
 
-        socket.on('disconnect', function() {
-            idlist.forEach(function(key) {
+        socket.on('disconnect', function () {
+            idlist.forEach(function (key) {
 
                 global.logger.log('debug', 'Database.socket - disconnect view:' + key.view._identity._id + ' subscription:' + key.id);
 
@@ -956,7 +962,7 @@ function loadExpress(rtdb, database, startTime, done) {
         });
 
         /*jslint unparam: true */
-        socket.on('unsubscribe', function(data) {
+        socket.on('unsubscribe', function (data) {
             // LATER make array aware
             // socket.leave(data.room);
             return undefined;
@@ -966,7 +972,7 @@ function loadExpress(rtdb, database, startTime, done) {
 
     // LATER do we need a different websocket for head listening host???
     if (database.getSettings().hosts) {
-        database.getSettings().hosts.forEach(function(host) {
+        database.getSettings().hosts.forEach(function (host) {
             rtdb.servers.push(server.listen(database.getSettings().port, host));
             global.logger.log('info', 'rtdb (' + database.getIdentity()._pjson.version + ') is listening on ' + host + ':' + database.getSettings().port + ' ...');
         });
@@ -983,14 +989,14 @@ function loadExpress(rtdb, database, startTime, done) {
     done();
 }
 
-Rtdb.prototype.stop = function(done) {
-    this.servers.forEach(function(server) {
+Rtdb.prototype.stop = function (done) {
+    this.servers.forEach(function (server) {
         server.close();
     });
     done();
 };
 /** main function */
-Rtdb.prototype.start = function(done) {
+Rtdb.prototype.start = function (done) {
     var database, globalSettings = null,
         settingsFile = null,
         startTime = new Date().getTime(),
@@ -1018,11 +1024,11 @@ Rtdb.prototype.start = function(done) {
         // global on purpose
         // we are going to put this in global.
         // global.logger = new(winston.Logger)(globalSettings.winston.options);
-        global.logger =  winston.createLogger(globalSettings.winston.options);
+        global.logger = winston.createLogger(globalSettings.winston.options);
 
-        globalSettings.winston.transports.forEach(function(item) {
+        globalSettings.winston.transports.forEach(function (item) {
             // global.logger.add(winston.transports[item[0]], item[1]);
-            global.logger.add(new winston.transports[item[0]](item[1]) );
+            global.logger.add(new winston.transports[item[0]](item[1]));
         });
 
     } else {
@@ -1057,7 +1063,7 @@ Rtdb.prototype.start = function(done) {
 
 
     // spark it up
-    database = new Database(globalSettings, function() {
+    database = new Database(globalSettings, function () {
         loadExpress(self, database, startTime, done);
 
     });

@@ -1,9 +1,9 @@
 # rtdb 
 
-© 2016 by Rheosoft. All rights reserved. 
+© 2013-2026 by Rheosoft. All rights reserved. 
 Licensed under the [RTDB Software License version 1.0](public/license.pdf).
  
-Comments, questions? <info@rheosoft.com>
+Comments, questions? <chicagozer@gmail.com>
 
 ## Overview
 
@@ -35,17 +35,13 @@ Use **rtdb** and leave polling behind!
 
 Launch **rtdb** with [node.js](http://http://nodejs.org/). Application settings are supplied via json.
 
-node rtdb.js --settings settings/settings.json
+npm start
 
 ## PaaS sites
 
 Online demo versions of **rtdb** are available.
 
-[https://rtdb.herokuapp.com](https://rtdb.herokuapp.com)
-
-[https://rtdb-rheosoft.rhcloud.com](https://rtdb-rheosoft.rhcloud.com)
-
-[https://rtdb.mybluemix.net](https://rtdb.mybluemix.net)
+[https://rtdb-7enp.onrender.com](https://rtdb-7enp.onrender.com)
 
 ## Acknowledgements
 

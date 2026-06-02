@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved.
+// © 2014-2026 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 
 // parcels.js supports the demo for Tax Parcels. Because it's in the cfs subfolder
@@ -45,7 +45,7 @@ function readFile(file, callback) {
 
     var start = new Date();
 
-    fs.readFile(dir + file, 'utf-8', function(err, data) {
+    fs.readFile(dir + file, 'utf-8', function (err, data) {
         if (err) {
             global.logger.log('error', 'parcel.readFile [' + dir + file + '] - ', err);
             callback(err);
@@ -54,10 +54,10 @@ function readFile(file, callback) {
 
         poptions.headers['Content-Length'] = data.length;
 
-        var req = http.request(poptions, function(res) {
+        var req = http.request(poptions, function (res) {
 
             res.setEncoding('utf-8');
-            res.on('end', function() {
+            res.on('end', function () {
                 var delay, now = new Date();
                 // we are going to slow this down to a max of 100
                 // inserts per sec
@@ -67,17 +67,17 @@ function readFile(file, callback) {
             });
 
             /*jslint unparam: true */
-            res.on('data', function(data) {
+            res.on('data', function (data) {
                 return undefined;
             });
             /*jslint unparam: false */
-            res.on('error', function(err) {
+            res.on('error', function (err) {
                 callback(err);
             });
 
         });
 
-        req.on('error', function(err) {
+        req.on('error', function (err) {
             callback(err);
         });
 
@@ -94,13 +94,13 @@ function readFile(file, callback) {
 
 function flush() {
 
-    var req = http.request(foptions, function(res) {
+    var req = http.request(foptions, function (res) {
         res.setEncoding('utf-8');
         /*jslint unparam: true */
-        res.on('data', function(data) {
+        res.on('data', function (data) {
             return undefined;
         });
-        res.on('error', function(err) {
+        res.on('error', function (err) {
             return undefined;
         });
         /*jslint unparam: false */
@@ -111,11 +111,11 @@ function flush() {
 }
 
 function main2() {
-    fs.readdir(dir, function(err, files) {
+    fs.readdir(dir, function (err, files) {
         if (err) {
             throw err;
         }
-        async.eachSeries(files, readFile, function(err) {
+        async.eachSeries(files, readFile, function (err) {
             if (err) {
                 global.logger.log('debug', 'parcel.readFile - ', err);
             } else {
@@ -131,6 +131,13 @@ function main() {
     setInterval(flush, 1000 * 60 * 5);
     main2();
 }
-setTimeout(main, 10000);
+if (process.env.NODE_ENV !== 'test') {
+    setTimeout(main, 10000);
+}
+
+Parcel.readFile = readFile;
+Parcel.flush = flush;
+Parcel.main2 = main2;
+Parcel.main = main;
 
 module.exports = Parcel;

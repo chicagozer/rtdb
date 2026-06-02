@@ -3,15 +3,9 @@
 
 "use strict";
 var util = require('util'),
-    Twitter = require('twitter'),
+    WebSocket = require('ws'),
     fs = require('fs'),
     path = require('path');
-var twit = new Twitter({
-    consumer_key: process.env.TWITTER_CONSUMER_KEY,
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-    access_token_key: process.env.TWITTER_TOKEN_KEY,
-    access_token_secret: process.env.TWITTER_TOKEN_SECRET
-});
 
 
 var http = require('http');
@@ -90,45 +84,67 @@ var timeout;
 
 function tweet() {
     global.logger.log('info', 'tweet - startup.');
-    twit.stream('statuses/filter', {
-        language: 'en',
-        track: match
-    }, function(stream) {
-        stream.on('error', function(error) {
-            global.logger.log('error', error);
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            timeout = setTimeout(tweet, 60000);
-        });
-        stream.on('end', function(error) {
-            global.logger.log('warn', 'twitter closed the stream');
-            if (timeout) {
-                clearTimeout(timeout);
-            }
-            timeout = setTimeout(tweet, 60000);
-        });
-        stream.on('data', function(data) {
-            if (!data.text) {
+    var ws = new WebSocket('wss://jetstream2.us-east.bsky.network/subscribe?wantedCollections=app.bsky.feed.post');
+
+    ws.on('open', function() {
+        global.logger.log('info', 'bluesky stream opened');
+    });
+
+    ws.on('error', function(error) {
+        global.logger.log('error', error);
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(tweet, 60000);
+    });
+
+    ws.on('close', function() {
+        global.logger.log('warn', 'bluesky closed the stream');
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(tweet, 60000);
+    });
+
+    ws.on('message', function(data) {
+        try {
+            var msg = JSON.parse(data);
+            if (!msg.commit || !msg.commit.record || !msg.commit.record.text) {
                 return;
             }
+            var text = msg.commit.record.text;
+            
             if (!arrayMatch.some(function(v) {
-                    return data.text.indexOf(v) >= 0;
+                    return text.toLowerCase().indexOf(v.toLowerCase()) >= 0;
                 })) {
                 return;
             }
 
-            if (data.retweeted_status) {
-                data.retweeted_status._ts = new Date().getTime();
-                doPost(data.retweeted_status);
-            }
+            var mockTweet = {
+                _ts: new Date().getTime(),
+                text: text,
+                user: {
+                    screen_name: msg.did // did is user identifier in Bluesky
+                },
+                bluesky: true
+            };
+            
+            doPost(mockTweet);
 
-        });
+        } catch(err) {
+            // Ignore parse errors
+        }
     });
 }
 
-cleanup();
-setInterval(cleanup, 60000);
-tweet();
+if (process.env.NODE_ENV !== 'test') {
+    cleanup();
+    setInterval(cleanup, 60000);
+    tweet();
+}
+
+Tweet.cleanup = cleanup;
+Tweet.doPost = doPost;
+Tweet.tweet = tweet;
 
 module.exports = Tweet;

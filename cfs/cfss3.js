@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved.
+// © 2014-2026 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 
 // amazon S3 filesystem support
@@ -7,7 +7,7 @@
 /*jshint laxbreak: true */
 
 "use strict";
-var AWS = require('aws-sdk');
+var { S3 } = require('@aws-sdk/client-s3');
 
 function CFSS3() {
     return this;
@@ -15,12 +15,14 @@ function CFSS3() {
 
 /*jslint unparam: true */
 
-CFSS3.prototype.exists = function(dir, callback) {
+CFSS3.prototype.exists = function (dir, callback) {
     callback(true);
 };
 /*jslint unparam: false */
 
-CFSS3.prototype.init = function(parms) {
+CFSS3.prototype.init = function (parms) {
+    parms.config = parms.config || {};
+    parms.params = parms.params || {};
 
     if (process.env.AWS_SECRET) {
         parms.config.secretAccessKey = process.env.AWS_SECRET;
@@ -33,40 +35,55 @@ CFSS3.prototype.init = function(parms) {
     }
 
     else {
-       return false;
+        return false;
     }
-      
-    AWS.config.update(parms.config);
-    this.s3 = new AWS.S3(parms);
+
+    var credentials = {};
+    if (parms.config.accessKeyId && parms.config.secretAccessKey) {
+        credentials = {
+            accessKeyId: parms.config.accessKeyId,
+            secretAccessKey: parms.config.secretAccessKey
+        };
+    }
+
+    this.s3 = new S3({
+        ...parms.config,
+        credentials: Object.keys(credentials).length > 0 ? credentials : undefined
+    });
+    this.defaultBucket = parms.params.Bucket;
     return true;
 
 };
 
-CFSS3.prototype.name = function() {
+CFSS3.prototype.name = function () {
     return 'CFSS3';
 };
 
-CFSS3.prototype.get = function(key, callback) {
+CFSS3.prototype.get = function (key, callback) {
 
     this.s3.getObject({
+        Bucket: this.defaultBucket,
         Key: key
-    }, function(err, data) {
+    }, function (err, data) {
         if (err) {
             callback(err);
         } else {
-            callback(null, JSON.parse(data.Body.toString()));
+            data.Body.transformToString().then(function (str) {
+                callback(null, JSON.parse(str));
+            }).catch(callback);
         }
     });
 };
 
-CFSS3.prototype.del = function(fn, callback) {
+CFSS3.prototype.del = function (fn, callback) {
     var key = fn;
     this.s3.deleteObject({
+        Bucket: this.defaultBucket,
         Key: key
     }, callback);
 };
 
-CFSS3.prototype.put = function(prefix, item, callback, expires) {
+CFSS3.prototype.put = function (prefix, item, callback, expires) {
     var buf = Buffer.from(JSON.stringify(item)),
         key, expireDate = null;
 
@@ -84,19 +101,21 @@ CFSS3.prototype.put = function(prefix, item, callback, expires) {
     if (expires) {
         expireDate = new Date(new Date().getTime() + expires);
         this.s3.putObject({
+            Bucket: this.defaultBucket,
             Key: key,
             Body: buf,
             Expires: expireDate
         }, callback);
     } else {
         this.s3.putObject({
+            Bucket: this.defaultBucket,
             Key: key,
             Body: buf
         }, callback);
     }
 };
 
-CFSS3.prototype.list = function(prefix, callback) {
+CFSS3.prototype.list = function (prefix, callback) {
 
     var self = this,
         keys = [];
@@ -104,6 +123,7 @@ CFSS3.prototype.list = function(prefix, callback) {
     function fetchNext(prefix, nextMarker, callback) {
 
         var options = {
+            Bucket: self.defaultBucket,
             Prefix: prefix
         };
         if (nextMarker) {
@@ -111,12 +131,12 @@ CFSS3.prototype.list = function(prefix, callback) {
         }
 
         global.logger.log('debug', 'CFSS3.list - prefix:' + prefix + ' marker:' + nextMarker);
-        self.s3.listObjects(options, function(err, files) {
+        self.s3.listObjects(options, function (err, files) {
             if (err) {
                 callback(err);
                 return;
             }
-            files.Contents.forEach(function(item) {
+            files.Contents.forEach(function (item) {
                 if (item.Size > 0 && item.Key.match('\\.json$')) {
                     keys.push(item.Key);
                 }

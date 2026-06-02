@@ -1,29 +1,29 @@
-// © 2014 by Rheosoft. All rights reserved.
+// © 2014-2026 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
 
 // local file system support
 "use strict";
-var fs = require('fs.extra');
+var fs = require('fs-extra');
 var path = require('path');
 
 function CFSL() {
     return this;
 }
 
-CFSL.prototype.init = function(parms) {
+CFSL.prototype.init = function (parms) {
     this.root = parms.root + path.sep;
     return true;
 };
 
-CFSL.prototype.name = function() {
+CFSL.prototype.name = function () {
     return 'CFSL';
 };
 
-CFSL.prototype.get = function(key, callback) {
+CFSL.prototype.get = function (key, callback) {
     global.logger.log('silly', 'CFSL.get - ', key);
-    fs.readFile(this.root + key, function(err, data) {
+    fs.readFile(this.root + key, function (err, data) {
         if (err) {
             global.logger.log('error', 'CFSL.get', err);
             callback(err);
@@ -33,16 +33,16 @@ CFSL.prototype.get = function(key, callback) {
     });
 };
 
-CFSL.prototype.exists = function(dir, callback) {
+CFSL.prototype.exists = function (dir, callback) {
     fs.exists(this.root + dir, callback);
 };
 
-CFSL.prototype.del = function(fn, callback) {
+CFSL.prototype.del = function (fn, callback) {
     var key = this.root + fn;
     fs.unlink(key, callback);
 };
 
-CFSL.prototype.put = function(prefix, item, callback) {
+CFSL.prototype.put = function (prefix, item, callback) {
     var fn = this.root,
         key, dirname;
     if (item._identity) {
@@ -55,7 +55,7 @@ CFSL.prototype.put = function(prefix, item, callback) {
     }
 
     dirname = path.dirname(key);
-    fs.mkdirp(dirname, function(err) {
+    fs.mkdirp(dirname, function (err) {
         if (err) {
             callback(err);
         } else {
@@ -65,19 +65,19 @@ CFSL.prototype.put = function(prefix, item, callback) {
     });
 };
 
-CFSL.prototype.list = function(prefix, callback) {
+CFSL.prototype.list = function (prefix, callback) {
 
     var dir = this.root + prefix;
-    fs.mkdirp(dir, function(err) {
+    fs.mkdirp(dir, function (err) {
         if (err) {
             callback(err);
         } else {
-            fs.readdir(dir, function(err, data) {
+            fs.readdir(dir, function (err, data) {
                 if (err) {
                     callback(err);
                 } else {
                     var list = [];
-                    data.forEach(function(item) {
+                    data.forEach(function (item) {
                         // BUG! we were picking up .DS_DStore stuff
                         if (item.match('\\.json$')) {
                             list.push(prefix + item);

@@ -1,4 +1,4 @@
-// © 2014 by Rheosoft. All rights reserved.
+// © 2014-2026 by Rheosoft. All rights reserved.
 // Licensed under the RTDB Software License version 1.0
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
@@ -15,14 +15,14 @@ var tmp = require('temporary');
 var assert = require('assert');
 
 
-describe('CFS plugins', function() {
+describe('CFS plugins', function () {
     var dn = 'junk/',
         id = null,
         dir = null,
         globalSettings = null,
         cfsTypes = [];
 
-    before(function() {
+    before(function () {
 
         /*jslint stupid: true */
 
@@ -34,9 +34,9 @@ describe('CFS plugins', function() {
             globalSettings = JSON.parse(fs.readFileSync('settings/mocha.json'));
         }
         global.logger = winston.createLogger(globalSettings.winston.options);
-        globalSettings.winston.transports.forEach(function(item) {
-                global.logger.add(new winston.transports[item[0]](item[1]) );
-            });
+        globalSettings.winston.transports.forEach(function (item) {
+            global.logger.add(new winston.transports[item[0]](item[1]));
+        });
 
         dir = new tmp.Dir();
         globalSettings.cfsinit.root = dir.path;
@@ -45,11 +45,11 @@ describe('CFS plugins', function() {
 
         /*jslint stupid: false */
 
-        cfslist.forEach(function(file) {
+        cfslist.forEach(function (file) {
             var mycfs, Cfs = require('../cfs/' + file);
 
             mycfs = new Cfs();
-            if (mycfs.init && mycfs.init(globalSettings.cfsinit) ) {
+            if (mycfs.init && mycfs.init(globalSettings.cfsinit)) {
                 cfsTypes.push(mycfs);
             }
         });
@@ -62,48 +62,48 @@ describe('CFS plugins', function() {
     // the before function
     //
     // anyway, this seems to do the trick
-    describe('OuterLoop', function() {
+    describe('OuterLoop', function () {
 
-        it('Iteration Test', function() {
+        it('Iteration Test', function () {
 
-            cfsTypes.forEach(function(cfs) {
+            cfsTypes.forEach(function (cfs) {
 
-                describe('InnerLoop', function() {
+                describe('InnerLoop', function () {
 
-                    it(cfs.name + ': should create a file', function(done) {
+                    it(cfs.name + ': should create a file', function (done) {
                         id = new Identity();
 
                         cfs.put(dn, id, done);
                     });
 
-                    it(cfs.name + ': should fetch a file', function(done) {
+                    it(cfs.name + ': should fetch a file', function (done) {
                         cfs.get(dn + id._id + '.json', done);
                     });
 
-                    it(cfs.name + ': should list files', function(done) {
+                    it(cfs.name + ': should list files', function (done) {
                         cfs.list(dn, done);
                     });
 
-                    it(cfs.name + ': should exist', function(done) {
-                        cfs.exists(dn, function(exists) {
+                    it(cfs.name + ': should exist', function (done) {
+                        cfs.exists(dn, function (exists) {
                             assert(exists);
                             done();
                         });
                     });
 
-                    it(cfs.name + ': should delete file', function(done) {
+                    it(cfs.name + ': should delete file', function (done) {
                         var fn = dn + id._id + '.json';
                         cfs.del(fn, done);
                     });
 
-                    it(cfs.name + ': should create a file with expiration', function(done) {
+                    it(cfs.name + ': should create a file with expiration', function (done) {
                         id = new Identity();
 
                         cfs.put(dn, id, done, 1);
                     });
 
 
-                    it(cfs.name + ': get name', function(done) {
+                    it(cfs.name + ': get name', function (done) {
                         assert(cfs.name().length > 0);
                         done();
                     });
@@ -112,7 +112,7 @@ describe('CFS plugins', function() {
         });
     });
 
-    after(function() {
+    after(function () {
         if (dir) {
             fs.rmSync(dir.path, { recursive: true });
         }
