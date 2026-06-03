@@ -12,7 +12,7 @@ var fs = require('fs-extra');
 var Database = require('../db');
 var Collection = require('../collection');
 var View = require('../view');
-var winston = require('winston');
+const { createLogger } = require('../lib/logger');
 var Tempdir = require('temporary/lib/dir');
 var async = require('async');
 
@@ -44,13 +44,8 @@ describe(
             /*jslint stupid: false */
             // global on purpose
             // we are going to put this in global.
-            global.logger = winston.createLogger(
-                globalSettings.winston.options);
-
-            globalSettings.winston.transports.forEach(function (item) {
-                //global.logger.add(winston.transports[item[0]], item[1]);
-                global.logger.add(new winston.transports[item[0]](item[1]));
-            });
+            globalSettings.logger = createLogger(globalSettings);
+            global.logger = globalSettings.logger;
 
             dir = new Tempdir();
             globalSettings.cfsinit.root = dir.path + '/';

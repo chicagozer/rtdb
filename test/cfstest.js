@@ -4,7 +4,7 @@
 /*jshint laxbreak: true */
 /*global describe, it, before, after */
 "use strict";
-var winston = require('winston');
+const { createLogger } = require('../lib/logger');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const argv = yargs(hideBin(process.argv)).argv;
@@ -33,10 +33,8 @@ describe('CFS plugins', function () {
         } else {
             globalSettings = JSON.parse(fs.readFileSync('settings/mocha.json'));
         }
-        global.logger = winston.createLogger(globalSettings.winston.options);
-        globalSettings.winston.transports.forEach(function (item) {
-            global.logger.add(new winston.transports[item[0]](item[1]));
-        });
+        globalSettings.logger = createLogger(globalSettings);
+        global.logger = globalSettings.logger;
 
         dir = new tmp.Dir();
         globalSettings.cfsinit.root = dir.path;

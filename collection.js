@@ -8,6 +8,10 @@ var Identity = require('./identity');
 var async = require('async');
 var View = require('./view');
 
+function logFor(database) {
+    return (database && database.logger) || global.logger;
+}
+
 // this controls concurrency when dealing with files
 var eachLimit = 10;
 
@@ -47,7 +51,7 @@ function Collection(database, obj) {
 
     function doExpire() {
 
-        global.logger.log('debug', 'expiring ' + self._identity._id);
+        logFor(self.database).log('debug', 'expiring ' + self._identity._id);
         // calculate when was the last expire. if less than 1 sec (now
         // configurable), hold off.
         var now = new Date(),
@@ -73,7 +77,7 @@ function Collection(database, obj) {
             });
             self.loadDocuments(Array.from(self.views.values()), function (err) {
                 if (err) {
-                    global.logger.log('error', err);
+                    logFor(self.database).log('error', err);
                 }
                 self._emitter.once('expire', doExpire);
             });
@@ -82,7 +86,7 @@ function Collection(database, obj) {
 
     function doReduce() {
 
-        global.logger.log('debug', 'in reduce! ', self._identity._id);
+        logFor(self.database).log('debug', 'in reduce! ', self._identity._id);
         // calculate when was the last reduce. if less than 1 sec (now
         // configurable), hold off.
         var now = new Date(),
@@ -98,15 +102,15 @@ function Collection(database, obj) {
         }
 
         lastReduce = now;
-        global.logger.log('debug', 'reduce delay is ', delay);
+        logFor(self.database).log('debug', 'reduce delay is ', delay);
 
         setTimeout(function () {
-            global.logger.log('debug', 'Reducing ', self._identity._id);
+            logFor(self.database).log('debug', 'Reducing ', self._identity._id);
             Array.from(self.views.values()).forEach(function (elem) {
                 try {
                     elem.mapreduce(self._workingdocs, true);
                 } catch (e) {
-                    global.logger.log('error', 'reduce - ' + e.toString());
+                    logFor(self.database).log('error', 'reduce - ' + e.toString());
                 }
             });
             self._workingdocs.length = 0;
@@ -181,7 +185,7 @@ Collection.prototype.push = function () {
             self._workingdocs.push(item);
         });
         // signal for reduce.
-        global.logger.log('silly', 'emitting change for ', self._identity._id);
+        logFor(self.database).log('silly', 'emitting change for ', self._identity._id);
 
         self._emitter.emit('change');
     }
@@ -194,14 +198,14 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
     var self, dir = 'collection/' + this._identity._id + '/documents/';
 
     self = this;
-    global.logger.log('debug',
+    logFor(self.database).log('debug',
         'Collection.loadDocuments: viewlist length:' + viewlist.length + ' loading documents from ', dir);
     self._workingdocs.length = 0;
 
     function readIt(item, callback) {
         self.database.cfs.get(item, function (err, data) {
             if (err) {
-                global.logger.log('error', err);
+                logFor(self.database).log('error', err);
                 callback(err);
                 return;
             }
@@ -221,12 +225,12 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
             return;
         }
         var subset, notify = idx + 100 >= files.length;
-        global.logger.log('debug', 'Collection.loadDocuments.innerLoop idx:' + idx + ' doc count is ' + self._workingdocs.length);
+        logFor(self.database).log('debug', 'Collection.loadDocuments.innerLoop idx:' + idx + ' doc count is ' + self._workingdocs.length);
 
         subset = files.slice(idx, idx + 100);
 
         // we need to use the async library to do 100 at a time.
-        global.logger.log('debug',
+        logFor(self.database).log('debug',
             'Collection.loadDocuments.innerLoop calling asynceach');
         async.eachLimit(subset, eachLimit, readIt, function (err) {
             if (err) {
@@ -234,11 +238,11 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
                 return;
             }
 
-            global.logger.log('debug',
+            logFor(self.database).log('debug',
                 'Collection.loadDocuments.innerLoop viewlist.length is ' + viewlist.length + ' workingdocs.length is ' + self._workingdocs.length + ' notify is ' + notify);
             if (self._workingdocs.length > 0) {
                 viewlist.forEach(function (v) {
-                    global.logger.log('debug',
+                    logFor(self.database).log('debug',
                         'Collection.loadDocuments.innerLoop reducing :' + v.getId());
                     try {
                         if (v._identity._exception) {
@@ -246,7 +250,7 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
                         }
                         v.mapreduce(self._workingdocs, notify);
                     } catch (e) {
-                        global.logger.log('error', e.toString());
+                        logFor(self.database).log('error', e.toString());
                         v._identity._exception = e.toString();
                     }
                 });
@@ -264,19 +268,19 @@ Collection.prototype.loadDocuments = function (viewlist, callback) {
         if (exists) {
             self.database.cfs.list(dir, function (err, files) {
                 if (err) {
-                    global.logger.log('error', 'Collection.loadDocuments [' + self._identity._id + ']', err);
+                    logFor(self.database).log('error', 'Collection.loadDocuments [' + self._identity._id + ']', err);
                     callback(err);
                     return;
                 }
                 var count = files.length;
                 self.stats.fileCount = count;
-                global.logger.log('debug', 'Collection.loadDocuments: [' + self._identity._id + '] document count is ', count);
+                logFor(self.database).log('debug', 'Collection.loadDocuments: [' + self._identity._id + '] document count is ', count);
 
                 innerLoop(0, files, callback);
 
             });
         } else {
-            global.logger.log('warn', 'Collection.loadDocuments [' + self._identity._id + '] ' + dir + ' does not exist.');
+            logFor(self.database).log('warn', 'Collection.loadDocuments [' + self._identity._id + '] ' + dir + ' does not exist.');
             callback();
         }
     });
@@ -288,20 +292,20 @@ Collection.prototype.loadViews = function (callback) {
     self = this;
     vdir = dir + '/views/';
 
-    global.logger.log('debug', 'Collection.loadViews', vdir);
+    logFor(self.database).log('debug', 'Collection.loadViews', vdir);
     self.database.cfs
         .exists(
             vdir,
             function (exists) {
                 if (exists) {
-                    global.logger.log('debug',
+                    logFor(self.database).log('debug',
                         'Collection.loadViews listing ', vdir);
                     self.database.cfs
                         .list(
                             vdir,
                             function (err, files) {
                                 if (err) {
-                                    global.logger
+                                    logFor(self.database)
                                         .log(
                                             'error',
                                             'Collection.loadViews [' + self._identity._id + ']',
@@ -323,7 +327,7 @@ Collection.prototype.loadViews = function (callback) {
                                         eachLimit,
                                         function (item,
                                             callback) {
-                                            global.logger
+                                            logFor(self.database)
                                                 .log(
                                                     'debug',
                                                     'Collection.loadViews: loading view [' + self._identity._id + ']',
@@ -335,7 +339,7 @@ Collection.prototype.loadViews = function (callback) {
                                                         err,
                                                         data) {
                                                         if (err) {
-                                                            global.logger
+                                                            logFor(self.database)
                                                                 .log(
                                                                     'error',
                                                                     'Collection.loadViews [' + self._identity._id + ']',
@@ -344,7 +348,7 @@ Collection.prototype.loadViews = function (callback) {
                                                             return;
                                                         }
 
-                                                        global.logger
+                                                        logFor(self.database)
                                                             .log(
                                                                 'debug',
                                                                 'Collection.loadViews - [' + self._identity._id + '] creating view from ',
@@ -356,12 +360,12 @@ Collection.prototype.loadViews = function (callback) {
 
                                                         self.views.set(v.getId(), v);
                                                         if (self._identity._transient) {
-                                                            global.logger.log(
+                                                            logFor(self.database).log(
                                                                 'debug',
                                                                 'Collection.loadViews - [' + self._identity._id + '] loading reduction ',
                                                                 v
                                                                     .getId());
-                                                            global.logger.log(
+                                                            logFor(self.database).log(
                                                                 'debug',
                                                                 'Collection.loadViews - [' + self._identity._id + '] loading reduction from  ' + dir + '/view/');
                                                             v.loadReduction(
@@ -369,7 +373,7 @@ Collection.prototype.loadViews = function (callback) {
                                                                 function (
                                                                     err) {
                                                                     if (err) {
-                                                                        global.logger
+                                                                        logFor(self.database)
                                                                             .log(
                                                                                 'error',
                                                                                 'Collection.loadViews [' + self._identity._id + ']',
@@ -386,7 +390,7 @@ Collection.prototype.loadViews = function (callback) {
 
                             });
                 } else {
-                    global.logger.log('warn', 'Collection.loadViews [' + self._identity._id + '] ' + vdir + ' does not exist.');
+                    logFor(self.database).log('warn', 'Collection.loadViews [' + self._identity._id + '] ' + vdir + ' does not exist.');
                     callback();
                 }
             });
@@ -400,10 +404,10 @@ Collection.prototype.addView = function (v, callback) {
             callback(err);
             return;
         }
-        global.logger.log('debug', 'Collection.addView before count:' + self.views.size);
+        logFor(self.database).log('debug', 'Collection.addView before count:' + self.views.size);
         self.setViewAt(v.getId(), v);
         self.database.addView(v);
-        global.logger.log('debug', 'Collection.addView after count:' + self.views.size);
+        logFor(self.database).log('debug', 'Collection.addView after count:' + self.views.size);
 
         var dn = 'collection/' + self.getId() + '/views/';
         self.database.cfs.put(dn, v.getIdentity(), callback);
@@ -446,7 +450,7 @@ Collection.prototype.removeView = function (vid, callback) {
         // should we put it back in, if the delete fails??
     } else {
         msg = 'Collection.removeView - View ' + vid + ' not found.';
-        global.logger.log('warn', msg);
+        logFor(this.database).log('warn', msg);
         callback(new Error(msg));
     }
 };
@@ -460,7 +464,7 @@ function removeFiles(c, deleteFiles, callback) {
     // grab all the collections from the file system
     c.database.cfs.list(dn, function (err, files) {
         if (err) {
-            global.logger.log('error', 'Collection.removeFiles ', err);
+            logFor(c.database).log('error', 'Collection.removeFiles ', err);
             callback(err);
             return;
         }

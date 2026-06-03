@@ -5,9 +5,14 @@
 var events = require('events');
 var Identity = require('./identity');
 var vm = require('vm');
-var _ = require("underscore");
 var Symmetry = require('symmetry');
+var util = require('util');
 var crypto = require('crypto');
+
+function logFor(database) {
+    return (database && database.logger) || global.logger;
+}
+
 // constructor
 
 // arguments: reference to database and optional json from filesystem
@@ -69,7 +74,7 @@ function View(database, collection, obj) {
     // on change function to notify subscriptions
     this._emitter.on('change', function () {
 
-        global.logger.log('debug', 'View.onChange - ', self._identity._id);
+        logFor(self.database).log('debug', 'View.onChange - ', self._identity._id);
 
         // for each element in our subscription list
         Object.keys(self.subscriptions).forEach(
@@ -105,7 +110,7 @@ function View(database, collection, obj) {
                         res.write(self._identity._id);
                         res.write("\ndata: ");
                         if (!res.write(JSON.stringify(data) + "\n\n")) {
-                            global.logger.log('warn',
+                            logFor(self.database).log('warn',
                                 'View.onChange - buffer full:', key);
                             sub.overflow = true;
                         }
@@ -202,7 +207,7 @@ View.prototype.mapreduce = function (documents, notify) {
 
     // local map result
     mapResult = new Map();
-    global.logger.log('debug', 'View.mapreduce - started for ' + self._identity._id);
+    logFor(self.database).log('debug', 'View.mapreduce - started for ' + self._identity._id);
 
     // make a copy of our current reduction.
     // we will compare it at the end to decide if notifications are
@@ -224,7 +229,7 @@ View.prototype.mapreduce = function (documents, notify) {
     // do the map function
     documents.forEach(function (e) {
         self._fmap(e, mapEmit, self.database);
-        global.logger
+        logFor(self.database)
             .log('silly', 'View.mapreduce - item is ', e._identity._id);
         // self._fmapScript.runInNewContext({ item : e, emit : mapEmit, database
         // : self.database, logger : logger});
@@ -321,14 +326,14 @@ View.prototype.mapreduce = function (documents, notify) {
     // this.redcontainer.reduction, emit : finalizeEmit, database :
     // self.database, logger : logger});
 
-    global.logger.log('debug', 'View.mapreduce - ended for ' + self._identity._id);
+    logFor(self.database).log('debug', 'View.mapreduce - ended for ' + self._identity._id);
 
     hrDiff = process.hrtime(hrStart);
     self.stats.reduceCount = self.stats.reduceCount + 1;
     self.stats.totalReduceTime += (hrDiff[0] + (hrDiff[1] / 1e9));
 
     // if the reduction changed, emit!
-    if (notify && !_.isEqual(clone, Array.from(self.reduction.entries()))) {
+    if (notify && !util.isDeepStrictEqual(clone, Array.from(self.reduction.entries()))) {
         self._emitter.emit('change');
     }
 };
@@ -376,11 +381,11 @@ View.prototype.loadReduction = function (dir, callback) {
         if (files.length === 1) {
             self.database.cfs.get(files[0], function (err, data) {
                 if (err) {
-                    global.logger.log('warn', 'View.loadReduction - ' + rn + 'not loaded.', err);
+                    logFor(self.database).log('warn', 'View.loadReduction - ' + rn + 'not loaded.', err);
                     // callback(err);
                     return;
                 }
-                global.logger.log('debug',
+                logFor(self.database).log('debug',
                     'View.loadReduction - reduction is ', data);
 
                 // we can marshal the json right into _redcontainer
@@ -402,7 +407,7 @@ View.prototype.loadReduction = function (dir, callback) {
 
         } else {
             // we didn't find a single file.
-            global.logger.log('warn', 'Not expecting ' + files.length + ' reductions in ' + rn);
+            logFor(self.database).log('warn', 'Not expecting ' + files.length + ' reductions in ' + rn);
             callback();
         }
 

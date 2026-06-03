@@ -18,6 +18,7 @@ function Database(settings, callback) {
         cfslist, cfsTypes = {};
 
     this.globalSettings = settings;
+    this.logger = settings.logger || self.logger;
 
     // right now we support two configurable file systems
     // CFSL = local, CFSS3 = Amazon S3
@@ -44,7 +45,7 @@ function Database(settings, callback) {
             c
                 .loadViews(function (err) {
                     if (err) {
-                        global.logger.log('error',
+                        self.logger.log('error',
                             'Database.loadViewsAndDocuments -  ', err);
                         callback(err);
                         return;
@@ -53,7 +54,7 @@ function Database(settings, callback) {
                         self.views.set(v.getId(), v);
                     });
 
-                    global.logger
+                    self.logger
                         .log(
                             'debug',
                             'Database.loadViewsAndDocuments: Loaded views ',
@@ -64,7 +65,7 @@ function Database(settings, callback) {
                             Array.from(c.views.values()),
                             function (err) {
                                 if (err) {
-                                    global.logger
+                                    self.logger
                                         .log(
                                             'error',
                                             'Database.loadViewsAndDocuments - loadDocuments ',
@@ -72,7 +73,7 @@ function Database(settings, callback) {
                                     callback(err);
                                     return;
                                 }
-                                global.logger
+                                self.logger
                                     .log(
                                         'debug',
                                         'Database.loadViewsAndDocuments: Documents completed ',
@@ -88,7 +89,7 @@ function Database(settings, callback) {
         // and do some final initialization
         function doneLoading(err) {
             if (err) {
-                global.logger.log('error', 'Database.loadCollections', err);
+                self.logger.log('error', 'Database.loadCollections', err);
                 callback(err);
                 return;
             }
@@ -110,8 +111,8 @@ function Database(settings, callback) {
             //    self._collectionsHash[c.getId()] = c;
             //});
 
-            if (global.logger.level === 'debug') {
-                global.logger.log('debug',
+            if (self.logger.level === 'debug') {
+                self.logger.log('debug',
                     'Database.loadCollections - now views then docs');
             }
             // now load documents and views
@@ -122,12 +123,12 @@ function Database(settings, callback) {
                     loadViewsAndDocuments,
                     function (err) {
                         if (err) {
-                            global.logger.log('error',
+                            self.logger.log('error',
                                 'Database.loadCollections', err);
                             callback(err);
                             return;
                         }
-                        global.logger
+                        self.logger
                             .log('debug',
                                 'Database.loadCollections - now done with docs and views!!');
                         callback();
@@ -137,27 +138,27 @@ function Database(settings, callback) {
         // grab all the collections from the file system
         self.cfs.list(dn, function (err, files) {
             if (err) {
-                global.logger.log('error',
+                self.logger.log('error',
                     'Database.loadCollections - listObjects ', err);
                 callback(err);
                 return;
             }
-            global.logger.log('debug', 'Database.loadCollections ' + JSON.stringify(files));
+            self.logger.log('debug', 'Database.loadCollections ' + JSON.stringify(files));
 
             // ok, for each one we are going to load it
             // when we are done with all of them, do
             // "doneLoading"
             async.each(files, function (item, callback) {
-                global.logger.log('debug',
+                self.logger.log('debug',
                     'Database.loadCollections - fetching ' + item);
                 self.cfs.get(item, function (err, data) {
                     if (err) {
-                        global.logger.log('error',
+                        self.logger.log('error',
                             'Database.loadCollections - getObject ', err);
                         callback(err);
                         return;
                     }
-                    global.logger.debug('debug',
+                    self.logger.debug('debug',
                         'Database.loadCollections - creating Collection:',
                         data);
                     var c = new Collection(self, data);
@@ -205,45 +206,45 @@ function Database(settings, callback) {
     self.cfs = new cfsTypes[self.globalSettings.cfs]();
     self.cfs.init(self.globalSettings.cfsinit);
 
-    global.logger.log('info', 'cfs is ' + self.globalSettings.cfs + '.');
-    global.logger.log('info', 'see settings file for connection parms.');
+    self.logger.log('info', 'cfs is ' + self.globalSettings.cfs + '.');
+    self.logger.log('info', 'see settings file for connection parms.');
 
     // some signal handlers to allow us to save reductions on shutdown
     function loadSignalHandlers() {
 
         process.on('uncaughtException', function (e) {
-            global.logger.log('error', e.toString());
+            self.logger.log('error', e.toString());
         });
 
         process.on('SIGINT', function () {
-            global.logger.log('info', 'Received sigint. Relaying to exit');
+            self.logger.log('info', 'Received sigint. Relaying to exit');
             self.saveViews(function (err) {
                 if (err) {
-                    global.logger.error('SIGINT saveViews', err);
+                    self.logger.error('SIGINT saveViews', err);
                 }
                 process.exit(128 + 2);
             });
         });
 
         process.on('SIGTERM', function () {
-            global.logger.log('info', 'Received sigterm. Relaying to exit');
+            self.logger.log('info', 'Received sigterm. Relaying to exit');
             self.saveViews(function (err) {
                 if (err) {
-                    global.logger.error('SIGTERM saveViews', err);
+                    self.logger.error('SIGTERM saveViews', err);
                 }
                 process.exit(128 + 15);
             });
         });
 
         process.on('exit', function () {
-            global.logger.log('info', 'rtdb (' + self._identity._pjson.version + ') is exiting.');
+            self.logger.log('info', 'rtdb (' + self._identity._pjson.version + ') is exiting.');
         });
     }
 
     // ok - we are ready to load our collections
     loadCollections(function (err) {
         if (err) {
-            global.logger.error('Database.loadCollections ', err);
+            self.logger.error('Database.loadCollections ', err);
             callback(err);
             return;
         }
@@ -258,21 +259,21 @@ function Database(settings, callback) {
 Database.prototype.saveViews = function (callback) {
     var self = this;
 
-    if (global.logger.level === 'debug') {
-        global.logger.log('debug', 'Database.saveViews - started');
+    if (self.logger.level === 'debug') {
+        self.logger.log('debug', 'Database.saveViews - started');
     }
     async.each(Array.from(self.collections.values()), function (c, callback) {
-        global.logger.debug('Database.saveViews - collection ', c
+        self.logger.debug('Database.saveViews - collection ', c
             .getId());
         // transient or not, save a copy of the views
         // I think we are going to reverse that decision
 
         if (c.isTransient()) {
             async.each(Array.from(c.views.values()), function (v, callback) {
-                global.logger.debug('Database.saveViews - view ', v
+                self.logger.debug('Database.saveViews - view ', v
                     .getId());
                 var vd = 'collection/' + c.getId() + '/view/';
-                global.logger.log('debug',
+                self.logger.log('debug',
                     'Database.onExit - writing view reduction to ' + vd);
                 v.saveReduction(vd, callback);
             }, function (err) {
@@ -284,7 +285,7 @@ Database.prototype.saveViews = function (callback) {
     },
         function (err) {
             if (err) {
-                global.logger.log('error', 'Database.saveViews - ',
+                self.logger.log('error', 'Database.saveViews - ',
                     err);
             }
             callback(err);
