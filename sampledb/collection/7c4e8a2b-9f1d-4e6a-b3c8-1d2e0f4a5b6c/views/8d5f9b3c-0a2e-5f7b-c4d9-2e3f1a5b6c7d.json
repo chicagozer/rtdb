@@ -1,0 +1,7 @@
+{
+  "_id": "8d5f9b3c-0a2e-5f7b-c4d9-2e3f1a5b6c7d",
+  "_ts": "2026-06-03T00:00:00.000Z",
+  "_key": "symbol",
+  "_map": "if (item.symbol && item.p) {\nemit(item.symbol, { volume: item.v || 0, price: item.p, firstPrice: item.p, lastPrice: item.p, count: 1 });\n}",
+  "_reduce": "var total;\nif (rereduce === false) {\n    total = values.reduce(function (a, b) {\n        return {\n            volume: a.volume + b.volume,\n            firstPrice: a.firstPrice || b.firstPrice,\n            lastPrice: b.lastPrice || b.price,\n            count: a.count + b.count\n        };\n    }, { volume: 0, firstPrice: null, lastPrice: 0, count: 0 });\n} else {\n    total = values.reduce(function (a, b) {\n        return {\n            volume: a.volume + b.volume,\n            firstPrice: a.firstPrice || b.firstPrice,\n            lastPrice: b.lastPrice,\n            count: a.count + b.count\n        };\n    }, { volume: 0, firstPrice: null, lastPrice: 0, count: 0 });\n}\nif (total.firstPrice) {\n    total.changePct = ((total.lastPrice - total.firstPrice) / total.firstPrice) * 100;\n    total.price = total.lastPrice;\n}\nemit(total);"
+}

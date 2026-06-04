@@ -1,0 +1,125 @@
+//- © 2014-2026 by Rheosoft. All rights reserved.
+//- Licensed under the RTDB Software License version 1.0
+extends nav
+block vars
+  - var title = 'Dow 30 Treemap'
+  - var viewId = '8d5f9b3c-0a2e-5f7b-c4d9-2e3f1a5b6c7d'
+
+block append head
+  style.
+    .dow30-chart-wrap {
+      width: 100%;
+      height: calc(100vh - 50px);
+      min-height: 400px;
+      background: #111;
+    }
+    #dow30treemap_div {
+      width: 100%;
+      height: 100%;
+    }
+  script(type='text/javascript', src='https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js')
+  script(type='text/javascript').
+    var viewId = '!{viewId}';
+    var chart;
+    var source;
+
+    function reductionToTreemap(reduction) {
+      var rows = [], i, row, name, stats;
+      if (!reduction || !reduction.length) {
+        return rows;
+      }
+      for (i = 0; i < reduction.length; i = i + 1) {
+        row = reduction[i];
+        if (!row || row.length < 2) {
+          continue;
+        }
+        name = row[0];
+        stats = row[1];
+        if (!stats || !stats.volume) {
+          continue;
+        }
+        rows.push({
+          name: name,
+          value: stats.volume,
+          changePct: stats.changePct || 0,
+          price: stats.price || 0
+        });
+      }
+      return rows;
+    }
+
+    function colorForChange(pct) {
+      var clamped = Math.max(-3, Math.min(3, pct));
+      if (clamped >= 0) {
+        return 'rgb(0,' + Math.round(80 + clamped * 50) + ',0)';
+      }
+      return 'rgb(' + Math.round(80 + Math.abs(clamped) * 50) + ',0,0)';
+    }
+
+    function drawTreemap(reduction) {
+      var data = reductionToTreemap(reduction), option;
+      if (!chart) {
+        chart = echarts.init(document.getElementById('dow30treemap_div'));
+      }
+      option = {
+        tooltip: {
+          formatter: function (p) {
+            var d = p.data;
+            return d.name + '<br/>Vol: ' + d.value +
+              '<br/>Change: ' + (d.changePct || 0).toFixed(2) + '%' +
+              '<br/>Price: ' + (d.price || 0);
+          }
+        },
+        series: [{
+          type: 'treemap',
+          roam: true,
+          nodeClick: false,
+          breadcrumb: { show: false },
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          label: { show: true, formatter: '{b}' },
+          upperLabel: { show: true, height: 24 },
+          itemStyle: {
+            borderColor: '#222',
+            borderWidth: 1,
+            gapWidth: 2
+          },
+          data: data.map(function (d) {
+            return {
+              name: d.name,
+              value: d.value,
+              changePct: d.changePct,
+              price: d.price,
+              itemStyle: { color: colorForChange(d.changePct) }
+            };
+          })
+        }]
+      };
+      chart.setOption(option, true);
+    }
+
+    function registerStream() {
+      var url = '/db/stream?view=' + viewId;
+      source = new EventSource(url);
+      source.addEventListener(viewId, function (event) {
+        drawTreemap(JSON.parse(event.data));
+      }, false);
+      source.onerror = function () {
+        console.warn('EventSource error (dow30 treemap)');
+      };
+    }
+
+    jQuery(document).ready(function () {
+      registerStream();
+      window.addEventListener('resize', function () {
+        if (chart) {
+          chart.resize();
+        }
+      });
+    });
+
+block append content
+  .dow30-chart-wrap
+    #dow30treemap_div

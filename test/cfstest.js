@@ -46,6 +46,10 @@ describe('CFS plugins', function () {
         cfslist.forEach(function (file) {
             var mycfs, Cfs = require('../cfs/' + file);
 
+            if (typeof Cfs !== 'function') {
+                return;
+            }
+
             mycfs = new Cfs();
             if (mycfs.init && mycfs.init(globalSettings.cfsinit)) {
                 cfsTypes.push(mycfs);

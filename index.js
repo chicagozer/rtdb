@@ -3,6 +3,7 @@
 /*jslint node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
 "use strict";
+require('./lib/loadEnv').loadEnvFile('.env');
 var Rtdb = require('./rtdb');
 
 var myrtdb = new Rtdb();

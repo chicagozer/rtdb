@@ -27,6 +27,10 @@ function register(app, ctx) {
         });
     });
 
+    app.get('/demo/sp500treemap', function (req, res) {
+        res.redirect(301, '/demo/dow30treemap');
+    });
+
     app.get('/demo/:dpage', function (req, res) {
         res.render(req.params.dpage, {
             json: database._identity

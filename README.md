@@ -328,7 +328,9 @@ The demos discussed below serve as references for a complete implementation.
 
 [http://localhost:9001/demo/parcels](http://localhost:9001/demo/parcels)
 
-These two demos utilize Server Sent Events to receive real-time updates. Documents are added through the REST API. 
+[http://localhost:9001/demo/dow30treemap](http://localhost:9001/demo/dow30treemap) — live Dow 30 treemap (ECharts; volume = area, color = % change). Set `FINNHUB_API_KEY` in a local `.env` file (see `.env.example`; `.env` is gitignored). See [docs/dow30-treemap-demo.md](docs/dow30-treemap-demo.md). Ingest is `cfs/dow30quotes.js` (disable with `ENABLE_DOW30_DEMO=false`).
+
+These demos utilize Server Sent Events to receive real-time updates. Documents are added through the REST API. 
 
 The "Apples" demo provides a simple front end for adding new documents and viewing the aggregations.
 It is more interesting when running simultaneously on multiple browsers.

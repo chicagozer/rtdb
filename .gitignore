@@ -1,4 +1,6 @@
 # ignore this stuff
+.env
+.env.local
 strongloop.json
 coverage
 coverage.txt
