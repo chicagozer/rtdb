@@ -1,0 +1,8 @@
+{
+  "_id": "c2d3e4f5-a6b7-8901-bcde-f12345678901",
+  "_ts": "2026-06-04T00:00:00.000Z",
+  "_key": "crowding",
+  "_map": "if (item.vehicle_id && item.lng != null && item.lat != null && item.crowding > 0) {\nemit(item.vehicle_id, {\n  lng: item.lng,\n  lat: item.lat,\n  crowding: item.crowding,\n  _ts: item._ts || 0\n});\n}",
+  "_reduce": "var best = values[0], i, v;\nfor (i = 1; i < values.length; i++) {\n  v = values[i];\n  if ((v._ts || 0) > (best._ts || 0)) {\n    best = v;\n  }\n}\nemit(best);",
+  "_finalize": "var cells = {}, row, d, gx, gy, key, c, out = [];\nreduction.forEach(function (row) {\n  if (!row || row.length < 2 || !row[1]) {\n    return;\n  }\n  d = row[1];\n  if (d.lng == null || d.lat == null) {\n    return;\n  }\n  gx = Math.floor(d.lng * 400);\n  gy = Math.floor(d.lat * 400);\n  key = gx + ',' + gy;\n  if (!cells[key]) {\n    cells[key] = {\n      lng: (gx + 0.5) / 400,\n      lat: (gy + 0.5) / 400,\n      crowdingSum: 0,\n      vehicles: 0,\n      maxCrowding: 0\n    };\n  }\n  c = cells[key];\n  c.crowdingSum += d.crowding || 0;\n  c.vehicles += 1;\n  c.maxCrowding = Math.max(c.maxCrowding, d.crowding || 0);\n});\nObject.keys(cells).forEach(function (k) {\n  c = cells[k];\n  c.avgCrowding = c.vehicles ? c.crowdingSum / c.vehicles : 0;\n  out.push([k, c]);\n});\nemit(out);"
+}

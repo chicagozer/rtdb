@@ -330,6 +330,10 @@ The demos discussed below serve as references for a complete implementation.
 
 [http://localhost:9001/demo/dow30treemap](http://localhost:9001/demo/dow30treemap) — live Dow 30 treemap (ECharts; volume = area, color = % change). Set `FINNHUB_API_KEY` in a local `.env` file (see `.env.example`; `.env` is gitignored). See [docs/dow30-treemap-demo.md](docs/dow30-treemap-demo.md). Ingest is `cfs/dow30quotes.js` (disable with `ENABLE_DOW30_DEMO=false`).
 
+[http://localhost:9001/demo/bostoncrowding](http://localhost:9001/demo/bostoncrowding) — live Boston MBTA crowding heatmap (MapLibre GL; map/reduce by area; weight = avg crowding index from `occupancy_status`). Set `MBTA_API_KEY` in `.env` ([api-v3.mbta.com](https://api-v3.mbta.com/)). Ingest is `cfs/mbtavehicles.js` via MBTA SSE (no polling; disable with `ENABLE_BOSTON_DEMO=false`). See [docs/boston-crowding-heatmap-demo.md](docs/boston-crowding-heatmap-demo.md).
+
+[http://localhost:9001/demo/zurichheatmap](http://localhost:9001/demo/zurichheatmap) — live Zurich SBB rail delay heatmap (MapLibre GL; map/reduce grid aggregation, weight = avg delay). Set `GEOPS_API_KEY` in `.env` (request a key from support@geops.io). Ingest is `cfs/geopstrains.js` (disable with `ENABLE_ZURICH_DEMO=false`). See [docs/zurich-heatmap-demo.md](docs/zurich-heatmap-demo.md).
+
 These demos utilize Server Sent Events to receive real-time updates. Documents are added through the REST API. 
 
 The "Apples" demo provides a simple front end for adding new documents and viewing the aggregations.

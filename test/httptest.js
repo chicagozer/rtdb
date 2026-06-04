@@ -293,6 +293,14 @@ describe('Suite', function () {
             get('http://localhost:9001/demo/dow30treemap', 200, done);
         });
 
+        it('demo zurich heatmap', function (done) {
+            get('http://localhost:9001/demo/zurichheatmap', 200, done);
+        });
+
+        it('demo boston crowding heatmap', function (done) {
+            get('http://localhost:9001/demo/bostoncrowding', 200, done);
+        });
+
 
         it('/db/collections/:parcels/documents - add', function (done) {
             var samplefile = "sampledb/parcels/1ffffebf-755b-49a0-a5ef-3793c748718f.json";

@@ -40,4 +40,36 @@ describe('Tweet CFS', function() {
         setTimeout(done, 100);
     });
 
+    it('matchesTopic accepts hashtags only', function() {
+        assert(Tweet.matchesTopic('hello #nodejs world'));
+        assert(!Tweet.matchesTopic('talking about rtdb today'));
+        assert(!Tweet.matchesTopic('plain post with no topic signal'));
+    });
+
+    it('matchesLang accepts English BCP-47 tags', function() {
+        assert(Tweet.matchesLang({ langs: ['en'] }));
+        assert(Tweet.matchesLang({ langs: ['en-US'] }));
+        assert(!Tweet.matchesLang({ langs: ['fr'] }));
+        assert(!Tweet.matchesLang({}));
+    });
+
+    it('ingestDecision requires create commits with text', function() {
+        var msg = {
+            commit: {
+                operation: 'create',
+                record: { text: '#demo', langs: ['en'] }
+            }
+        };
+        assert.equal(Tweet.ingestDecision(msg), 'post');
+        assert.equal(Tweet.ingestDecision({
+            commit: { operation: 'delete', record: { text: '#demo' } }
+        }), 'notCreate');
+        assert.equal(Tweet.ingestDecision({
+            commit: { operation: 'create', record: { text: 'no topic here', langs: ['en'] } }
+        }), 'noTopic');
+        assert.equal(Tweet.ingestDecision({
+            commit: { operation: 'create', record: { text: '#demo', langs: ['de'] } }
+        }), 'noLang');
+    });
+
 });

@@ -2,7 +2,7 @@
 // Licensed under the RTDB Software License version 1.0
 "use strict";
 const async = require('async');
-const Symmetry = require('symmetry');
+const Symmetry = require('../symmetryRt');
 const Identity = require('../identity');
 
 function addStream(req, res, view, delta, logger) {
@@ -24,11 +24,15 @@ function addStream(req, res, view, delta, logger) {
         if (sub.data) {
             if (sub._identity.delta) {
                 draindata = Symmetry.diff(sub.last, sub.data);
+                sub.last = sub.data;
+                if (draindata === "none") {
+                    delete sub.data;
+                    return;
+                }
             } else {
                 draindata = sub.data;
+                sub.last = sub.data;
             }
-
-            sub.last = sub.data;
 
             res.write('event: ');
             res.write(view._identity._id + '\n');

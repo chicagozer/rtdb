@@ -5,7 +5,7 @@
 var events = require('events');
 var Identity = require('./identity');
 var vm = require('vm');
-var Symmetry = require('symmetry');
+var Symmetry = require('./symmetryRt');
 var util = require('util');
 var crypto = require('crypto');
 
@@ -98,12 +98,14 @@ function View(database, collection, obj) {
 
                     if (sub._identity.delta) {
                         data = Symmetry.diff(sub.last, myReduction);
-
+                        sub.last = myReduction;
+                        if (data === "none") {
+                            return;
+                        }
                     } else {
                         data = myReduction;
+                        sub.last = myReduction;
                     }
-
-                    sub.last = myReduction;
 
                     if (res) {
                         res.write("event: ");

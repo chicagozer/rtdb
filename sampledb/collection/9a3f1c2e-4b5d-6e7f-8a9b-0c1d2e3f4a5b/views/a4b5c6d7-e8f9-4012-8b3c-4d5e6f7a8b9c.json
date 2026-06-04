@@ -1,0 +1,8 @@
+{
+  "_id": "a4b5c6d7-e8f9-4012-8b3c-4d5e6f7a8b9c",
+  "_ts": "2026-06-04T00:00:00.000Z",
+  "_key": "heatmap",
+  "_map": "if (item.train_id && item.lng != null && item.lat != null) {\nemit(item.train_id, {\n  lng: item.lng,\n  lat: item.lat,\n  delay: item.delay || 0,\n  _ts: item._ts || 0\n});\n}",
+  "_reduce": "var best = values[0], i, v;\nfor (i = 1; i < values.length; i++) {\n  v = values[i];\n  if ((v._ts || 0) > (best._ts || 0)) {\n    best = v;\n  }\n}\nemit(best);",
+  "_finalize": "var cells = {}, row, d, gx, gy, key, c, out = [];\nreduction.forEach(function (row) {\n  if (!row || row.length < 2 || !row[1]) {\n    return;\n  }\n  d = row[1];\n  if (d.lng == null || d.lat == null) {\n    return;\n  }\n  gx = Math.floor(d.lng * 400);\n  gy = Math.floor(d.lat * 400);\n  key = gx + ',' + gy;\n  if (!cells[key]) {\n    cells[key] = {\n      lng: (gx + 0.5) / 400,\n      lat: (gy + 0.5) / 400,\n      delaySum: 0,\n      count: 0,\n      maxDelay: 0\n    };\n  }\n  c = cells[key];\n  c.delaySum += d.delay || 0;\n  c.count += 1;\n  c.maxDelay = Math.max(c.maxDelay, d.delay || 0);\n});\nObject.keys(cells).forEach(function (k) {\n  c = cells[k];\n  c.avgDelay = c.count ? c.delaySum / c.count : 0;\n  out.push([k, c]);\n});\nemit(out);"
+}
