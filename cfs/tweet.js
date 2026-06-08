@@ -1,3 +1,5 @@
+// tweet.js — Bluesky Jetstream ingest for SSE Topics demo.
+// Set ENABLE_BLUESKY_DEMO=false to disable.
 /*jslint unparam: true, node: true, white: true, nomen: true */
 /*jshint laxbreak: true */
 
@@ -12,6 +14,10 @@ var http = require('http');
 
 function Tweet() {
     return this;
+}
+
+function demoDisabled() {
+    return process.env.ENABLE_BLUESKY_DEMO === 'false';
 }
 
 function cleanup() {
@@ -267,11 +273,19 @@ function tweet() {
     });
 }
 
-if (process.env.NODE_ENV !== 'test') {
+function main() {
+    if (demoDisabled()) {
+        global.logger.log('info', 'tweet - disabled (ENABLE_BLUESKY_DEMO=false).');
+        return;
+    }
     cleanup();
     setInterval(cleanup, 60000);
     setInterval(logIngestStats, 60000);
     tweet();
+}
+
+if (process.env.NODE_ENV !== 'test') {
+    main();
 }
 
 Tweet.cleanup = cleanup;
@@ -283,5 +297,6 @@ Tweet.ingestDecision = ingestDecision;
 Tweet.shouldIngest = shouldIngest;
 Tweet.takeRateToken = takeRateToken;
 Tweet.logIngestStats = logIngestStats;
+Tweet.main = main;
 
 module.exports = Tweet;
