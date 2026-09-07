@@ -20,7 +20,7 @@ jobs:
     - run: npm run build --if-present
     - run: npm test
     - name: Run static analysis
-      uses: aquasecurity/trivy-action@0.20.0
+      uses: aquasecurity/trivy-action@v0.36.0
       with:
           scan-type: 'fs'
           scanners: 'vuln,secret,config'
